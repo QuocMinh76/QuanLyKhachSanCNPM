@@ -7,7 +7,8 @@ from enum import Enum as RoleEnum
 from flask_login import UserMixin
 
 # Thay đổi theo máy
-from kiet.appQLKS import db, app
+#from kiet.appQLKS import db, app
+from appQLKS import db, app
 
 
 class UserRoles(RoleEnum):
@@ -18,26 +19,27 @@ class UserRoles(RoleEnum):
 
 class User(db.Model, UserMixin):
     id = Column(Integer, primary_key=True, autoincrement=True)
-    name = Column(String(), nullable=False)
-    username = Column(String(), nullable=False, unique=True)
-    password = Column(String(), nullable=False)
-    avatar = Column(String(), nullable=True)
+    name = Column(String(100), nullable=False)
+    username = Column(String(100), nullable=False, unique=True)
+    password = Column(String(100), nullable=False)
+    avatar = Column(String(100), nullable=True)
     active = Column(Boolean, default=True)
     user_role = Column(Enum(UserRoles), default=UserRoles.customer)
 
 
 class CustomerType(db.Model):
     id = Column(Integer, primary_key=True, autoincrement=True)
-    cust_type = Column(String(), nullable=False)
+    cust_type = Column(String(100), nullable=False)
     cust_rate = Column(Float, default="1")
+    customer = relationship('Customer', backref='custType', lazy=True)
 
 
 class Customer(db.Model):
     id = Column(Integer, primary_key=True, autoincrement=True)
     cust_active = Column(Boolean, default=True)
-    cust_name = Column(String(), nullable=False)
-    custIdentity_num = Column(String(), nullable=False)
-    custAddress = Column(String(), nullable=False)
+    cust_name = Column(String(100), nullable=False)
+    custIdentity_num = Column(String(100), nullable=False)
+    custAddress = Column(String(100), nullable=False)
     custType_id = Column(Integer, ForeignKey(CustomerType.id), nullable=False)
 
 
@@ -55,7 +57,7 @@ class RentingOrder(db.Model):
 
 
 class Bill(db.Model):
-    rentingOrder_id = Column(Integer, ForeignKey(RentingOrder.id_bookingOrder), primary_key=True)
+    rentingOrder_id = Column(Integer, ForeignKey(RentingOrder.bookingOrder_id), primary_key=True)
     checkin_date = Column(DateTime, nullable=False)
     checkout_date = Column(DateTime, nullable=False)
     totalCust = Column(Integer, nullable=False)
@@ -66,22 +68,28 @@ class Bill(db.Model):
 
 class RoomType(db.Model):
     id = Column(Integer, primary_key=True, autoincrement=True)
-    name = Column(String(), nullable=False)
+    name = Column(String(100), nullable=False)
     basePrice = Column(Float, default=0)
     maxCust = Column(Integer, default=3)
     overMaxRate = Column(Float, default=1.25)
+    rooms = relationship('Room', backref='roomType', lazy=True)
 
 
 class Room(db.Model):
     id = Column(Integer, primary_key=True, autoincrement=True)
-    name = Column(String(), nullable=False)
-    description = Column(String(), nullable=True)
+    name = Column(String(100), nullable=False)
+    description = Column(String(200), nullable=True)
     available = Column(Boolean, default=True)
     roomType_id = Column(Integer, ForeignKey(RoomType.id), nullable=False)
 
 
 class OrderDetails(db.Model):
     id = Column(Integer, primary_key=True, autoincrement=True)
-    rentingOrder_id = Column(Integer, ForeignKey(RentingOrder.id_bookingOrder), nullable=False)
+    rentingOrder_id = Column(Integer, ForeignKey(RentingOrder.bookingOrder_id), nullable=False)
     room_id = Column(Integer, ForeignKey(Room.id), nullable=False)
     cust_id = Column(Integer, ForeignKey(Customer.id), nullable=False)
+
+
+if __name__ == '__main__':
+    with app.app_context():
+        db.create_all()
