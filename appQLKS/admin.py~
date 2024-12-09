@@ -20,8 +20,8 @@ class RoomAdmin(ModelView):
 
 class CustomerTypeAdmin(ModelView):
     column_list = ['id', 'cust_type', 'cust_rate']
-    column_searchable_list = ['cust_type']
-    column_filters = ['cust_type']
+    column_searchable_list = ['name']
+    column_filters = ['name']
 
 
 admin = Admin(app, name='hotelbookingapp', template_mode='bootstrap4')

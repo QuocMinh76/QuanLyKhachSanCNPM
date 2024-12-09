@@ -12,7 +12,6 @@ if __name__ == '__main__':
         db.create_all()
         print("Dữ liệu mẫu đã được thêm thành công!")
 
-
 class UserRoles(RoleEnum):
     admin = 1
     employee = 2
@@ -76,6 +75,13 @@ class RoomType(db.Model):
     overMaxRate = Column(Float, default=1.25)
     rooms = relationship('Room', backref='roomType', lazy=True)
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if not self.roomPrice and self.roomType_id:
+            room_type = RoomType.query.get(self.roomType_id)
+            if room_type:
+                self.roomPrice = room_type.basePrice
+
 
 class Room(db.Model):
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -84,13 +90,6 @@ class Room(db.Model):
     available = Column(Boolean, default=True)
     roomPrice = Column(Float, default=0)
     roomType_id = Column(Integer, ForeignKey(RoomType.id), nullable=False)
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        if not self.roomPrice and self.roomType_id:
-            room_type = RoomType.query.get(self.roomType_id)
-            if room_type:
-                self.roomPrice = room_type.basePrice
 
 
 class OrderDetails(db.Model):
