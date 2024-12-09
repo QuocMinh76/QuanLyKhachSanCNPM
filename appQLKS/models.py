@@ -5,16 +5,13 @@ from sqlalchemy import Column, Integer, String, Float, Boolean, ForeignKey, Enum
 import hashlib
 from enum import Enum as RoleEnum
 from flask_login import UserMixin
-
-# Thay đổi theo máy
-#from kiet.appQLKS import db, app
 from appQLKS import db, app
 
 
 class UserRoles(RoleEnum):
-    admin = 1
-    employee = 2
-    customer = 3
+    ADMIN = 1
+    EMPLOYEE = 2
+    CUSTOMER = 3
 
 
 class User(db.Model, UserMixin):
@@ -24,14 +21,14 @@ class User(db.Model, UserMixin):
     password = Column(String(100), nullable=False)
     avatar = Column(String(100), nullable=True)
     active = Column(Boolean, default=True)
-    user_role = Column(Enum(UserRoles), default=UserRoles.customer)
+    user_role = Column(Enum(UserRoles), default=UserRoles.CUSTOMER)
 
 
 class CustomerType(db.Model):
     id = Column(Integer, primary_key=True, autoincrement=True)
     cust_type = Column(String(100), nullable=False)
     cust_rate = Column(Float, default="1")
-    customer = relationship('Customer', backref='custType', lazy=True)
+    customers = relationship('Customer', backref='custType', lazy=True)
 
 
 class Customer(db.Model):
@@ -74,11 +71,15 @@ class RoomType(db.Model):
     overMaxRate = Column(Float, default=1.25)
     rooms = relationship('Room', backref='roomType', lazy=True)
 
+    def __str__(self):
+        return self.name
+
 
 class Room(db.Model):
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(100), nullable=False)
     description = Column(String(200), nullable=True)
+    price = Column(Float, default=0)
     available = Column(Boolean, default=True)
     roomType_id = Column(Integer, ForeignKey(RoomType.id), nullable=False)
 
@@ -93,3 +94,12 @@ class OrderDetails(db.Model):
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
+
+        # add user
+        u = User(name="admin", username="admin",
+                 password=str(hashlib.md5("123456".strip().encode('utf-8')).hexdigest()),
+                 avatar="https://res.cloudinary.com/dxxwcby8l/image/upload/v1647056401/ipmsmnxjydrhpo21xrd8.jpg",
+                 user_role=UserRoles.ADMIN)
+        db.session.add(u)
+        db.session.commit()
+
