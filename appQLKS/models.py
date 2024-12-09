@@ -14,9 +14,9 @@ if __name__ == '__main__':
 
 
 class UserRoles(RoleEnum):
-    admin = 1
-    employee = 2
-    customer = 3
+    ADMIN = 1
+    EMPLOYEE = 2
+    CUSTOMER = 3
 
 
 class User(db.Model, UserMixin):
@@ -26,14 +26,14 @@ class User(db.Model, UserMixin):
     password = Column(String(100), nullable=False)
     avatar = Column(String(100), nullable=True)
     active = Column(Boolean, default=True)
-    user_role = Column(Enum(UserRoles), default=UserRoles.customer)
+    user_role = Column(Enum(UserRoles), default=UserRoles.CUSTOMER)
 
 
 class CustomerType(db.Model):
     id = Column(Integer, primary_key=True, autoincrement=True)
     cust_type = Column(String(100), nullable=False)
     cust_rate = Column(Float, default="1")
-    customer = relationship('Customer', backref='custType', lazy=True)
+    customers = relationship('Customer', backref='custType', lazy=True)
 
 
 class Customer(db.Model):
@@ -75,6 +75,9 @@ class RoomType(db.Model):
     maxCust = Column(Integer, default=3)
     overMaxRate = Column(Float, default=1.25)
     rooms = relationship('Room', backref='roomType', lazy=True)
+
+    def __str__(self):
+        return self.name
 
 
 class Room(db.Model):
