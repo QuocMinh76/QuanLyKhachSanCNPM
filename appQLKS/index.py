@@ -73,6 +73,11 @@ def logout_process():
     return redirect('/login')
 
 
+@app.route("/hotel_homepage")
+def hotel_homepage():
+    return render_template('hotel_homepage.html')
+
+
 @login.user_loader
 def load_user(user_id):
     return dao.get_user_by_id(user_id)
