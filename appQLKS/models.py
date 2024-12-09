@@ -1,13 +1,9 @@
 from datetime import datetime
-
 from sqlalchemy.orm import relationship
 from sqlalchemy import Column, Integer, String, Float, Boolean, ForeignKey, Enum, DateTime
 import hashlib
 from enum import Enum as RoleEnum
 from flask_login import UserMixin
-
-# Thay đổi theo máy
-#from kiet.appQLKS import db, app
 from appQLKS import db, app
 
 
@@ -88,8 +84,3 @@ class OrderDetails(db.Model):
     rentingOrder_id = Column(Integer, ForeignKey(RentingOrder.bookingOrder_id), nullable=False)
     room_id = Column(Integer, ForeignKey(Room.id), nullable=False)
     cust_id = Column(Integer, ForeignKey(Customer.id), nullable=False)
-
-
-if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()
