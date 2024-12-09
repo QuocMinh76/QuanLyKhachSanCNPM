@@ -20,6 +20,6 @@ def load_user(user_id):
 
 if __name__ == '__main__':
     with app.app_context():
-        from appQLKS import admin
+        #from appQLKS import admin
 
         app.run(debug=True)
