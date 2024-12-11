@@ -77,6 +77,9 @@ def logout_process():
 def hotel_homepage():
     return render_template('hotel_homepage.html')
 
+@app.route("/rent")
+def rent():
+    return render_template('rent.html')
 
 @login.user_loader
 def load_user(user_id):
