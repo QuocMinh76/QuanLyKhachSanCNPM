@@ -15,7 +15,7 @@ def load_rooms(room_type_id=None, kw=None, page=1):
         products = products.filter(Room.name.contains(kw))
 
     if room_type_id:
-        products = products
+        products = products.filter(Room.roomType_id.__eq__(room_type_id))
 
     page_size = app.config["PAGE_SIZE"]
     start = (page - 1) * page_size
