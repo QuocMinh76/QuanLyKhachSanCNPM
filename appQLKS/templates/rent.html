@@ -1,0 +1,88 @@
+{% extends 'layout/base.html' %}
+
+{% block content %}
+<body>
+    <div class="container mt-5">
+        <h2 class="text-center mb-4">Lập phiếu thuê phòng</h2>
+        <form>
+<!--            <div class="row mb-3">-->
+<!--                <div class="col-md-6">-->
+<!--                    <label for="nhanVienLapPhieu" class="form-label">Nhân viên lập phiếu:</label>-->
+<!--                    <input type="text" id="nhanVienLapPhieu" class="form-control">-->
+<!--                </div>-->
+<!--                <div class="col-md-6">-->
+<!--                    <label for="thoiGianLapPhieu" class="form-label">Thời gian lập phiếu:</label>-->
+<!--                    <input type="datetime-local" id="thoiGianLapPhieu" class="form-control">-->
+<!--                </div>-->
+<!--            </div>-->
+
+<!--            <div class="row mb-3">-->
+<!--                <div class="col-md-6">-->
+<!--                    <label for="ngayNhanPhong" class="form-label">Ngày nhận phòng:</label>-->
+<!--                    <input type="datetime-local" id="ngayNhanPhong" class="form-control" readonly>-->
+<!--                </div>-->
+<!--                <div class="col-md-6">-->
+<!--                    <label for="ngayTraPhong" class="form-label">Ngày trả phòng:</label>-->
+<!--                    <input type="datetime-local" id="ngayTraPhong" class="form-control" readonly>-->
+<!--                </div>-->
+<!--            </div>-->
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>Nhân viên lập phiếu:</strong> DEF</p>
+                    <p><strong>Ngày nhận phòng:</strong> dd/MM/yyyy</p>
+                    <p><strong>Ngày trả phòng:</strong> dd/MM/yyyy</p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>Thời gian lập phiếu:</strong> hh:mm dd/MM/yyyy</p>
+                    <p><strong>Số lượng khách thuê:</strong> 2</p>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-md-6">
+<!--                    <label for="cacPhongThue" class="form-label">Các phòng thuê:</label>-->
+<!--                    <input type="text" id="cacPhongThue" class="form-control" readonly>-->
+                    <label for="phongDaChon" class="form-label"><strong>Các phòng thuê:</strong></label>
+                    <select id="phongDaChon" class="form-control" size="3" readonly>
+                        <option>Phòng 1</option>
+                        <option>Phòng 2</option>
+                        <option>Phòng 3</option>
+                        <option>Phòng 4</option>
+                        <option>Phòng 1</option>
+                        <option>Phòng 2</option>
+                    </select>
+                </div>
+            </div>
+            <h5 class="mb-3">Danh sách khách hàng</h5>
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Tên khách hàng</th>
+                        <th>Loại khách hàng</th>
+                        <th>CMND</th>
+                        <th>Địa chỉ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><input type="text" class="form-control" placeholder="Tên khách hàng"></td>
+                        <td>
+                            <select class="form-select">
+                                <option value="Nội địa">Nội địa</option>
+                                <option value="Quốc tế">Quốc tế</option>
+                            </select>
+                        </td>
+                        <td><input type="text" class="form-control" placeholder="CMND"></td>
+                        <td><input type="text" class="form-control" placeholder="Địa chỉ"></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- Buttons -->
+            <div class="d-flex justify-content-end">
+                <button type="submit" class="btn btn-primary me-2">Lập phiếu</button>
+                <button type="button" class="btn btn-secondary">Hủy</button>
+            </div>
+        </form>
+    </div>
+</body>
+{% endblock %}
