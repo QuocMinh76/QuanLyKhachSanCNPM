@@ -12,6 +12,7 @@ if __name__ == '__main__':
     with app.app_context():
         db.drop_all()
         db.create_all()
+        print("Dữ liệu mẫu đã được thêm thành công!")
 
 if __name__ == '__main__':
     with app.app_context():
@@ -32,8 +33,6 @@ if __name__ == '__main__':
 
         db.session.add_all(room_types)
         db.session.commit()
-
-        print("Dữ liệu mẫu cho RoomType đã được thêm thành công!")
 
 if __name__ == '__main__':
     with app.app_context():
