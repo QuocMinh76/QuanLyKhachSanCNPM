@@ -5,38 +5,53 @@
     <div class="container mt-5">
         <h2 class="text-center mb-4">Lập phiếu thuê phòng</h2>
         <form>
-            <div class="row mb-3">
-                <div class="col-md-6">
-                    <label for="nhanVienLapPhieu" class="form-label">Nhân viên lập phiếu:</label>
-                    <input type="text" id="nhanVienLapPhieu" class="form-control">
-                </div>
-                <div class="col-md-6">
-                    <label for="thoiGianLapPhieu" class="form-label">Thời gian lập phiếu:</label>
-                    <input type="datetime-local" id="thoiGianLapPhieu" class="form-control">
-                </div>
-            </div>
+<!--            <div class="row mb-3">-->
+<!--                <div class="col-md-6">-->
+<!--                    <label for="nhanVienLapPhieu" class="form-label">Nhân viên lập phiếu:</label>-->
+<!--                    <input type="text" id="nhanVienLapPhieu" class="form-control">-->
+<!--                </div>-->
+<!--                <div class="col-md-6">-->
+<!--                    <label for="thoiGianLapPhieu" class="form-label">Thời gian lập phiếu:</label>-->
+<!--                    <input type="datetime-local" id="thoiGianLapPhieu" class="form-control">-->
+<!--                </div>-->
+<!--            </div>-->
 
-            <div class="row mb-3">
+<!--            <div class="row mb-3">-->
+<!--                <div class="col-md-6">-->
+<!--                    <label for="ngayNhanPhong" class="form-label">Ngày nhận phòng:</label>-->
+<!--                    <input type="datetime-local" id="ngayNhanPhong" class="form-control" readonly>-->
+<!--                </div>-->
+<!--                <div class="col-md-6">-->
+<!--                    <label for="ngayTraPhong" class="form-label">Ngày trả phòng:</label>-->
+<!--                    <input type="datetime-local" id="ngayTraPhong" class="form-control" readonly>-->
+<!--                </div>-->
+<!--            </div>-->
+            <div class="row">
                 <div class="col-md-6">
-                    <label for="ngayNhanPhong" class="form-label">Ngày nhận phòng:</label>
-                    <input type="datetime-local" id="ngayNhanPhong" class="form-control" readonly>
+                    <p><strong>Nhân viên lập phiếu:</strong> DEF</p>
+                    <p><strong>Ngày nhận phòng:</strong> dd/MM/yyyy</p>
+                    <p><strong>Ngày trả phòng:</strong> dd/MM/yyyy</p>
                 </div>
                 <div class="col-md-6">
-                    <label for="ngayTraPhong" class="form-label">Ngày trả phòng:</label>
-                    <input type="datetime-local" id="ngayTraPhong" class="form-control" readonly>
+                    <p><strong>Thời gian lập phiếu:</strong> hh:mm dd/MM/yyyy</p>
+                    <p><strong>Số lượng khách thuê:</strong> 2</p>
                 </div>
             </div>
             <div class="row mb-3">
                 <div class="col-md-6">
-                    <label for="cacPhongThue" class="form-label">Các phòng thuê:</label>
-                    <input type="text" id="cacPhongThue" class="form-control" readonly>
-                </div>
-                <div class="col-md-6">
-                    <label for="soLuongKhachThue" class="form-label">Số lượng khách thuê:</label>
-                    <input type="number" id="soLuongKhachThue" class="form-control" readonly>
+<!--                    <label for="cacPhongThue" class="form-label">Các phòng thuê:</label>-->
+<!--                    <input type="text" id="cacPhongThue" class="form-control" readonly>-->
+                    <label for="phongDaChon" class="form-label"><strong>Các phòng thuê:</strong></label>
+                    <select id="phongDaChon" class="form-control" size="3" readonly>
+                        <option>Phòng 1</option>
+                        <option>Phòng 2</option>
+                        <option>Phòng 3</option>
+                        <option>Phòng 4</option>
+                        <option>Phòng 1</option>
+                        <option>Phòng 2</option>
+                    </select>
                 </div>
             </div>
-            <!-- Danh sách khách hàng -->
             <h5 class="mb-3">Danh sách khách hàng</h5>
             <table class="table table-bordered">
                 <thead>
