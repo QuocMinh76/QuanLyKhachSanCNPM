@@ -45,19 +45,20 @@ if __name__ == '__main__':
 
 if __name__ == '__main__':
     with app.app_context():
+        string_image = 'https://res.cloudinary.com/dhhpxhskj/image/upload/v1733934406/coakbeg2epakg1ghrl1x.jpg'
         rooms = [
-            Room(name="Room 1", description="Standard Room", available=True, roomType_id=1),
-            Room(name="Room 2", description="Standard Room", available=True, roomType_id=1),
-            Room(name="Room 3", description="Standard Room", available=True, roomType_id=1),
-            Room(name="Room 4", description="Standard Room", available=True, roomType_id=1),
-            Room(name="Room 5", description="Pro Room", available=True, roomType_id=2),
-            Room(name="Room 6", description="Pro Room", available=True, roomType_id=2),
-            Room(name="Room 7", description="Pro Room", available=True, roomType_id=2),
-            Room(name="Room 8", description="Pro Room", available=True, roomType_id=2),
-            Room(name="Room 9", description="Ultra Room", available=True, roomType_id=3),
-            Room(name="Room 10", description="Ultra Room", available=True, roomType_id=3),
-            Room(name="Room 11", description="Ultra Room", available=True, roomType_id=3),
-            Room(name="Room 12", description="Ultra Room", available=True, roomType_id=3),
+            Room(name="Room 1", description="Standard Room", image=string_image, available=True, roomType_id=1),
+            Room(name="Room 2", description="Standard Room", image=string_image, available=True, roomType_id=1),
+            Room(name="Room 3", description="Standard Room", image=string_image, available=True, roomType_id=1),
+            Room(name="Room 4", description="Standard Room", image=string_image, available=True, roomType_id=1),
+            Room(name="Room 5", description="Pro Room", image=string_image, available=True, roomType_id=2),
+            Room(name="Room 6", description="Pro Room", image=string_image, available=True, roomType_id=2),
+            Room(name="Room 7", description="Pro Room", image=string_image, available=True, roomType_id=2),
+            Room(name="Room 8", description="Pro Room", image=string_image, available=True, roomType_id=2),
+            Room(name="Room 9", description="Ultra Room", image=string_image, available=True, roomType_id=3),
+            Room(name="Room 10", description="Ultra Room", image=string_image, available=True, roomType_id=3),
+            Room(name="Room 11", description="Ultra Room", image=string_image, available=True, roomType_id=3),
+            Room(name="Room 12", description="Ultra Room", image=string_image, available=True, roomType_id=3),
         ]
         db.session.add_all(rooms)
         db.session.commit()

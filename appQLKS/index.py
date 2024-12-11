@@ -81,6 +81,11 @@ def hotel_homepage():
 def rent():
     return render_template('rent.html')
 
+@app.route('/booking')
+def booking():
+    return render_template('form_datphong.html')
+
+
 @login.user_loader
 def load_user(user_id):
     return dao.get_user_by_id(user_id)

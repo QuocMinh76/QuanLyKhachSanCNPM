@@ -88,6 +88,7 @@ class Room(db.Model):
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(100), nullable=False)
     description = Column(String(200), nullable=True)
+    image = Column(String(100), nullable=True)
     available = Column(Boolean, default=True)
     roomPrice = Column(Float, default=0)
     roomType_id = Column(Integer, ForeignKey(RoomType.id), nullable=False)
