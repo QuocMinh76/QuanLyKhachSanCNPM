@@ -3,7 +3,7 @@ from flask_admin import Admin, BaseView, expose
 from flask_admin.contrib.sqla import ModelView
 from flask_login import current_user, logout_user
 from flask import redirect
-from appQLKS.models import RoomType, Room, CustomerType, UserRoles
+from appQLKS.models import RoomType, Room, CustomerType, UserRoles, User
 
 
 class AuthenticatedView(ModelView):
@@ -33,6 +33,14 @@ class CustomerTypeView(ModelView):
     can_view_details = True
 
 
+class UserView(ModelView):
+    column_list = ['id', 'name', 'username', 'active', 'user_role']
+    column_searchable_list = ['name', 'username']
+    column_filters = ['name', 'username', 'user_role']
+    can_view_details = True
+    can_delete = False
+
+
 class AuthenticatedBaseView(BaseView):
     def is_accessible(self):
         return current_user.is_authenticated
@@ -55,5 +63,6 @@ admin = Admin(app, name='Hotel Admin Page', template_mode='bootstrap4')
 admin.add_view(RoomTypeView(RoomType, db.session, name='Loại phòng'))
 admin.add_view(RoomView(Room, db.session, name='Phòng'))
 admin.add_view(CustomerTypeView(CustomerType, db.session, name='Loại KH'))
+admin.add_view(UserView(User, db.session, name='Người dùng'))
 admin.add_view(StatsView(name='Thống kê - Báo cáo'))
 admin.add_view(LogoutView(name='Đăng xuất'))
