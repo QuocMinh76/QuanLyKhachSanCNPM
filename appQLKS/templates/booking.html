@@ -1,0 +1,94 @@
+{% extends 'layout/base.html' %}
+
+{% block content %}
+<div class="container">
+    <h2 class="text-center">Đặt phòng</h2>
+    <form>
+
+        <div>
+            <label for="name" class="form-label">Tên người đặt</label>
+            <input type="text" id="name" class="form-control"/>
+        </div>
+        <br/>
+        <div class="row">
+            <div class="col">
+                <label for="checkin" class="form-label">Ngày nhận phòng</label>
+                <input type="date" id="checkin" class="form-control"/>
+            </div>
+            <div class="col">
+                <label for="checkout" class="form-label">Ngày trả phòng</label>
+                <input type="date" id="checkout" class="form-control"/>
+            </div>
+
+        </div>
+        <br/>
+        <!-- Hiển thị tổng số khách thuê -->
+        <div class="row">
+            <div class="col">
+                <label for="num_guests" class="form-label">Số lượng khách thuê đã thêm</label>
+                <input type="number" id="num_guests" class="form-control" readonly value="6"/>
+            </div>
+            <!-- Hiển thị tổng số phòng thuê -->
+            <div class="col">
+                <label for="num_rooms" class="form-label">Số lượng phòng đã chọn</label>
+                <input type="number" id="num_rooms" class="form-control" readonly value="8"/>
+            </div>
+        </div>
+        <br/>
+        <!-- Chọn loại phòng trong -->
+        <div class="row">
+            {% for room_type in room_types %}
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="checkbox" value="{{ room_type.id }}"
+                       id="room_type_{{ room_type.id }}">
+                <label class="form-check-label" for="room_type_{{ room_type.id }}">{{ room_type.name }}</label>
+            </div>
+            {% endfor %}
+        </div>
+        <br/>
+        <!-- Hiển thị danh sách phòng theo loại đã chọn dưới dạng có thể tick chọn nhiều-->
+        <div class="row">
+            {% for room in rooms %}
+            <div class="col">
+                <div class="form-check form-check-inline">
+                    <input class="form-check input" type="checkbox" value="{{ room.id }}" id="room_{{ room.id }}"> {{ room.name }} - {{ room.price }} VNĐ / đêm - {{ room.room_type.name }}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <br/>
+        <!-- hiển thị tiêu đề "Danh sách khách hàng" -->
+        <h5 class="mb-3">Danh sách khách hàng</h5>
+        <!-- Hiển thị bảng danh sách khách hàng -->
+        <table class="table table-bordered">
+            <thead>
+            <tr>
+                <th>Tên khách hàng</th>
+                <th>Loại khách hàng</th>
+                <th>CMND</th>
+                <th>Địa chỉ</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>Nguyễn Văn A</td>
+                <td>Nội địa</td>
+                <td>123456789</td>
+                <td>TPHCM</td>
+            </tr>
+            <tr>
+                <td><input type="text" class="form-control" placeholder="Tên khách hàng"></td>
+                <td>
+                    <select class="form-select">
+                        <option value="Nội địa">Nội địa</option>
+                        <option value="Quốc tế">Quốc tế</option>
+                    </select>
+                </td>
+                <td><input type="text" class="form-control" placeholder="CMND"></td>
+                <td><input type="text" class="form-control" placeholder="Địa chỉ"></td>
+            </tr>
+            </tbody>
+        </table>
+    </form>
+    {% endblock %}

@@ -77,15 +77,21 @@ def logout_process():
 def hotel_homepage():
     return render_template('hotel_homepage.html')
 
+
 @app.route("/rent")
 def rent():
     return render_template('rent.html')
 
+
 @app.route('/booking')
 def booking():
-    return render_template('form_datphong.html')
-
-
+    # Lấy danh sách loại phòng
+    room_types = dao.get_room_types()
+    # Hiển thị danh sách phòng theo loại phòng đã chọn
+    if request.args.get('room_type_id'):
+        rooms = dao.get_rooms_by_type(request.args.get('room_type_id'))
+        return render_template('booking.html', room_types=room_types, rooms=rooms)
+    return render_template('booking.html', room_types=room_types)
 @login.user_loader
 def load_user(user_id):
     return dao.get_user_by_id(user_id)
