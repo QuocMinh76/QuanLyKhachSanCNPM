@@ -77,13 +77,24 @@ def logout_process():
 def hotel_homepage():
     return render_template('hotel_homepage.html')
 
+
 @app.route("/rent")
 def rent():
     return render_template('rent.html')
 
+
 @app.route('/booking')
 def booking():
     return render_template('form_datphong.html')
+
+
+@app.route('/find_order')
+def find_booking_order():
+    kw = request.args.get('kw')
+
+    orders = dao.load_booking_orders(kw)
+
+    return render_template('find_booking_order.html', orders=orders)
 
 
 @login.user_loader
