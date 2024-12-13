@@ -11,6 +11,7 @@ app = Flask(__name__)
 # app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+pymysql://root:%s@localhost/hoteldb?charset=utf8mb4" % quote("My123456") #my
 app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+pymysql://root:%s@localhost/hoteldb?charset=utf8mb4" % quote("0420") #kiet
 
+
 app.secret_key = 'aweut9n8*@$*djhfjsadhfsdqefsfgasedq23i'
 
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = True

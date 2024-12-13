@@ -83,6 +83,7 @@ def rent():
     return render_template('rent.html')
 
 
+
 @app.route('/booking')
 def booking():
     # Lấy danh sách loại phòng
@@ -92,6 +93,22 @@ def booking():
         rooms = dao.get_rooms_by_type(request.args.get('room_type_id'))
         return render_template('booking.html', room_types=room_types, rooms=rooms)
     return render_template('booking.html', room_types=room_types)
+
+  
+@app.route("/thanhtoan")
+def thanhtoan():
+    return render_template('thanhtoan.html')
+
+
+
+@app.route('/find_order')
+def find_booking_order():
+    kw = request.args.get('kw')
+
+    orders = dao.load_booking_orders(kw)
+
+    return render_template('find_booking_order.html', orders=orders)
+
 @login.user_loader
 def load_user(user_id):
     return dao.get_user_by_id(user_id)

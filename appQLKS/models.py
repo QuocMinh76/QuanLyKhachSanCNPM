@@ -1,13 +1,7 @@
-from datetime import datetime
-
 from sqlalchemy.orm import relationship
 from sqlalchemy import Column, Integer, String, Float, Boolean, ForeignKey, Enum, DateTime
-import hashlib
 from enum import Enum as RoleEnum
 from flask_login import UserMixin
-
-# Thay đổi theo máy
-#from kiet.appQLKS import db, app
 from appQLKS import db, app
 
 if __name__ == '__main__':
@@ -31,6 +25,10 @@ class User(db.Model, UserMixin):
     avatar = Column(String(100), nullable=True)
     active = Column(Boolean, default=True)
     user_role = Column(Enum(UserRoles), default=UserRoles.CUSTOMER)
+    orders = relationship('BookingOrder', backref='ordered', lazy=True)
+
+    def __str__(self):
+        return self.username
 
 
 class CustomerType(db.Model):
@@ -38,6 +36,9 @@ class CustomerType(db.Model):
     cust_type = Column(String(100), nullable=False)
     cust_rate = Column(Float, default="1")
     customers = relationship('Customer', backref='custType', lazy=True)
+
+    def __str__(self):
+        return self.cust_type
 
 
 class Customer(db.Model):
@@ -54,12 +55,14 @@ class BookingOrder(db.Model):
     ordered_by = Column(Integer, ForeignKey(User.id), nullable=False)  # Tham chiếu đến bảng User
     checkin_date = Column(DateTime, nullable=False)
     checkout_date = Column(DateTime, nullable=False)
+    created_date = Column(DateTime, nullable=False)
 
 
 class RentingOrder(db.Model):
     bookingOrder_id = Column(Integer, ForeignKey(BookingOrder.id), primary_key=True)  # Khóa ngoại là khóa chính
     checkin_date = Column(DateTime, nullable=False)
     checkout_date = Column(DateTime, nullable=False)
+    created_date = Column(DateTime, nullable=False)
 
 
 class Bill(db.Model):
@@ -70,6 +73,7 @@ class Bill(db.Model):
     foreignCust = Column(Integer, nullable=False)
     basePrice = Column(Float, nullable=False)
     extraCharge = Column(Float, default=0)
+    created_date = Column(DateTime, nullable=False)
 
 
 class RoomType(db.Model):

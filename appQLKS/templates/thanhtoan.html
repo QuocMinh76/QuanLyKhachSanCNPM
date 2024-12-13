@@ -1,0 +1,40 @@
+{% extends 'layout/base.html' %}
+
+{% block content %}
+<style>
+    .payment-details p {
+           padding-left: 20px;
+     }
+    .container {
+            max-width: 800px;
+            border-radius: 8px;
+    }
+    .card {
+        border: 2px solid #000;
+    }
+</style>
+<div class="d-flex justify-content-center align-items-center">
+    <div class="container mt-5">
+        <h2 class="text-center">HÓA ĐƠN THANH TOÁN</h2>
+        <h6 class="text-center"><strong>Thời gian thanh toán: </strong>20/12/2024</h6>
+        <div class="card">
+            <div class="card-header bg-success text-white">
+            </div>
+            <div class="payment-details mt-2">
+                <p><strong>Họ tên khách hàng: </strong>ABC</p>
+                <p><strong>Ngày nhận phòng: </strong>dd/MM/yyyy</p>
+                <p><strong>Ngày trả phòng: </strong>dd/MM/yyyy</p>
+                <p><strong>Các phòng thuê: </strong>A101, B102</p>
+                <p><strong>Số lượng khách thuê: </strong>n</p>
+                 <p><strong>Nhân viên thanh toán:</strong>DEF</p>
+                <p><strong>Tổng tiền: </strong>100</p>
+            </div>
+        </div>
+        <div class="d-flex justify-content-center gap-4 mt-4">
+                <button class="btn btn-lg btn-success">Thanh toán tiền mặt</button>
+                <button class="btn btn-lg btn-primary">Thanh toán VNPay</button>
+                <button class="btn btn-lg btn-danger">Hủy thanh toán</button>
+            </div>
+    </div>
+</div>
+{% endblock %}
