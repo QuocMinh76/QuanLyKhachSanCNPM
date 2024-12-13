@@ -3,7 +3,7 @@ from flask_admin import Admin, BaseView, expose
 from flask_admin.contrib.sqla import ModelView
 from flask_login import current_user, logout_user
 from flask import redirect
-from appQLKS.models import RoomType, Room, CustomerType, UserRoles
+from appQLKS.models import RoomType, Room, CustomerType, UserRoles, User
 
 
 class AuthenticatedView(ModelView):
@@ -11,7 +11,7 @@ class AuthenticatedView(ModelView):
         return current_user.is_authenticated and current_user.user_role.__eq__(UserRoles.ADMIN)
 
 
-class RoomTypeAdmin(ModelView):
+class RoomTypeView(ModelView):
     can_export = True
     column_list = ['id', 'name', 'basePrice', 'maxCust', 'overMaxRate', 'rooms']
     column_searchable_list = ['name']
@@ -19,16 +19,26 @@ class RoomTypeAdmin(ModelView):
     can_view_details = True
 
 
-class RoomAdmin(ModelView):
-    column_list = ['id', 'name', 'description', 'roomPrice', 'available', 'roomType_id']
+class RoomView(ModelView):
+    column_list = ['id', 'name', 'description', 'roomPrice', 'available', 'image', 'roomType_id']
     column_searchable_list = ['name']
     column_filters = ['name']
+    can_view_details = True
 
 
-class CustomerTypeAdmin(ModelView):
+class CustomerTypeView(ModelView):
     column_list = ['id', 'cust_type', 'cust_rate']
     column_searchable_list = ['cust_type']
     column_filters = ['cust_type']
+    can_view_details = True
+
+
+class UserView(ModelView):
+    column_list = ['id', 'name', 'username', 'active', 'user_role']
+    column_searchable_list = ['name', 'username']
+    column_filters = ['name', 'username', 'user_role']
+    can_view_details = True
+    can_delete = False
 
 
 class AuthenticatedBaseView(BaseView):
@@ -43,8 +53,16 @@ class LogoutView(AuthenticatedBaseView):
         return redirect('/admin')
 
 
-admin = Admin(app, name='hotelbookingapp', template_mode='bootstrap4')
-admin.add_view(RoomTypeAdmin(RoomType, db.session))
-admin.add_view(RoomAdmin(Room, db.session))
-admin.add_view(CustomerTypeAdmin(CustomerType, db.session))
+class StatsView(AuthenticatedBaseView):
+    @expose("/")
+    def index(self):
+        return self.render('admin/stats.html')
+
+
+admin = Admin(app, name='Hotel Admin Page', template_mode='bootstrap4')
+admin.add_view(RoomTypeView(RoomType, db.session, name='Loại phòng'))
+admin.add_view(RoomView(Room, db.session, name='Phòng'))
+admin.add_view(CustomerTypeView(CustomerType, db.session, name='Loại KH'))
+admin.add_view(UserView(User, db.session, name='Người dùng'))
+admin.add_view(StatsView(name='Thống kê - Báo cáo'))
 admin.add_view(LogoutView(name='Đăng xuất'))

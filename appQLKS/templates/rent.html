@@ -1,0 +1,61 @@
+{% extends 'layout/base.html' %}
+
+{% block content %}
+<body>
+    <div class="container mt-5">
+        <h2 class="text-center mb-4">Lập phiếu thuê phòng</h2>
+        <form>
+            <!-- Thông tin phiếu -->
+            <table class="table table-bordered text-center">
+                <tbody>
+                    <tr>
+                        <th>Nhân viên lập phiếu</th>
+                        <th>Thời gian lập phiếu</th>
+                        <th>Ngày nhận phòng</th>
+                        <th>Ngày trả phòng</th>
+                        <th>Số lượng khách thuê</th>
+                    </tr>
+                    <tr>
+                        <td>ABC</td>
+                        <td>hhddmm</td>
+                        <td>hhddmm</td>
+                        <td>hhddmm</td>
+                        <td>2</td>
+                    </tr>
+                    <tr>
+                        <th>Các phòng thuê</th>
+                        <td colspan="4">Phòng 1, Phòng 2</td>
+                    </tr>
+                </tbody>
+            </table>
+            <h5 class="mb-3 mt-4">Danh sách khách hàng:</h5>
+            <table class="table table-bordered text-center">
+                <thead>
+                    <tr>
+                        <th>Tên khách hàng</th>
+                        <th>Loại khách hàng</th>
+                        <th>CMND</th>
+                        <th>Địa chỉ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+<!--                        <td><input type="text" class="form-control" placeholder="Tên khách hàng"></td>-->
+<!--                        <td><input type="text" class="form-control" placeholder="Loại khách hàng"></td>-->
+<!--                        <td><input type="text" class="form-control" placeholder="CMND"></td>-->
+<!--                        <td><input type="text" class="form-control" placeholder="Địa chỉ"></td>-->
+                        <td>ABC</td>
+                        <td>Nội địa</td>
+                        <td>0837645354535</td>
+                        <td>HCM</td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="d-flex justify-content-end">
+                <button type="submit" class="btn btn-primary me-2">Lập phiếu</button>
+                <button type="button" class="btn btn-secondary">Hủy</button>
+            </div>
+        </form>
+    </div>
+</body>
+{% endblock %}
