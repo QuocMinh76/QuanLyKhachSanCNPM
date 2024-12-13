@@ -65,3 +65,13 @@ def auth_user(username, password, role=None):
 
 def get_user_by_id(user_id):
     return User.query.get(user_id)
+
+
+# Lấy danh sách loại phòng
+def get_room_types():
+    return RoomType.query.all()
+
+
+# Lấy danh sách phòng theo loại phòng
+def get_rooms_by_type(room_type_id):
+    return Room.query.filter(Room.roomType_id == room_type_id).all()
