@@ -1,4 +1,4 @@
-from appQLKS.models import User, Room, RoomType
+from appQLKS.models import User, Room, RoomType, BookingOrder
 from appQLKS import app, db
 import hashlib
 import cloudinary.uploader
@@ -22,6 +22,15 @@ def load_rooms(room_type_id=None, kw=None, page=1):
     products = products.slice(start, start + page_size)
 
     return products.all()
+
+
+def load_booking_orders(kw=None):
+    orders = BookingOrder.query
+
+    if kw:
+        orders = orders.filter(BookingOrder.ordered_by.like(f"%{kw}%"))
+
+    return orders.all()
 
 
 def count_rooms():
