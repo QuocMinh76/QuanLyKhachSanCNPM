@@ -83,22 +83,45 @@ def rent():
     return render_template('rent.html')
 
 
-
 @app.route('/booking')
 def booking():
     # Lấy danh sách loại phòng
-    room_types = dao.get_room_types()
+    room_types = dao.load_room_types()
+    rooms = dao.get_rooms_by_type()
+
     # Hiển thị danh sách phòng theo loại phòng đã chọn
     if request.args.get('room_type_id'):
         rooms = dao.get_rooms_by_type(request.args.get('room_type_id'))
         return render_template('booking.html', room_types=room_types, rooms=rooms)
-    return render_template('booking.html', room_types=room_types)
 
-  
+    return render_template('booking.html', room_types=room_types, rooms=rooms)
+
+
+@app.route('/api/rooms', methods=['GET'])
+def get_rooms():
+    room_type_id = request.args.get('room_type_id')
+    rooms = dao.get_rooms_by_type(room_type_id)
+
+    # Serialize rooms to JSON
+    room_list = [
+        {
+            "id": room.id,
+            "name": room.name,
+            "description": room.description,
+            "image": room.image,
+            "status": "Available" if room.available else "Unavailable",
+            "price": room.roomPrice,
+            "type": dao.get_name_type_of_room_by_id(room.id)
+        }
+        for room in rooms
+    ]
+
+    return jsonify(room_list)
+
+
 @app.route("/thanhtoan")
 def thanhtoan():
     return render_template('thanhtoan.html')
-
 
 
 @app.route('/find_order')
@@ -108,6 +131,7 @@ def find_booking_order():
     orders = dao.load_booking_orders(kw)
 
     return render_template('find_booking_order.html', orders=orders)
+
 
 @login.user_loader
 def load_user(user_id):

@@ -2,10 +2,16 @@ from appQLKS.models import User, Room, RoomType, BookingOrder
 from appQLKS import app, db
 import hashlib
 import cloudinary.uploader
+from sqlalchemy.orm import joinedload
+from sqlalchemy import or_
 
 
 def load_room_types():
     return RoomType.query.order_by('id').all()
+
+
+def get_all_rooms():
+    return Room.query.order_by('id').all()
 
 
 def load_rooms(room_type_id=None, kw=None, page=1):
@@ -28,7 +34,13 @@ def load_booking_orders(kw=None):
     orders = BookingOrder.query
 
     if kw:
-        orders = orders.filter(BookingOrder.ordered_by.like(f"%{kw}%"))
+        # Join with the User table and filter by user ID or name
+        orders = orders.join(User).filter(
+            or_(
+                BookingOrder.id == kw,  # Search by user ID
+                User.name.ilike(f"%{kw}%")  # Search by username (case-insensitive)
+            )
+        )
 
     return orders.all()
 
@@ -73,5 +85,29 @@ def get_room_types():
 
 
 # Lấy danh sách phòng theo loại phòng
-def get_rooms_by_type(room_type_id):
-    return Room.query.filter(Room.roomType_id == room_type_id).all()
+def get_rooms_by_type(room_type_id=None):
+    rooms = Room.query
+
+    if room_type_id:
+        rooms = rooms.filter(Room.roomType_id.__eq__(room_type_id))
+
+    rooms = rooms.filter(Room.available.__eq__(True))
+
+    return rooms.order_by('id').all()
+
+
+def get_room_type_by_id(room_type_id):
+    return RoomType.query.get(room_type_id)
+
+
+def get_name_type_of_room_by_id(room_id):
+    # Fetch the room by its ID
+    room = Room.query.get(room_id)
+
+    # Check if the room exists
+    if room:
+        # Fetch the associated RoomType
+        room_type = RoomType.query.get(room.roomType_id)
+        if room_type:
+            return room_type.name  # Return the name of the room type
+    return None  # If no room or room type is found, return None
