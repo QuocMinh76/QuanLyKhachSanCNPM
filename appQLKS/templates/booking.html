@@ -2,7 +2,7 @@
 
 {% block content %}
 <div class="container">
-    <h2 class="text-center">Đặt phòng</h2>
+    <h2 class="text-center mt-4">ĐẶT PHÒNG</h2>
     <form>
 
         <div>
@@ -35,26 +35,22 @@
             </div>
         </div>
         <br/>
+        <h5 class="mb-3">Chọn loại phòng</h5>
         <!-- Chọn loại phòng trong -->
         <div class="row">
             {% for room_type in room_types %}
-            <div class="form-check form-check-inline">
-                <input class="form-check-input" type="checkbox" value="{{ room_type.id }}"
-                       id="room_type_{{ room_type.id }}">
+            <div class="col-2 form-check form-check-inline">
+                <input class="form-check-input room-type-checkbox" type="checkbox" value="{{ room_type.id }}"
+                       id="room_type_{{ room_type.id }}" name="room_type_id">
                 <label class="form-check-label" for="room_type_{{ room_type.id }}">{{ room_type.name }}</label>
             </div>
             {% endfor %}
         </div>
         <br/>
         <!-- Hiển thị danh sách phòng theo loại đã chọn dưới dạng có thể tick chọn nhiều-->
-        <div class="row">
-            {% for room in rooms %}
-            <div class="col">
-                <div class="form-check form-check-inline">
-                    <input class="form-check input" type="checkbox" value="{{ room.id }}" id="room_{{ room.id }}"> {{ room.name }} - {{ room.price }} VNĐ / đêm - {{ room.room_type.name }}
-                </div>
-            </div>
-            {% endfor %}
+<!--        tam de day mai an no chung voi danh sach-->
+        <h5 class="mb-3">Danh sách phòng khả dụng</h5>
+        <div class="list-view-container" id="room-list">
         </div>
 
         <br/>
@@ -91,4 +87,136 @@
             </tbody>
         </table>
     </form>
+</div>
+
+<script>
+        // Get the container for the room list
+        const roomListContainer = document.getElementById('room-list');
+        const MAX_ITEMS_PER_ROW = 5; // Maximum number of items per row
+
+        // Keep track of selected room IDs
+        let selectedRooms = new Set();
+
+        // Add event listeners to room type checkboxes
+        document.querySelectorAll('.room-type-checkbox').forEach(checkbox => {
+            checkbox.addEventListener('change', handleCheckboxChange);
+        });
+
+        // Handle changes in the room type checkboxes
+        function handleCheckboxChange() {
+            const selectedTypes = Array.from(document.querySelectorAll('.room-type-checkbox:checked')).map(cb => cb.value);
+
+            // Clear the previous output
+            roomListContainer.innerHTML = '';
+
+            // If no room types are selected, hide the container and stop further processing
+            if (selectedTypes.length === 0) {
+                roomListContainer.style.display = 'none';
+                return;
+            }
+
+            roomListContainer.style.display = 'block';
+
+            // Collect all rooms for selected types in order
+            const allRooms = [];
+            selectedTypes.forEach(type => {
+                fetchRoomsByType(type).then(rooms => {
+                    rooms.forEach(room => {
+                        allRooms.push({ ...room, type }); // Attach the type to each room
+                    });
+
+                    // Once all room types are fetched, sort and display rooms
+                    if (allRooms.length > 0) {
+                        displayRooms(allRooms);
+                    }
+                }).catch(error => {
+                    console.error(`Error fetching rooms for type ${type}:`, error);
+                });
+            });
+        }
+
+        // Fetch room data by type from the server
+        async function fetchRoomsByType(type) {
+            try {
+                const response = await fetch(`/api/rooms?room_type_id=${type}`);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                return await response.json();
+            } catch (error) {
+                console.error('Error fetching rooms:', error);
+                return [];
+            }
+        }
+
+        // Display all rooms in a grid layout
+        function displayRooms(allRooms) {
+            // Reset the grid layout
+            roomListContainer.innerHTML = '';
+
+            let currentRow = document.createElement('div');
+            currentRow.classList.add('room-row');
+            roomListContainer.appendChild(currentRow);
+
+            allRooms.forEach((room, index) => {
+                // Add room item
+                const roomItem = createRoomItem(room, room.type);
+                currentRow.appendChild(roomItem);
+
+                // If the row is full, start a new row
+                if ((index + 1) % MAX_ITEMS_PER_ROW === 0) {
+                    currentRow = document.createElement('div');
+                    currentRow.classList.add('room-row');
+                    roomListContainer.appendChild(currentRow);
+                }
+            });
+        }
+
+        // Create a single room item element
+        function createRoomItem(room, type) {
+            const roomItem = document.createElement('div');
+            roomItem.classList.add('room-item');
+
+            // Format the room price (e.g., "1,000,000 VNĐ")
+            const formattedPrice = formatPrice(room.price);
+
+            roomItem.innerHTML = `
+                <div class="room-name">${room.name}</div>
+                <div class="room-type">${type} - ${formattedPrice}</div>
+            `;
+
+            // Check if the room was previously selected and apply the selected state
+            if (selectedRooms.has(room.id)) {
+                roomItem.classList.add('selected');
+                roomItem.style.backgroundColor = 'green'; // Keep selected room highlighted
+            }
+
+            // Add click event listener for selection
+            roomItem.addEventListener('click', () => {
+                // Toggle selection state
+                roomItem.classList.toggle('selected');
+
+                // Update background color based on selection
+                if (roomItem.classList.contains('selected')) {
+                    roomItem.style.backgroundColor = 'green';
+                    selectedRooms.add(room.id); // Add room to selected set
+                } else {
+                    roomItem.style.backgroundColor = '';
+                    selectedRooms.delete(room.id); // Remove room from selected set
+                }
+            });
+
+            return roomItem;
+        }
+
+        // Format the price with commas and append "VNĐ"
+        function formatPrice(price) {
+            if (isNaN(price)) return price;
+            const formatter = new Intl.NumberFormat('vi-VN', {
+                style: 'decimal',
+                maximumFractionDigits: 0,
+            });
+            return formatter.format(price) + ' VNĐ';
+        }
+    </script>
     {% endblock %}
