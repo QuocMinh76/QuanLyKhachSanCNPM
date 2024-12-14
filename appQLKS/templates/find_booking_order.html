@@ -13,6 +13,7 @@
         {% if orders %}
         <table class="table table-bordered text-center">
             <tr>
+                <td>Mã đơn</td>
                 <td>Người đặt đơn</td>
                 <td>Ngày nhận phòng</td>
                 <td>Ngày trả phòng</td>
@@ -20,7 +21,8 @@
             </tr>
             {% for o in orders %}
             <tr>
-                <td>{{ o.ordered_by }}</td>
+                <td>{{ o.id }}</td>
+                <td>{{ o.ordered.name }}</td>
                 <td>{{ o.checkin_date }}</td>
                 <td>{{ o.checkout_date }}</td>
                 <td>
