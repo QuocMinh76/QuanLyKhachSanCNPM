@@ -2,7 +2,6 @@ from appQLKS.models import User, Room, RoomType, BookingOrder
 from appQLKS import app, db
 import hashlib
 import cloudinary.uploader
-from sqlalchemy.orm import joinedload
 from sqlalchemy import or_
 
 
@@ -85,6 +84,7 @@ def get_room_types():
 
 
 # Lấy danh sách phòng theo loại phòng
+# This function get all AVAILABLE rooms of a room type
 def get_rooms_by_type(room_type_id=None):
     rooms = Room.query
 
