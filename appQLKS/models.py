@@ -3,6 +3,7 @@ from sqlalchemy import Column, Integer, String, Float, Boolean, ForeignKey, Enum
 from enum import Enum as RoleEnum
 from flask_login import UserMixin
 from appQLKS import db, app
+from datetime import datetime
 
 if __name__ == '__main__':
     with app.app_context():
@@ -25,6 +26,7 @@ class User(db.Model, UserMixin):
     avatar = Column(String(100), nullable=True)
     active = Column(Boolean, default=True)
     user_role = Column(Enum(UserRoles), default=UserRoles.CUSTOMER)
+
     orders = relationship('BookingOrder', backref='ordered', lazy=True)
 
     def __str__(self):
@@ -35,6 +37,7 @@ class CustomerType(db.Model):
     id = Column(Integer, primary_key=True, autoincrement=True)
     cust_type = Column(String(100), nullable=False)
     cust_rate = Column(Float, default="1")
+
     customers = relationship('Customer', backref='custType', lazy=True)
 
     def __str__(self):
@@ -49,31 +52,43 @@ class Customer(db.Model):
     custAddress = Column(String(100), nullable=False)
     custType_id = Column(Integer, ForeignKey(CustomerType.id), nullable=False)
 
+    details = relationship('BookingDetails', backref='customer', lazy=True)
+
 
 class BookingOrder(db.Model):
     id = Column(Integer, primary_key=True, autoincrement=True)
     ordered_by = Column(Integer, ForeignKey(User.id), nullable=False)  # Tham chiếu đến bảng User
     checkin_date = Column(DateTime, nullable=False)
     checkout_date = Column(DateTime, nullable=False)
-    created_date = Column(DateTime, nullable=False)
+    created_date = Column(DateTime, nullable=False, default=datetime.now())
+
+    renting_order = relationship('RentingOrder', back_populates='booking_order', uselist=False)
 
 
 class RentingOrder(db.Model):
-    bookingOrder_id = Column(Integer, ForeignKey(BookingOrder.id), primary_key=True)  # Khóa ngoại là khóa chính
+    id = Column(Integer, ForeignKey(BookingOrder.id, ondelete="CASCADE"),
+                primary_key=True, unique=True)  # Khóa ngoại tham chiếu 1-1 đến khóa chính đơn đặt
     checkin_date = Column(DateTime, nullable=False)
     checkout_date = Column(DateTime, nullable=False)
-    created_date = Column(DateTime, nullable=False)
+    created_date = Column(DateTime, nullable=False, default=datetime.now())
+
+    details = relationship('BookingDetails', backref='booking_order', lazy=True)
+    booking_order = relationship('BookingOrder', back_populates='renting_order')
+    bill = relationship('Bill', back_populates='renting_order', uselist=False)
 
 
 class Bill(db.Model):
-    rentingOrder_id = Column(Integer, ForeignKey(RentingOrder.bookingOrder_id), primary_key=True)
+    id = Column(Integer, ForeignKey(RentingOrder.id, ondelete="CASCADE"),
+                primary_key=True, unique=True)
     checkin_date = Column(DateTime, nullable=False)
     checkout_date = Column(DateTime, nullable=False)
     totalCust = Column(Integer, nullable=False)
     foreignCust = Column(Integer, nullable=False)
     basePrice = Column(Float, nullable=False)
     extraCharge = Column(Float, default=0)
-    created_date = Column(DateTime, nullable=False)
+    created_date = Column(DateTime, nullable=False, default=datetime.now())
+
+    renting_order = relationship('RentingOrder', back_populates='bill')
 
 
 class RoomType(db.Model):
@@ -82,6 +97,7 @@ class RoomType(db.Model):
     basePrice = Column(Float, default=0)
     maxCust = Column(Integer, default=3)
     overMaxRate = Column(Float, default=1.25)
+
     rooms = relationship('Room', backref='roomType', lazy=True)
 
     def __str__(self):
@@ -97,6 +113,8 @@ class Room(db.Model):
     roomPrice = Column(Float, default=0)
     roomType_id = Column(Integer, ForeignKey(RoomType.id), nullable=False)
 
+    details = relationship('BookingDetails', backref='room', lazy=True)
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if not self.roomPrice and self.roomType_id:
@@ -105,9 +123,9 @@ class Room(db.Model):
                 self.roomPrice = room_type.basePrice
 
 
-class OrderDetails(db.Model):
+class BookingDetails(db.Model):
     id = Column(Integer, primary_key=True, autoincrement=True)
-    rentingOrder_id = Column(Integer, ForeignKey(RentingOrder.bookingOrder_id), nullable=False)
+    rentingOrder_id = Column(Integer, ForeignKey(RentingOrder.id), nullable=False)
     room_id = Column(Integer, ForeignKey(Room.id), nullable=False)
     cust_id = Column(Integer, ForeignKey(Customer.id), nullable=False)
 

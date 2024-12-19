@@ -2,6 +2,13 @@
     background-color: rgb(255, 178, 165);
 }
 
+.btn-circle {
+    width: 40px;
+    height: 40px;
+    margin: auto;
+    text-align: center;
+}
+
 .room-container {
             margin-top: 20px;
         }
@@ -48,11 +55,5 @@
 
         .room-type {
             font-size: 14px;
-            color: gray;
             margin-bottom: 10px;
-        }
-
-        .room-status {
-            color: #007bff;
-            font-size: 12px;
         }
