@@ -102,25 +102,25 @@ def get_rooms():
     room_type_id = request.args.get('room_type_id')
     rooms = dao.get_rooms_by_type(room_type_id)
 
-    # Serialize rooms to JSON
-    room_list = [
-        {
+    room_list = []
+    for room, type_name in rooms:
+        room_data = {
             "id": room.id,
             "name": room.name,
             "description": room.description,
             "image": room.image,
             "status": "Available" if room.available else "Unavailable",
             "price": room.roomPrice,
-            "type": dao.get_name_type_of_room_by_id(room.id)
+            "type": room.roomType_id,
+            "type_name": type_name
         }
-        for room in rooms
-    ]
+        room_list.append(room_data)
 
     return jsonify(room_list)
 
 
 @app.route("/thanhtoan")
-def thanhtoan():
+def thanh_toan():
     return render_template('thanhtoan.html')
 
 

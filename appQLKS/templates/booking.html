@@ -26,12 +26,12 @@
         <div class="row">
             <div class="col">
                 <label for="num_guests" class="form-label">Số lượng khách thuê đã thêm</label>
-                <input type="number" id="num_guests" class="form-control" readonly value="6"/>
+                <input type="number" id="num_guests" class="form-control" min="1" readonly/>
             </div>
             <!-- Hiển thị tổng số phòng thuê -->
             <div class="col">
                 <label for="num_rooms" class="form-label">Số lượng phòng đã chọn</label>
-                <input type="number" id="num_rooms" class="form-control" readonly value="8"/>
+                <input type="number" id="num_rooms" class="form-control" readonly min="0"/>
             </div>
         </div>
         <br/>
@@ -49,8 +49,13 @@
         <br/>
         <!-- Hiển thị danh sách phòng theo loại đã chọn dưới dạng có thể tick chọn nhiều-->
 <!--        tam de day mai an no chung voi danh sach-->
-        <h5 class="mb-3">Danh sách phòng khả dụng</h5>
-        <div class="list-view-container" id="room-list">
+        <div class="row">
+            <h5 class="mb-3 col-11">Danh sách phòng khả dụng</h5>
+            <!-- Button to uncheck all selected rooms -->
+            <button type="button" id="uncheckAllButton" class="btn btn-warning col-1 btn-circle"><i class="fa fa-trash"></i></button>
+
+        </div>
+        <div class="list-view-container mt-3" id="room-list">
         </div>
 
         <br/>
@@ -66,26 +71,25 @@
                 <th>Địa chỉ</th>
             </tr>
             </thead>
-            <tbody>
-            <tr>
-                <td>Nguyễn Văn A</td>
-                <td>Nội địa</td>
-                <td>123456789</td>
-                <td>TPHCM</td>
-            </tr>
-            <tr>
-                <td><input type="text" class="form-control" placeholder="Tên khách hàng"></td>
-                <td>
-                    <select class="form-select">
-                        <option value="Nội địa">Nội địa</option>
-                        <option value="Quốc tế">Quốc tế</option>
-                    </select>
-                </td>
-                <td><input type="text" class="form-control" placeholder="CMND"></td>
-                <td><input type="text" class="form-control" placeholder="Địa chỉ"></td>
-            </tr>
+            <tbody id="customerTableBody">
+                <tr>
+                    <td><input type="text" class="form-control" placeholder="Tên khách hàng"></td>
+                    <td>
+                        <select class="form-select">
+                            <option value="Nội địa">Nội địa</option>
+                            <option value="Quốc tế">Quốc tế</option>
+                        </select>
+                    </td>
+                    <td><input type="text" class="form-control" placeholder="CMND"></td>
+                    <td><input type="text" class="form-control" placeholder="Địa chỉ"></td>
+                </tr>
             </tbody>
         </table>
+
+        <div>
+            <button type="button" class="btn btn-dark btn-circle rounded-circle" id="addRowButton">&plus;</button>
+            <button type="button" class="btn btn-dark btn-circle rounded-circle" id="removeRowButton">&minus;</button>
+        </div>
     </form>
 </div>
 
@@ -160,7 +164,7 @@
 
             allRooms.forEach((room, index) => {
                 // Add room item
-                const roomItem = createRoomItem(room, room.type);
+                const roomItem = createRoomItem(room, room.type, room.type_name);
                 currentRow.appendChild(roomItem);
 
                 // If the row is full, start a new row
@@ -173,7 +177,7 @@
         }
 
         // Create a single room item element
-        function createRoomItem(room, type) {
+        function createRoomItem(room, type, type_name) {
             const roomItem = document.createElement('div');
             roomItem.classList.add('room-item');
 
@@ -182,7 +186,7 @@
 
             roomItem.innerHTML = `
                 <div class="room-name">${room.name}</div>
-                <div class="room-type">${type} - ${formattedPrice}</div>
+                <div class="room-type">${type_name} - ${formattedPrice}</div>
             `;
 
             // Check if the room was previously selected and apply the selected state
@@ -204,9 +208,33 @@
                     roomItem.style.backgroundColor = '';
                     selectedRooms.delete(room.id); // Remove room from selected set
                 }
+
+                // Update the number of selected rooms
+                updateSelectedRoomCount()
             });
 
             return roomItem;
+        }
+
+        // Function to update the count of selected rooms
+        function updateSelectedRoomCount() {
+            const numRoomsInput = document.getElementById('num_rooms');
+            numRoomsInput. value = selectedRooms.size; // Set the number of selected rooms
+        }
+
+        // Function to uncheck all rooms
+        function uncheckAllRooms() {
+            // Remove 'selected' class and reset background for each room
+            document.querySelectorAll('.room-item').forEach(roomItem => {
+                roomItem.classList.remove('selected');
+                roomItem.style.backgroundColor = ''; // Reset background color
+            });
+
+            // Clear the selectedRooms set
+            selectedRooms.clear();
+
+            // Update the count of selected rooms
+            updateSelectedRoomCount();
         }
 
         // Format the price with commas and append "VNĐ"
@@ -218,5 +246,69 @@
             });
             return formatter.format(price) + ' VNĐ';
         }
+
+        updateSelectedRoomCount()
+        // Add event listener to the "Uncheck All" button
+        document.getElementById('uncheckAllButton').addEventListener('click', uncheckAllRooms);
+    </script>
+
+    <script>
+        // Function to update the number of guests
+        function updateGuestCount() {
+            const tableBody = document.getElementById('customerTableBody');
+            const rows = tableBody.getElementsByTagName('tr');
+            // Count the number of rows excluding the first one (static row)
+            const guestCount = rows. length;
+            document.getElementById('num_guests').value = guestCount;
+        }
+
+        document.getElementById('addRowButton').addEventListener('click', function () {
+            const tableBody = document.getElementById('customerTableBody');
+            const rows = tableBody.getElementsByTagName('tr');
+            const lastRow = rows[rows.length - 1];
+            const inputs = lastRow.querySelectorAll('input');
+            let allFilled = true;
+
+            // Check if all input fields in the last row are filled
+            inputs.forEach(input => {
+                if (input.value.trim() === '') {
+                    allFilled = false;
+                }
+            });
+
+            if (allFilled) {
+                // Create and append a new row
+                const newRow = document.createElement('tr');
+                newRow.innerHTML = `
+                    <td><input type="text" class="form-control" placeholder="Tên khách hàng"></td>
+                    <td>
+                        <select class="form-select">
+                            <option value="Nội địa">Nội địa</option>
+                            <option value="Quốc tế">Quốc tế</option>
+                        </select>
+                    </td>
+                    <td><input type="text" class="form-control" placeholder="CMND"></td>
+                    <td><input type="text" class="form-control" placeholder="Địa chỉ"></td>
+                `;
+                tableBody.appendChild(newRow);
+
+                updateGuestCount();
+            } else {
+                alert('Please fill in all fields before adding a new row.');
+            }
+        });
+
+        document.getElementById('removeRowButton').addEventListener('click', function () {
+            const tableBody = document.getElementById('customerTableBody');
+            const rows = tableBody.getElementsByTagName('tr');
+
+            if (rows.length > 1) { // Ensure at least one input row remains
+                tableBody.removeChild(rows[rows.length - 1]);
+
+                updateGuestCount();
+            }
+        });
+
+        updateGuestCount();
     </script>
     {% endblock %}
