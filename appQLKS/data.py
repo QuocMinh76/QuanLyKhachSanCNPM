@@ -11,6 +11,7 @@ from appQLKS.models import RoomType, User, UserRoles, CustomerType, Room
 if __name__ == '__main__':
     with app.app_context():
         db.drop_all()
+        from appQLKS import models
         db.create_all()
         print("Dữ liệu mẫu đã được thêm thành công!")
 
