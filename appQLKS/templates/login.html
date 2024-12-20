@@ -1,19 +1,27 @@
 {% extends 'layout/base.html' %}
 
 {% block content %}
-<h1 class="text-center text-danger mt-3">ĐĂNG NHẬP NGƯỜI DÙNG</h1>
+<h1 class="text-center mt-5">ĐĂNG NHẬP</h1>
 
-<form method="post" action="/login">
-    <div class="form-floating mb-3 mt-3">
-        <input type="text" class="form-control" id="username" placeholder="Tên đăng nhập" name="username">
-        <label for="username">Tên đăng nhập</label>
+<div class="d-flex justify-content-center mt-4">
+    <div class="card p-5" style="max-width: 500px; width: 100%; box-shadow: 0 8px 16px rgba(0,0,0,0.2); border-radius: 10px;">
+        <form method="post" action="/login">
+            <div class="form-floating mb-4">
+                <input type="text" class="form-control form-control-lg" id="username" placeholder="Tên đăng nhập" name="username" required>
+                <label for="username">Tên đăng nhập</label>
+            </div>
+            <div class="form-floating mb-4">
+                <input type="password" class="form-control form-control-lg" id="password" placeholder="Mật khẩu" name="password" required>
+                <label for="password">Mật khẩu</label>
+            </div>
+            <div class="d-flex justify-content-between mb-4">
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" id="rememberMe">
+                    <label class="form-check-label" for="rememberMe">Hiện mật khẩu</label>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-pink btn-lg w-100">Đăng nhập</button>
+        </form>
     </div>
-    <div class="form-floating mb-3 mt-3">
-        <input type="password" class="form-control" id="password" placeholder="Mật khẩu" name="password">
-        <label for="password">Mật khẩu</label>
-    </div>
-    <div class="form-floating mb-3 mt-3">
-        <button type="submit" class="btn btn-success">Đăng nhập</button>
-    </div>
-</form>
+</div>
 {% endblock %}

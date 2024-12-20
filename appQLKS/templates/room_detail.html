@@ -1,0 +1,83 @@
+{% extends 'layout/base.html' %}
+
+{% block content %}
+<body>
+    <div class="container my-5">
+        <div class="row">
+            <!-- Hình ảnh phòng -->
+            <div class="col-md-6">
+                <div>
+                    <img src="https://via.placeholder.com/600x400" class="d-block w-100" alt="Phòng 2">
+                </div>
+            </div>
+
+            <!-- Thông tin chi tiết -->
+            <div class="col-md-6">
+                <div>
+                    <h2>
+                        Phòng 1 - <span>Pro Room</span>
+                    </h2>
+                </div>
+                <p></p>
+                <h4 class="text-success">Giá: <span>150.000</span> VND/Đêm</h4>
+                <p>(Giá chưa kèm phụ thu - Vui lòng đọc phần mô tả)</p>
+
+                <h5 class="mt-4">Tiện Nghi:</h5>
+                <ul>
+                    <li>Giường cỡ lớn</li>
+                    <li>Điều hòa</li>
+                    <li>Wifi miễn phí</li>
+                    <li>Tivi màn hình phẳng</li>
+                    <li>Mini-bar</li>
+                </ul>
+                <button class="btn btn-pink mt-3">Đặt Phòng</button>
+            </div>
+        </div>
+
+        <!-- Mô tả chi tiết -->
+        <div class="row mt-5">
+            <div class="col-12">
+                <h3>Mô Tả Chi Tiết</h3>
+                <p>
+                    Phòng Deluxe của chúng tôi được thiết kế với phong cách hiện đại, mang lại sự thoải mái tối đa cho khách hàng.
+                    Với tầm nhìn đẹp, nội thất cao cấp và các tiện ích tiện nghi, bạn sẽ có những giây phút thư giãn tuyệt vời.
+                </p>
+                <p>
+                    Lưu ý: Phòng được ở tối đa 3 khách. Giá phòng ở phần thông tin là đơn giá phòng dành cho 2 khách, nếu khách thứ 3 phụ thu thêm 25%.
+                    Nếu phòng có khách nước ngoài thì nhân hệ số 1.5.
+                </p>
+            </div>
+        </div>
+
+        <!-- Phần bình luận -->
+        <div class="row mt-5">
+            <div class="col-12">
+                <h3>Bình Luận</h3>
+
+                <!-- Danh sách bình luận -->
+                <div class="mb-4">
+                    <div class="border p-3 rounded mb-2">
+                        <strong>Nguyễn Văn A</strong>
+                        <p>Phòng rất đẹp và sạch sẽ. Dịch vụ tuyệt vời!</p>
+                        <span class="text-muted">Ngày: 20/12/2024</span>
+                    </div>
+                    <div class="border p-3 rounded mb-2">
+                        <strong>Trần Thị B</strong>
+                        <p>Không gian yên tĩnh, rất phù hợp để nghỉ ngơi.</p>
+                        <span class="text-muted">Ngày: 19/12/2024</span>
+                    </div>
+                </div>
+
+                <!-- Form gửi bình luận -->
+                <form>
+                    <div class="mb-3">
+                        <label for="comment" class="form-label"><h5>Nhập bình luận</h5></label>
+                        <textarea class="form-control" id="comment" rows="4" placeholder="Nhập bình luận của bạn"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-pink">Gửi Bình Luận</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+{% endblock %}
