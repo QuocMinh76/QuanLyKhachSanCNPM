@@ -1,8 +1,9 @@
-from appQLKS.models import User, Room, RoomType, BookingOrder
+from appQLKS.models import User, Room, RoomType, BookingOrder, BookingRoomInfo, BookingCustInfo, RentingOrder, Bill
 from appQLKS import app, db
 import hashlib
 import cloudinary.uploader
 from sqlalchemy import or_
+from sqlalchemy.orm import Session
 
 
 def load_room_types():
@@ -48,7 +49,45 @@ def count_rooms():
     return Room.query.count()
 
 
-def add_booking_order(username, checkin_date, checkout_date, created_date):
+def add_booking_order(session: Session, user_id, checkin_date, checkout_date, rooms: list, customers: list):
+    try:
+        # Create the booking order
+        booking_order = BookingOrder(
+            user_id=user_id,
+            checkin_date=checkin_date,
+            checkout_date=checkout_date
+        )
+        session.add(booking_order)
+        session.flush()  # Flush to generate the ID for the booking order
+
+        # Add room information
+        for room_id in rooms:
+            room_info = BookingRoomInfo(
+                bookingOrder_id=booking_order.id,
+                room_id=room_id
+            )
+            session.add(room_info)
+
+        # Add customer information
+        for customer_id in customers:
+            cust_info = BookingCustInfo(
+                bookingOrder_id=booking_order.id,
+                cust_id=customer_id
+            )
+            session.add(cust_info)
+
+        # Commit the transaction
+        session.commit()
+
+        return booking_order
+
+    except Exception as e:
+        # Rollback in case of an error
+        session.rollback()
+        raise e
+
+
+def add_renting_order(booking_order_id):
     pass
 
 
@@ -98,3 +137,7 @@ def get_rooms_by_type(room_type_id=None):
 
 def get_room_type_by_id(room_type_id):
     return RoomType.query.get(room_type_id)
+
+def get_booking_order_by_id(booking_order_id):
+    return BookingOrder.query.get(booking_order_id)
+

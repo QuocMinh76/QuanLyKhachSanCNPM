@@ -48,13 +48,14 @@
         </div>
         <br/>
         <!-- Hiển thị danh sách phòng theo loại đã chọn dưới dạng có thể tick chọn nhiều-->
-<!--        tam de day mai an no chung voi danh sach-->
+        <!--        tam de day mai an no chung voi danh sach-->
         <div class="row">
             <h5 class="mb-3 col-11">Danh sách phòng khả dụng</h5>
             <!-- Button to uncheck all selected rooms -->
-            <button type="button" id="uncheckAllButton" class="btn btn-warning col-1 btn-circle"><i class="fa fa-trash"></i></button>
-
+            <button type="button" id="uncheckAllButton" class="btn btn-warning col-1 btn-circle"><i
+                    class="fa fa-trash"></i></button>
         </div>
+
         <div class="list-view-container mt-3" id="room-list">
         </div>
 
@@ -72,243 +73,282 @@
             </tr>
             </thead>
             <tbody id="customerTableBody">
-                <tr>
-                    <td><input type="text" class="form-control" placeholder="Tên khách hàng"></td>
-                    <td>
-                        <select class="form-select">
-                            <option value="Nội địa">Nội địa</option>
-                            <option value="Quốc tế">Quốc tế</option>
-                        </select>
-                    </td>
-                    <td><input type="text" class="form-control" placeholder="CMND"></td>
-                    <td><input type="text" class="form-control" placeholder="Địa chỉ"></td>
-                </tr>
+            <tr>
+                <td><input type="text" class="form-control" placeholder="Tên khách hàng"></td>
+                <td>
+                    <select class="form-select">
+                        <option value="Domestic">Nội địa</option>
+                        <option value="Foreign">Quốc tế</option>
+                    </select>
+                </td>
+                <td><input type="text" class="form-control" placeholder="CMND"></td>
+                <td><input type="text" class="form-control" placeholder="Địa chỉ"></td>
+            </tr>
             </tbody>
         </table>
 
-        <div>
-            <button type="button" class="btn btn-dark btn-circle rounded-circle" id="addRowButton">&plus;</button>
-            <button type="button" class="btn btn-dark btn-circle rounded-circle" id="removeRowButton">&minus;</button>
+        <div class="row" id="fnc_button">
+            <div class="col">
+                <button type="button" class="btn btn-dark btn-circle rounded-circle" id="addRowButton">&plus;</button>
+                <button type="button" class="btn btn-dark btn-circle rounded-circle" id="removeRowButton">&minus;
+                </button>
+            </div>
+            <div class="col d-flex justify-content-end">
+                <button type="submit" class="btn btn-primary" id="confirmBookingButton">Đặt phòng</button>
+            </div>
         </div>
     </form>
 </div>
-
+<style>
+    .fnc_button {
+        display: flex;
+        justify-content: space-between;
+    }
+</style>
 <script>
-        // Get the container for the room list
-        const roomListContainer = document.getElementById('room-list');
-        const MAX_ITEMS_PER_ROW = 5; // Maximum number of items per row
+    // Get the container for the room list
+    const roomListContainer = document.getElementById('room-list');
+    const MAX_ITEMS_PER_ROW = 5; // Maximum number of items per row
 
-        // Keep track of selected room IDs
-        let selectedRooms = new Set();
+    // Keep track of selected room IDs
+    let selectedRooms = new Set();
 
-        // Add event listeners to room type checkboxes
-        document.querySelectorAll('.room-type-checkbox').forEach(checkbox => {
-            checkbox.addEventListener('change', handleCheckboxChange);
-        });
+    // Add event listeners to room type checkboxes
+    document.querySelectorAll('.room-type-checkbox').forEach(checkbox => {
+        checkbox.addEventListener('change', handleCheckboxChange);
+    });
 
-        // Handle changes in the room type checkboxes
-        function handleCheckboxChange() {
-            const selectedTypes = Array.from(document.querySelectorAll('.room-type-checkbox:checked')).map(cb => cb.value);
+    // Handle changes in the room type checkboxes
+    function handleCheckboxChange() {
+        const selectedTypes = Array.from(document.querySelectorAll('.room-type-checkbox:checked')).map(cb => cb.value);
 
-            // Clear the previous output
-            roomListContainer.innerHTML = '';
+        // Clear the previous output
+        roomListContainer.innerHTML = '';
 
-            // If no room types are selected, hide the container and stop further processing
-            if (selectedTypes.length === 0) {
-                roomListContainer.style.display = 'none';
-                return;
-            }
+        // If no room types are selected, hide the container and stop further processing
+        if (selectedTypes.length === 0) {
+            roomListContainer.style.display = 'none';
+            return;
+        }
 
-            roomListContainer.style.display = 'block';
+        roomListContainer.style.display = 'block';
 
-            // Collect all rooms for selected types in order
-            const allRooms = [];
-            selectedTypes.forEach(type => {
-                fetchRoomsByType(type).then(rooms => {
-                    rooms.forEach(room => {
-                        allRooms.push({ ...room, type }); // Attach the type to each room
-                    });
-
-                    // Once all room types are fetched, sort and display rooms
-                    if (allRooms.length > 0) {
-                        displayRooms(allRooms);
-                    }
-                }).catch(error => {
-                    console.error(`Error fetching rooms for type ${type}:`, error);
+        // Collect all rooms for selected types in order
+        const allRooms = [];
+        selectedTypes.forEach(type => {
+            fetchRoomsByType(type).then(rooms => {
+                rooms.forEach(room => {
+                    allRooms.push({ ...room, type }); // Attach the type to each room
                 });
-            });
-        }
 
-        // Fetch room data by type from the server
-        async function fetchRoomsByType(type) {
-            try {
-                const response = await fetch(`/api/rooms?room_type_id=${type}`);
-                if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
+                // Once all room types are fetched, sort and display rooms
+                if (allRooms.length > 0) {
+                    displayRooms(allRooms);
                 }
-                return await response.json();
-            } catch (error) {
-                console.error('Error fetching rooms:', error);
-                return [];
+            }).catch(error => {
+                console.error(`Error fetching rooms for type ${type}:`, error);
+            });
+        });
+    }
+
+    // Fetch room data by type from the server
+    async function fetchRoomsByType(type) {
+        try {
+            const response = await fetch(`/api/rooms?room_type_id=${type}`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
             }
+            return await response.json();
+        } catch (error) {
+            console.error('Error fetching rooms:', error);
+            return [];
         }
+    }
 
-        // Display all rooms in a grid layout
-        function displayRooms(allRooms) {
-            // Reset the grid layout
-            roomListContainer.innerHTML = '';
+    // Display all rooms in a grid layout
+    function displayRooms(allRooms) {
+        // Reset the grid layout
+        roomListContainer.innerHTML = '';
 
-            let currentRow = document.createElement('div');
-            currentRow.classList.add('room-row');
-            roomListContainer.appendChild(currentRow);
+        let currentRow = document.createElement('div');
+        currentRow.classList.add('room-row');
+        roomListContainer.appendChild(currentRow);
 
-            allRooms.forEach((room, index) => {
-                // Add room item
-                const roomItem = createRoomItem(room, room.type, room.type_name);
-                currentRow.appendChild(roomItem);
+        allRooms.forEach((room, index) => {
+            // Add room item
+            const roomItem = createRoomItem(room, room.type, room.type_name);
+            currentRow.appendChild(roomItem);
 
-                // If the row is full, start a new row
-                if ((index + 1) % MAX_ITEMS_PER_ROW === 0) {
-                    currentRow = document.createElement('div');
-                    currentRow.classList.add('room-row');
-                    roomListContainer.appendChild(currentRow);
-                }
-            });
-        }
-
-        // Create a single room item element
-        function createRoomItem(room, type, type_name) {
-            const roomItem = document.createElement('div');
-            roomItem.classList.add('room-item');
-
-            // Format the room price (e.g., "1,000,000 VNĐ")
-            const formattedPrice = formatPrice(room.price);
-
-            roomItem.innerHTML = `
-                <div class="room-name">${room.name}</div>
-                <div class="room-type">${type_name} - ${formattedPrice}</div>
-            `;
-
-            // Check if the room was previously selected and apply the selected state
-            if (selectedRooms.has(room.id)) {
-                roomItem.classList.add('selected');
-                roomItem.style.backgroundColor = 'green'; // Keep selected room highlighted
+            // If the row is full, start a new row
+            if ((index + 1) % MAX_ITEMS_PER_ROW === 0) {
+                currentRow = document.createElement('div');
+                currentRow.classList.add('room-row');
+                roomListContainer.appendChild(currentRow);
             }
+        });
+    }
 
-            // Add click event listener for selection
-            roomItem.addEventListener('click', () => {
-                // Toggle selection state
-                roomItem.classList.toggle('selected');
+    // Create a single room item element
+    function createRoomItem(room, type, type_name) {
+        const roomItem = document.createElement('div');
+        roomItem.classList.add('room-item');
 
-                // Update background color based on selection
-                if (roomItem.classList.contains('selected')) {
-                    roomItem.style.backgroundColor = 'green';
-                    selectedRooms.add(room.id); // Add room to selected set
-                } else {
-                    roomItem.style.backgroundColor = '';
-                    selectedRooms.delete(room.id); // Remove room from selected set
-                }
+        // Format the room price (e.g., "1,000,000 VNĐ")
+        const formattedPrice = formatPrice(room.price);
 
-                // Update the number of selected rooms
-                updateSelectedRoomCount()
-            });
+        roomItem.innerHTML = `
+            <div class="room-name">${room.name}</div>
+            <div class="room-type">${type_name} - ${formattedPrice}</div>
+        `;
 
-            return roomItem;
+        // Check if the room was previously selected and apply the selected state
+        if (selectedRooms.has(room.id)) {
+            roomItem.classList.add('selected');
+            roomItem.style.backgroundColor = 'green'; // Keep selected room highlighted
         }
 
-        // Function to update the count of selected rooms
-        function updateSelectedRoomCount() {
-            const numRoomsInput = document.getElementById('num_rooms');
-            numRoomsInput. value = selectedRooms.size; // Set the number of selected rooms
-        }
+        // Add click event listener for selection
+        roomItem.addEventListener('click', () => {
+            // Toggle selection state
+            roomItem.classList.toggle('selected');
 
-        // Function to uncheck all rooms
-        function uncheckAllRooms() {
-            // Remove 'selected' class and reset background for each room
-            document.querySelectorAll('.room-item').forEach(roomItem => {
-                roomItem.classList.remove('selected');
-                roomItem.style.backgroundColor = ''; // Reset background color
-            });
-
-            // Clear the selectedRooms set
-            selectedRooms.clear();
-
-            // Update the count of selected rooms
-            updateSelectedRoomCount();
-        }
-
-        // Format the price with commas and append "VNĐ"
-        function formatPrice(price) {
-            if (isNaN(price)) return price;
-            const formatter = new Intl.NumberFormat('vi-VN', {
-                style: 'decimal',
-                maximumFractionDigits: 0,
-            });
-            return formatter.format(price) + ' VNĐ';
-        }
-
-        updateSelectedRoomCount()
-        // Add event listener to the "Uncheck All" button
-        document.getElementById('uncheckAllButton').addEventListener('click', uncheckAllRooms);
-    </script>
-
-    <script>
-        // Function to update the number of guests
-        function updateGuestCount() {
-            const tableBody = document.getElementById('customerTableBody');
-            const rows = tableBody.getElementsByTagName('tr');
-            // Count the number of rows excluding the first one (static row)
-            const guestCount = rows. length;
-            document.getElementById('num_guests').value = guestCount;
-        }
-
-        document.getElementById('addRowButton').addEventListener('click', function () {
-            const tableBody = document.getElementById('customerTableBody');
-            const rows = tableBody.getElementsByTagName('tr');
-            const lastRow = rows[rows.length - 1];
-            const inputs = lastRow.querySelectorAll('input');
-            let allFilled = true;
-
-            // Check if all input fields in the last row are filled
-            inputs.forEach(input => {
-                if (input.value.trim() === '') {
-                    allFilled = false;
-                }
-            });
-
-            if (allFilled) {
-                // Create and append a new row
-                const newRow = document.createElement('tr');
-                newRow.innerHTML = `
-                    <td><input type="text" class="form-control" placeholder="Tên khách hàng"></td>
-                    <td>
-                        <select class="form-select">
-                            <option value="Nội địa">Nội địa</option>
-                            <option value="Quốc tế">Quốc tế</option>
-                        </select>
-                    </td>
-                    <td><input type="text" class="form-control" placeholder="CMND"></td>
-                    <td><input type="text" class="form-control" placeholder="Địa chỉ"></td>
-                `;
-                tableBody.appendChild(newRow);
-
-                updateGuestCount();
+            // Update background color based on selection
+            if (roomItem.classList.contains('selected')) {
+                roomItem.style.backgroundColor = 'green';
+                selectedRooms.add(room.id); // Add room to selected set
             } else {
-                alert('Please fill in all fields before adding a new row.');
+                roomItem.style.backgroundColor = '';
+                selectedRooms.delete(room.id); // Remove room from selected set
+            }
+
+            // Update the number of selected rooms
+            updateSelectedRoomCount()
+        });
+
+        return roomItem;
+    }
+
+    // Function to update the count of selected rooms
+    function updateSelectedRoomCount() {
+        const numRoomsInput = document.getElementById('num_rooms');
+        numRoomsInput. value = selectedRooms.size; // Set the number of selected rooms
+    }
+
+    // Function to uncheck all rooms
+    function uncheckAllRooms() {
+        // Remove 'selected' class and reset background for each room
+        document.querySelectorAll('.room-item').forEach(roomItem => {
+            roomItem.classList.remove('selected');
+            roomItem.style.backgroundColor = ''; // Reset background color
+        });
+
+        // Clear the selectedRooms set
+        selectedRooms.clear();
+
+        // Update the count of selected rooms
+        updateSelectedRoomCount();
+    }
+
+    // Format the price with commas and append "VNĐ"
+    function formatPrice(price) {
+        if (isNaN(price)) return price;
+        const formatter = new Intl.NumberFormat('vi-VN', {
+            style: 'decimal',
+            maximumFractionDigits: 0,
+        });
+        return formatter.format(price) + ' VNĐ';
+    }
+
+    updateSelectedRoomCount()
+    // Add event listener to the "Uncheck All" button
+    document.getElementById('uncheckAllButton').addEventListener('click', uncheckAllRooms);
+</script>
+<script>
+    // Function to update the number of guests
+    function updateGuestCount() {
+        const tableBody = document.getElementById('customerTableBody');
+        const rows = tableBody.getElementsByTagName('tr');
+        // Count the number of rows excluding the first one (static row)
+        const guestCount = rows. length;
+        document.getElementById('num_guests').value = guestCount;
+    }
+
+    document.getElementById('addRowButton').addEventListener('click', function () {
+        const tableBody = document.getElementById('customerTableBody');
+        const rows = tableBody.getElementsByTagName('tr');
+        const lastRow = rows[rows.length - 1];
+        const inputs = lastRow.querySelectorAll('input');
+        let allFilled = true;
+
+        // Check if all input fields in the last row are filled
+        inputs.forEach(input => {
+            if (input.value.trim() === '') {
+                allFilled = false;
             }
         });
 
-        document.getElementById('removeRowButton').addEventListener('click', function () {
-            const tableBody = document.getElementById('customerTableBody');
-            const rows = tableBody.getElementsByTagName('tr');
+        if (allFilled) {
+            // Create and append a new row
+            const newRow = document.createElement('tr');
+            newRow.innerHTML = `
+                <td><input type="text" class="form-control" placeholder="Tên khách hàng"></td>
+                <td>
+                    <select class="form-select">
+                        <option value="Nội địa">Nội địa</option>
+                        <option value="Quốc tế">Quốc tế</option>
+                    </select>
+                </td>
+                <td><input type="text" class="form-control" placeholder="CMND"></td>
+                <td><input type="text" class="form-control" placeholder="Địa chỉ"></td>
+            `;
+            tableBody.appendChild(newRow);
 
-            if (rows.length > 1) { // Ensure at least one input row remains
-                tableBody.removeChild(rows[rows.length - 1]);
+            updateGuestCount();
+        } else {
+            alert('Please fill in all fields before adding a new row.');
+        }
+    });
 
-                updateGuestCount();
-            }
-        });
+    document.getElementById('removeRowButton').addEventListener('click', function () {
+        const tableBody = document.getElementById('customerTableBody');
+        const rows = tableBody.getElementsByTagName('tr');
 
-        updateGuestCount();
-    </script>
-    {% endblock %}
+        if (rows.length > 1) { // Ensure at least one input row remains
+            tableBody.removeChild(rows[rows.length - 1]);
+
+            updateGuestCount();
+        }
+    });
+
+    updateGuestCount();
+</script>
+<script>
+document.getElementById('confirmBookingButton').addEventListener('click', function (event) {
+    event.preventDefault(); // Ngăn việc submit form mặc định
+
+    // Lấy dữ liệu từ các trường input
+    const name = document.getElementById('name').value;
+    const checkin = document.getElementById('checkin').value;
+    const checkout = document.getElementById('checkout').value;
+    const numGuests = document.getElementById('num_guests').value;
+    const numRooms = document.getElementById('num_rooms').value;
+
+    // Tạo danh sách loại phòng đã chọn
+    const selectedRoomTypes = Array.from(document.querySelectorAll('.room-type-checkbox:checked'))
+        .map(input => input.value);
+
+    // Định dạng dữ liệu truyền qua URL
+    const queryParams = new URLSearchParams({
+        name,
+        checkin,
+        checkout,
+        numGuests,
+        numRooms,
+        roomTypes: selectedRoomTypes.join(','),
+    }).toString();
+
+    // Chuyển hướng sang trang booking_confirm.html với dữ liệu trong URL
+    window.location.href = `booking_confirm.html?${queryParams}`;
+});
+</script>
+{% endblock %}

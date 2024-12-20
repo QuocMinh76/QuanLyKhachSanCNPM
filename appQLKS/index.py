@@ -100,6 +100,12 @@ def booking():
     return render_template('booking.html', room_types=room_types, rooms=rooms)
 
 
+@app.route('/booking_confirm')
+def booking_confirm():
+
+    return render_template('booking_confirm.html')
+
+
 @app.route('/api/rooms', methods=['GET'])
 def get_rooms():
     room_type_id = request.args.get('room_type_id')
