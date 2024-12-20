@@ -98,3 +98,4 @@ def get_rooms_by_type(room_type_id=None):
 
 def get_room_type_by_id(room_type_id):
     return RoomType.query.get(room_type_id)
+
