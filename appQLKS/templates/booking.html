@@ -188,45 +188,43 @@
         });
     }
 
-    // Create a single room item element
-    function createRoomItem(room, type, type_name) {
-        const roomItem = document.createElement('div');
-        roomItem.classList.add('room-item');
+function createRoomItem(room, type, type_name) {
+    const roomItem = document.createElement('div');
+    roomItem.classList.add('room-item');
+    roomItem.setAttribute('data-room-id', room.id); // Thêm data-room-id
 
-        // Format the room price (e.g., "1,000,000 VNĐ")
-        const formattedPrice = formatPrice(room.price);
+    // Format giá phòng
+    const formattedPrice = formatPrice(room.price);
 
-        roomItem.innerHTML = `
-            <div class="room-name">${room.name}</div>
-            <div class="room-type">${type_name} - ${formattedPrice}</div>
-        `;
+    roomItem.innerHTML = `
+        <div class="room-name">${room.name}</div>
+        <div class="room-type">${type_name} - ${formattedPrice}</div>
+    `;
 
-        // Check if the room was previously selected and apply the selected state
-        if (selectedRooms.has(room.id)) {
-            roomItem.classList.add('selected');
-            roomItem.style.backgroundColor = 'green'; // Keep selected room highlighted
+    // Kiểm tra xem phòng đã được chọn chưa
+    if (selectedRooms.has(room.id)) {
+        roomItem.classList.add('selected');
+        roomItem.style.backgroundColor = 'green'; // Đánh dấu phòng đã chọn
+    }
+
+    // Lắng nghe sự kiện click để chọn phòng
+    roomItem.addEventListener('click', () => {
+        // Toggle trạng thái chọn phòng
+        roomItem.classList.toggle('selected');
+        if (roomItem.classList.contains('selected')) {
+            roomItem.style.backgroundColor = 'green';
+            selectedRooms.add(room.id); // Thêm phòng vào danh sách chọn
+        } else {
+            roomItem.style.backgroundColor = '';
+            selectedRooms.delete(room.id); // Xóa phòng khỏi danh sách chọn
         }
 
-        // Add click event listener for selection
-        roomItem.addEventListener('click', () => {
-            // Toggle selection state
-            roomItem.classList.toggle('selected');
+        // Cập nhật số lượng phòng đã chọn
+        updateSelectedRoomCount();
+    });
 
-            // Update background color based on selection
-            if (roomItem.classList.contains('selected')) {
-                roomItem.style.backgroundColor = 'green';
-                selectedRooms.add(room.id); // Add room to selected set
-            } else {
-                roomItem.style.backgroundColor = '';
-                selectedRooms.delete(room.id); // Remove room from selected set
-            }
-
-            // Update the number of selected rooms
-            updateSelectedRoomCount()
-        });
-
-        return roomItem;
-    }
+    return roomItem;
+}
 
     // Function to update the count of selected rooms
     function updateSelectedRoomCount() {
@@ -323,32 +321,39 @@
     updateGuestCount();
 </script>
 <script>
-document.getElementById('confirmBookingButton').addEventListener('click', function (event) {
-    event.preventDefault(); // Ngăn việc submit form mặc định
+document.getElementById('confirmBookingButton').addEventListener('click', function(event) {
+    event.preventDefault(); // Ngăn chặn hành vi submit mặc định
 
-    // Lấy dữ liệu từ các trường input
-    const name = document.getElementById('name').value;
-    const checkin = document.getElementById('checkin').value;
-    const checkout = document.getElementById('checkout').value;
-    const numGuests = document.getElementById('num_guests').value;
-    const numRooms = document.getElementById('num_rooms').value;
+    // Thu thập thông tin từ form
+    const bookingData = {
+        name: document.getElementById('name').value,
+        checkin: document.getElementById('checkin').value,
+        checkout: document.getElementById('checkout').value,
+        num_guests: document.getElementById('num_guests').value,
+        num_rooms: document.getElementById('num_rooms').value,
 
-    // Tạo danh sách loại phòng đã chọn
-    const selectedRoomTypes = Array.from(document.querySelectorAll('.room-type-checkbox:checked'))
-        .map(input => input.value);
+        // Lấy danh sách các loại phòng đã chọn
+        room_types: Array.from(document.querySelectorAll('.room-type-checkbox:checked')).map(cb => cb.value),
 
-    // Định dạng dữ liệu truyền qua URL
-    const queryParams = new URLSearchParams({
-        name,
-        checkin,
-        checkout,
-        numGuests,
-        numRooms,
-        roomTypes: selectedRoomTypes.join(','),
-    }).toString();
+        // Lấy danh sách các phòng đã chọn từ các phòng trong danh sách phòng khả dụng
+        selected_rooms: Array.from(document.querySelectorAll('.room-item.selected')).map(room => ({
+            id: room.getAttribute('data-room-id'),
+            name: room.querySelector('.room-name').innerText
+        })),
 
-    // Chuyển hướng sang trang booking_confirm.html với dữ liệu trong URL
-    window.location.href = `booking_confirm.html?${queryParams}`;
+        // Lấy thông tin khách hàng
+        customers: Array.from(document.querySelectorAll('#customerTableBody tr')).map(row => ({
+            name: row.querySelector('input[placeholder="Tên khách hàng"]').value,
+            type: row.querySelector('select').value,
+            id: row.querySelector('input[placeholder="CMND"]').value,
+            address: row.querySelector('input[placeholder="Địa chỉ"]').value
+        }))
+    };
+
+    // Lưu dữ liệu vào localStorage và chuyển hướng
+    localStorage.setItem('bookingData', JSON.stringify(bookingData));
+    window.location.href = 'booking_confirm';
 });
 </script>
+
 {% endblock %}
