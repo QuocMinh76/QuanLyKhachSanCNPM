@@ -16,7 +16,8 @@
                 {% if current_user.is_authenticated %}
                 <li class="nav-item">
                     <a class="nav-link text-danger" href="/">
-                        <img src="{{ current_user.avatar }}" width="25" class="rounded-circle" /> Chào {{ current_user.username }}
+                        <img src="{{ current_user.avatar }}" width="25" class="rounded-circle"/> Chào {{
+                        current_user.username }}
                     </a>
                 </li>
                 <li class="nav-item">
@@ -35,6 +36,9 @@
                 <!--booking-->
                 <li class="nav-item">
                     <a class="nav-link text-info" href="/booking">&#129333; Đặt phòng</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-info" href="/booking_confirm">&#129333; Xác nhận Đặt phòng</a>
                 </li>
                 {% endif %}
             </ul>
