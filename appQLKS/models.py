@@ -4,6 +4,7 @@ from enum import Enum as RoleEnum
 from flask_login import UserMixin
 from appQLKS import db, app
 from datetime import datetime
+import pytz
 
 if __name__ == '__main__':
     with app.app_context():
@@ -27,7 +28,8 @@ class User(db.Model, UserMixin):
     active = Column(Boolean, default=True)
     user_role = Column(Enum(UserRoles), default=UserRoles.CUSTOMER)
 
-    orders = relationship('BookingOrder', backref='ordered', lazy=True)
+    orders = relationship('BookingOrder', backref='user', lazy=True)
+    comments = relationship('Comment', backref='room', lazy=True)
 
     def __str__(self):
         return self.username
@@ -52,16 +54,20 @@ class Customer(db.Model):
     custAddress = Column(String(100), nullable=False)
     custType_id = Column(Integer, ForeignKey(CustomerType.id), nullable=False)
 
-    details = relationship('BookingDetails', backref='customer', lazy=True)
+    booking_room_info = relationship('BookingCustInfo', back_populates='customer', lazy=True)
+    renting_details = relationship('RentingDetails', back_populates='customer', lazy=True)
 
 
 class BookingOrder(db.Model):
     id = Column(Integer, primary_key=True, autoincrement=True)
-    ordered_by = Column(Integer, ForeignKey(User.id), nullable=False)  # Tham chiếu đến bảng User
+    user_id = Column(Integer, ForeignKey(User.id), nullable=False)  # Tham chiếu đến bảng User
     checkin_date = Column(DateTime, nullable=False)
     checkout_date = Column(DateTime, nullable=False)
-    created_date = Column(DateTime, nullable=False, default=datetime.now())
+    created_date = Column(DateTime, default=lambda: datetime.utcnow()
+                          .replace(tzinfo=pytz.utc).astimezone(pytz.timezone('Asia/Ho_Chi_Minh')))
 
+    booking_room_info = relationship('BookingRoomInfo', back_populates='booking_order', lazy=True)
+    booking_cust_info = relationship('BookingCustInfo', back_populates='booking_order', lazy=True)
     renting_order = relationship('RentingOrder', back_populates='booking_order', uselist=False)
 
 
@@ -70,9 +76,10 @@ class RentingOrder(db.Model):
                 primary_key=True, unique=True)  # Khóa ngoại tham chiếu 1-1 đến khóa chính đơn đặt
     checkin_date = Column(DateTime, nullable=False)
     checkout_date = Column(DateTime, nullable=False)
-    created_date = Column(DateTime, nullable=False, default=datetime.now())
+    created_date = Column(DateTime, default=lambda: datetime.utcnow()
+                          .replace(tzinfo=pytz.utc).astimezone(pytz.timezone('Asia/Ho_Chi_Minh')))
 
-    details = relationship('BookingDetails', backref='booking_order', lazy=True)
+    details = relationship('RentingDetails', back_populates='renting_order', lazy=True)
     booking_order = relationship('BookingOrder', back_populates='renting_order')
     bill = relationship('Bill', back_populates='renting_order', uselist=False)
 
@@ -86,7 +93,8 @@ class Bill(db.Model):
     foreignCust = Column(Integer, nullable=False)
     basePrice = Column(Float, nullable=False)
     extraCharge = Column(Float, default=0)
-    created_date = Column(DateTime, nullable=False, default=datetime.now())
+    created_date = Column(DateTime, default=lambda: datetime.utcnow()
+                          .replace(tzinfo=pytz.utc).astimezone(pytz.timezone('Asia/Ho_Chi_Minh')))
 
     renting_order = relationship('RentingOrder', back_populates='bill')
 
@@ -113,7 +121,9 @@ class Room(db.Model):
     roomPrice = Column(Float, default=0)
     roomType_id = Column(Integer, ForeignKey(RoomType.id), nullable=False)
 
-    details = relationship('BookingDetails', backref='room', lazy=True)
+    booking_room_info = relationship('BookingRoomInfo', back_populates='room', lazy=True)
+    renting_details = relationship('RentingDetails', back_populates='room', lazy=True)
+    comments = relationship('Comment', backref='room_comment', lazy=True)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -123,13 +133,39 @@ class Room(db.Model):
                 self.roomPrice = room_type.basePrice
 
 
-class BookingDetails(db.Model):
+class BookingRoomInfo(db.Model):
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    bookingOrder_id = Column(Integer, ForeignKey(BookingOrder.id), nullable=False)
+    room_id = Column(Integer, ForeignKey(Room.id), nullable=False)
+
+    booking_order = relationship('BookingOrder', back_populates='booking_room_info')
+    room = relationship("Room", back_populates="booking_room_info")
+
+
+class BookingCustInfo(db.Model):
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    bookingOrder_id = Column(Integer, ForeignKey(BookingOrder.id), nullable=False)
+    cust_id = Column(Integer, ForeignKey(Customer.id), nullable=False)
+
+    booking_order = relationship('BookingOrder', back_populates='booking_cust_info')
+    customer = relationship("Customer", back_populates="booking_room_info")
+
+
+class RentingDetails(db.Model):
     id = Column(Integer, primary_key=True, autoincrement=True)
     rentingOrder_id = Column(Integer, ForeignKey(RentingOrder.id), nullable=False)
     room_id = Column(Integer, ForeignKey(Room.id), nullable=False)
     cust_id = Column(Integer, ForeignKey(Customer.id), nullable=False)
 
+    renting_order = relationship("RentingOrder", back_populates="details")
+    room = relationship("Room", back_populates="renting_details")
+    customer = relationship("Customer", back_populates="renting_details")
 
-if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()
+
+class Comment(db.Model):
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    content = Column(String(255), nullable=False)
+    created_date = Column(DateTime, default=lambda: datetime.utcnow()
+                          .replace(tzinfo=pytz.utc).astimezone(pytz.timezone('Asia/Ho_Chi_Minh')))
+    room_id = Column(Integer, ForeignKey(Room.id), nullable=False)
+    user_id = Column(Integer, ForeignKey(User.id), nullable=False)
