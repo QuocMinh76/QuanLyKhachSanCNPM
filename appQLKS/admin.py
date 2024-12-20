@@ -56,12 +56,12 @@ class UserView(ModelView):
 
 
 class BookingOrderView(ModelView):
-    column_list = ['id', 'ordered_by', 'checkin_date', 'checkout_date', 'created_date']
-    column_searchable_list = ['ordered_by', 'checkin_date', 'checkout_date', 'created_date']
-    column_filters = ['ordered_by', 'checkin_date', 'checkout_date', 'created_date']
+    column_list = ['id', 'user_id', 'checkin_date', 'checkout_date', 'created_date']
+    column_searchable_list = ['user_id', 'checkin_date', 'checkout_date', 'created_date']
+    column_filters = ['user_id', 'checkin_date', 'checkout_date', 'created_date']
     can_view_details = True
     can_delete = False
-    column_labels = dict(id='Mã đơn đặt', ordered_by='Tên người đặt', checkin_date='Ngày nhận phòng',
+    column_labels = dict(id='Mã đơn đặt', user_id='Người đặt', checkin_date='Ngày nhận phòng',
                          checkout_date='Ngày trả phòng', created_date='Ngày tạo đơn')
 
 
