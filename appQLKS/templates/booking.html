@@ -191,7 +191,7 @@
 function createRoomItem(room, type, type_name) {
     const roomItem = document.createElement('div');
     roomItem.classList.add('room-item');
-    roomItem.setAttribute('data-room-id', room.id); // Thêm data-room-id
+    roomItem.setAttribute('data-room-id', room. id); // Thêm data-room-id
 
     // Format giá phòng
     const formattedPrice = formatPrice(room.price);
@@ -303,7 +303,7 @@ function createRoomItem(room, type, type_name) {
 
             updateGuestCount();
         } else {
-            alert('Please fill in all fields before adding a new row.');
+            alert('Vui lòng điền đủ thông tin khách hàng hiện tại trước khi thêm khách hàng khác.');
         }
     });
 
@@ -332,14 +332,8 @@ document.getElementById('confirmBookingButton').addEventListener('click', functi
         num_guests: document.getElementById('num_guests').value,
         num_rooms: document.getElementById('num_rooms').value,
 
-        // Lấy danh sách các loại phòng đã chọn
-        room_types: Array.from(document.querySelectorAll('.room-type-checkbox:checked')).map(cb => cb.value),
-
         // Lấy danh sách các phòng đã chọn từ các phòng trong danh sách phòng khả dụng
-        selected_rooms: Array.from(document.querySelectorAll('.room-item.selected')).map(room => ({
-            id: room.getAttribute('data-room-id'),
-            name: room.querySelector('.room-name').innerText
-        })),
+        selected_rooms: Array.from(selectedRooms),
 
         // Lấy thông tin khách hàng
         customers: Array.from(document.querySelectorAll('#customerTableBody tr')).map(row => ({

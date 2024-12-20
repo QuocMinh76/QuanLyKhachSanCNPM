@@ -31,26 +31,11 @@
                 <td><input type="number" id="num_rooms" class="form-control" min="0" readonly/></td>
             </tr>
             <!-- Chọn loại phòng -->
-            <tr>
-                <td colspan="2">
-                    <h5 class="mb-3">Loại phòng</h5>
-                    <div class="row">
-                        {% for room_type in room_types %}
-                        <div class="col-2 form-check form-check-inline">
-                            <input class="form-check-input room-type-checkbox" type="checkbox"
-                                   value="{{ room_type.id }}" id="room_type_{{ room_type.id }}" name="room_type_id">
-                            <label class="form-check-label" for="room_type_{{ room_type.id }}">{{ room_type.name
-                                }}</label>
-                        </div>
-                        {% endfor %}
-                    </div>
-                </td>
-            </tr>
             <!-- Danh sách phòng khả dụng -->
             <tr>
                 <td colspan="2">
                     <h5 class="mb-3">Danh sách phòng đã chọn</h5>
-                    <div class="list-view-container mt-3" id="room-list"></div>
+                    <div class="list-view-container mt-3" id="roomListContainer"></div>
                 </td>
             </tr>
             <!-- Danh sách khách hàng -->
@@ -67,17 +52,6 @@
                         </tr>
                         </thead>
                         <tbody id="customerTableBody">
-                        <tr>
-                            <td><input type="text" class="form-control" placeholder="Tên khách hàng"></td>
-                            <td>
-                                <select class="form-select">
-                                    <option value="Domestic">Nội địa</option>
-                                    <option value="Foreign">Quốc tế</option>
-                                </select>
-                            </td>
-                            <td><input type="text" class="form-control" placeholder="CMND"></td>
-                            <td><input type="text" class="form-control" placeholder="Địa chỉ"></td>
-                        </tr>
                         </tbody>
                     </table>
                 </td>
@@ -108,15 +82,7 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('num_guests').value = bookingData.num_guests;
         document.getElementById('num_rooms').value = bookingData.num_rooms;
 
-        // Hiển thị các loại phòng đã chọn
-        bookingData.room_types.forEach(roomType => {
-            const checkbox = document.getElementById(`room_type_${roomType}`);
-            if (checkbox) checkbox.checked = true;
-        });
-
         // Hiển thị danh sách phòng đã chọn
-        const roomListContainer = document.getElementById('room-list');
-        roomListContainer.innerHTML = ''; // Xóa nội dung trước đó
         bookingData.selected_rooms.forEach(room => {
             const roomElement = `
                 <div class="form-check">
@@ -125,11 +91,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 </div>
             `;
             roomListContainer.insertAdjacentHTML('beforeend', roomElement);
+            console.log(room)
         });
 
         // Hiển thị thông tin khách hàng
-        const customerTableBody = document.getElementById('customerTableBody');
-        customerTableBody.innerHTML = ''; // Xóa nội dung cũ
         bookingData.customers.forEach(customer => {
             const row = `
                 <tr>

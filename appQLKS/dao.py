@@ -1,4 +1,5 @@
-from appQLKS.models import User, Room, RoomType, BookingOrder, BookingRoomInfo, BookingCustInfo, RentingOrder, Bill
+from appQLKS.models import (User, Room, RoomType, BookingOrder, BookingRoomInfo,
+                            BookingCustInfo, Comment, RentingOrder, Bill)
 from appQLKS import app, db
 import hashlib
 import cloudinary.uploader
@@ -43,6 +44,10 @@ def load_booking_orders(kw=None):
         )
 
     return orders.all()
+
+
+def load_comments(room_id):
+    return Comment.query.filter(Comment.room_id.__eq__(room_id))
 
 
 def count_rooms():
@@ -138,6 +143,11 @@ def get_rooms_by_type(room_type_id=None):
 def get_room_type_by_id(room_type_id):
     return RoomType.query.get(room_type_id)
 
+
 def get_booking_order_by_id(booking_order_id):
     return BookingOrder.query.get(booking_order_id)
+
+
+def get_room_by_id(room_id):
+    return Room.query.get(room_id)
 
