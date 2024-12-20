@@ -82,6 +82,9 @@ def hotel_homepage():
 def rent():
     return render_template('rent.html')
 
+@app.route("/room_detail")
+def room_detail():
+    return render_template('room_detail.html')
 
 @app.route('/booking')
 def booking():
