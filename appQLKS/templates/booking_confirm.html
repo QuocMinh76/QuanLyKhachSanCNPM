@@ -97,6 +97,58 @@
     </form>
 </div>
 <script>
+document.addEventListener('DOMContentLoaded', function() {
+    const bookingData = JSON.parse(localStorage.getItem('bookingData'));
+
+    if (bookingData) {
+        // Hiển thị thông tin đặt phòng cơ bản
+        document.getElementById('name').value = bookingData.name;
+        document.getElementById('checkin').value = bookingData.checkin;
+        document.getElementById('checkout').value = bookingData.checkout;
+        document.getElementById('num_guests').value = bookingData.num_guests;
+        document.getElementById('num_rooms').value = bookingData.num_rooms;
+
+        // Hiển thị các loại phòng đã chọn
+        bookingData.room_types.forEach(roomType => {
+            const checkbox = document.getElementById(`room_type_${roomType}`);
+            if (checkbox) checkbox.checked = true;
+        });
+
+        // Hiển thị danh sách phòng đã chọn
+        const roomListContainer = document.getElementById('room-list');
+        roomListContainer.innerHTML = ''; // Xóa nội dung trước đó
+        bookingData.selected_rooms.forEach(room => {
+            const roomElement = `
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="${room.id}" checked disabled>
+                    <label class="form-check-label">${room.name}</label>
+                </div>
+            `;
+            roomListContainer.insertAdjacentHTML('beforeend', roomElement);
+        });
+
+        // Hiển thị thông tin khách hàng
+        const customerTableBody = document.getElementById('customerTableBody');
+        customerTableBody.innerHTML = ''; // Xóa nội dung cũ
+        bookingData.customers.forEach(customer => {
+            const row = `
+                <tr>
+                    <td><input type="text" class="form-control" value="${customer.name}" placeholder="Tên khách hàng"></td>
+                    <td>
+                        <select class="form-select">
+                            <option value="Domestic" ${customer.type === 'Domestic' ? 'selected' : ''}>Nội địa</option>
+                            <option value="Foreign" ${customer.type === 'Foreign' ? 'selected' : ''}>Quốc tế</option>
+                        </select>
+                    </td>
+                    <td><input type="text" class="form-control" value="${customer.id}" placeholder="CMND"></td>
+                    <td><input type="text" class="form-control" value="${customer.address}" placeholder="Địa chỉ"></td>
+                </tr>
+            `;
+            customerTableBody.insertAdjacentHTML('beforeend', row);
+        });
+    }
+});
 </script>
+
 
 {% endblock %}
