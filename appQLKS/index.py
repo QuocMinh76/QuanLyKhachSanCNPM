@@ -82,6 +82,9 @@ def hotel_homepage():
 def rent():
     return render_template('rent.html')
 
+@app.route("/room_detail")
+def room_detail():
+    return render_template('room_detail.html')
 
 @app.route('/booking')
 def booking():
@@ -95,6 +98,12 @@ def booking():
         return render_template('booking.html', room_types=room_types, rooms=rooms)
 
     return render_template('booking.html', room_types=room_types, rooms=rooms)
+
+
+@app.route('/booking_confirm')
+def booking_confirm():
+
+    return render_template('booking_confirm.html')
 
 
 @app.route('/api/rooms', methods=['GET'])

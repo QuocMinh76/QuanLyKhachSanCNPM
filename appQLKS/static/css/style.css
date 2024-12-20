@@ -2,6 +2,55 @@
     background-color: rgb(255, 178, 165);
 }
 
+.btn-pink{
+    background-color: rgb(255, 178, 165);
+    color: black;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+    .btn:hover {
+            background-color: rgb(249, 114, 114);
+            color: white;
+        }
+
+.btn-red{
+    background-color: rgb(117, 35, 41);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.btn-gr{
+    background-color: rgb(117, 148, 101);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.btn-blossom{
+    background-color: rgb(179, 128, 170);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+
+}
+
 .btn-circle {
     width: 40px;
     height: 40px;
@@ -57,3 +106,20 @@
             font-size: 14px;
             margin-bottom: 10px;
         }
+
+
+.text-pink{
+    color: #FFB2A5;
+}
+
+#confirmBookingButton {
+    background-color: green;
+    border-color: darkgreen;
+    color: white;
+}
+#cancelBookingButton {
+    background-color: red;
+    border-color: darkred;
+    color: white;
+}
+
