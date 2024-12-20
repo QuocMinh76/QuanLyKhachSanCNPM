@@ -15,7 +15,7 @@
             <div class="card-body">
                 <h4 class="card-title">{{ r.name }}</h4>
                 <p class="card-text">{{ "{:,.0f}".format(r.roomPrice) }} VNĐ</p>
-                <a href="#" class="btn btn-primary">Xem chi tiết</a>
+                <a href="/rooms/{{ r.id }}" class="btn btn-primary">Xem chi tiết</a>
                 <button class="btn btn-danger">Đặt phòng</button>
             </div>
         </div>

@@ -22,6 +22,13 @@ def index():
     return render_template('index.html', room_types=room_type, rooms=rooms, pages=math.ceil(total_room / page_size))
 
 
+@app.route("/rooms/<room_id>")
+def room_details(room_id):
+    comments = dao.load_comments(room_id)
+    return render_template('room_detail.html', room=dao.get_room_by_id(room_id),
+                           comments=comments)
+
+
 @app.route("/register", methods=['get', 'post'])
 def register_view():
     err_msg = ''
