@@ -8,8 +8,8 @@ import pytz
 
 if __name__ == '__main__':
     with app.app_context():
-        db.drop_all()
-        db.create_all()
+        # db.drop_all()
+        # db.create_all()
         print("Dữ liệu mẫu đã được thêm thành công!")
 
 
@@ -29,7 +29,7 @@ class User(db.Model, UserMixin):
     user_role = Column(Enum(UserRoles), default=UserRoles.CUSTOMER)
 
     orders = relationship('BookingOrder', backref='user', lazy=True)
-    comments = relationship('Comment', backref='room', lazy=True)
+    comments = relationship('Comment', backref='user', lazy=True)
 
     def __str__(self):
         return self.username
@@ -169,3 +169,13 @@ class Comment(db.Model):
                           .replace(tzinfo=pytz.utc).astimezone(pytz.timezone('Asia/Ho_Chi_Minh')))
     room_id = Column(Integer, ForeignKey(Room.id), nullable=False)
     user_id = Column(Integer, ForeignKey(User.id), nullable=False)
+
+
+if __name__ == '__main__':
+    with app.app_context():
+        cm1 = Comment(content='good', room_id=1, user_id=1)
+        cm2 = Comment(content='nice', room_id=1, user_id=1)
+        cm3 = Comment(content='great product!', room_id=1, user_id=1)
+
+        db.session.add_all([cm1, cm2, cm3])
+        db.session.commit()
