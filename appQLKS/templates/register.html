@@ -34,7 +34,7 @@
             </div>
             <div class="d-flex justify-content-between mb-4">
                 <div class="form-check">
-                    <input type="checkbox" class="form-check-input" onclick="showHidePass()" id="rememberMe">
+                    <input type="checkbox" class="form-check-input" onclick="togglePassword()" id="rememberMe">
                     <label class="form-check-label" for="rememberMe">Hiện mật khẩu</label>
                 </div>
             </div>
@@ -46,19 +46,8 @@
 </div>
 
 <script>
-    function showHidePass() {
-        var x = document.getElementById("password");
-        if (x.type === "password") {
-            x.type = "text";
-        } else {
-            x.type = "password";
-        }
-        var y = document.getElementById("confirm");
-        if (y.type === "password") {
-            y.type = "text";
-        } else {
-            y.type = "password";
-        }
+    function togglePassword() {
+        showHidePass('password', 'confirm');
     }
 </script>
 {% endblock %}
