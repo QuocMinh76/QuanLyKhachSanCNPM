@@ -38,8 +38,8 @@ if __name__ == '__main__':
 if __name__ == '__main__':
     with app.app_context():
         cust_types = [
-            CustomerType(cust_type="Domestic", cust_rate=1),
-            CustomerType(cust_type="Foreign", cust_rate=1.5),
+            CustomerType(name="Nội địa", cust_rate=1),
+            CustomerType(name="Quốc tế", cust_rate=1.5)
         ]
         db.session.add_all(cust_types)
         db.session.commit()

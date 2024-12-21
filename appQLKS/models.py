@@ -37,13 +37,13 @@ class User(db.Model, UserMixin):
 
 class CustomerType(db.Model):
     id = Column(Integer, primary_key=True, autoincrement=True)
-    cust_type = Column(String(100), nullable=False)
+    name = Column(String(50), unique=True, nullable=False)
     cust_rate = Column(Float, default="1")
 
     customers = relationship('Customer', backref='custType', lazy=True)
 
     def __str__(self):
-        return self.cust_type
+        return self.name
 
 
 class Customer(db.Model):
@@ -169,13 +169,3 @@ class Comment(db.Model):
                           .replace(tzinfo=pytz.utc).astimezone(pytz.timezone('Asia/Ho_Chi_Minh')))
     room_id = Column(Integer, ForeignKey(Room.id), nullable=False)
     user_id = Column(Integer, ForeignKey(User.id), nullable=False)
-
-
-if __name__ == '__main__':
-    with app.app_context():
-        cm1 = Comment(content='good', room_id=1, user_id=1)
-        cm2 = Comment(content='nice', room_id=1, user_id=1)
-        cm3 = Comment(content='great product!', room_id=1, user_id=1)
-
-        db.session.add_all([cm1, cm2, cm3])
-        db.session.commit()
