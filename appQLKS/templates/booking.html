@@ -19,7 +19,6 @@
                 <label for="checkout" class="form-label">Ngày trả phòng</label>
                 <input type="date" id="checkout" class="form-control"/>
             </div>
-
         </div>
         <br/>
         <!-- Hiển thị tổng số khách thuê -->
@@ -99,12 +98,6 @@
         </div>
     </form>
 </div>
-<style>
-    .fnc_button {
-        display: flex;
-        justify-content: space-between;
-    }
-</style>
 <script>
     // Get the container for the room list
     const roomListContainer = document.getElementById('room-list');
@@ -188,45 +181,43 @@
         });
     }
 
-    // Create a single room item element
-    function createRoomItem(room, type, type_name) {
-        const roomItem = document.createElement('div');
-        roomItem.classList.add('room-item');
+function createRoomItem(room, type, type_name) {
+    const roomItem = document.createElement('div');
+    roomItem.classList.add('room-item');
+    roomItem.setAttribute('data-room-id', room. id); // Thêm data-room-id
 
-        // Format the room price (e.g., "1,000,000 VNĐ")
-        const formattedPrice = formatPrice(room.price);
+    // Format giá phòng
+    const formattedPrice = formatPrice(room.price);
 
-        roomItem.innerHTML = `
-            <div class="room-name">${room.name}</div>
-            <div class="room-type">${type_name} - ${formattedPrice}</div>
-        `;
+    roomItem.innerHTML = `
+        <div class="room-name">${room.name}</div>
+        <div class="room-type">${type_name} - ${formattedPrice}</div>
+    `;
 
-        // Check if the room was previously selected and apply the selected state
-        if (selectedRooms.has(room.id)) {
-            roomItem.classList.add('selected');
-            roomItem.style.backgroundColor = 'green'; // Keep selected room highlighted
+    // Kiểm tra xem phòng đã được chọn chưa
+    if (selectedRooms.has(room.id)) {
+        roomItem.classList.add('selected');
+        roomItem.style.backgroundColor = 'green'; // Đánh dấu phòng đã chọn
+    }
+
+    // Lắng nghe sự kiện click để chọn phòng
+    roomItem.addEventListener('click', () => {
+        // Toggle trạng thái chọn phòng
+        roomItem.classList.toggle('selected');
+        if (roomItem.classList.contains('selected')) {
+            roomItem.style.backgroundColor = 'green';
+            selectedRooms.add(room.id); // Thêm phòng vào danh sách chọn
+        } else {
+            roomItem.style.backgroundColor = '';
+            selectedRooms.delete(room.id); // Xóa phòng khỏi danh sách chọn
         }
 
-        // Add click event listener for selection
-        roomItem.addEventListener('click', () => {
-            // Toggle selection state
-            roomItem.classList.toggle('selected');
+        // Cập nhật số lượng phòng đã chọn
+        updateSelectedRoomCount();
+    });
 
-            // Update background color based on selection
-            if (roomItem.classList.contains('selected')) {
-                roomItem.style.backgroundColor = 'green';
-                selectedRooms.add(room.id); // Add room to selected set
-            } else {
-                roomItem.style.backgroundColor = '';
-                selectedRooms.delete(room.id); // Remove room from selected set
-            }
-
-            // Update the number of selected rooms
-            updateSelectedRoomCount()
-        });
-
-        return roomItem;
-    }
+    return roomItem;
+}
 
     // Function to update the count of selected rooms
     function updateSelectedRoomCount() {
@@ -305,7 +296,7 @@
 
             updateGuestCount();
         } else {
-            alert('Please fill in all fields before adding a new row.');
+            alert('Vui lòng điền đủ thông tin khách hàng hiện tại trước khi thêm khách hàng khác.');
         }
     });
 
@@ -323,32 +314,82 @@
     updateGuestCount();
 </script>
 <script>
-document.getElementById('confirmBookingButton').addEventListener('click', function (event) {
-    event.preventDefault(); // Ngăn việc submit form mặc định
+document.getElementById('confirmBookingButton').addEventListener('click', function(event) {
+    event.preventDefault(); // Ngăn chặn hành vi submit mặc định
 
-    // Lấy dữ liệu từ các trường input
-    const name = document.getElementById('name').value;
-    const checkin = document.getElementById('checkin').value;
-    const checkout = document.getElementById('checkout').value;
-    const numGuests = document.getElementById('num_guests').value;
-    const numRooms = document.getElementById('num_rooms').value;
+    if (selectedRooms.size === 0) {
+        alert('Vui lòng chọn ít nhất một phòng để tiếp tục.');
+        return false; // Stop the form submission or action
+    }
 
-    // Tạo danh sách loại phòng đã chọn
-    const selectedRoomTypes = Array.from(document.querySelectorAll('.room-type-checkbox:checked'))
-        .map(input => input.value);
+    // Check if any required customer fields are empty
+    const customerRows = document.querySelectorAll('#customerTableBody tr');
+    for (const row of customerRows) {
+        const customerName = row.querySelector('td input[placeholder="Tên khách hàng"]');
+        const customerId = row.querySelector('td input[placeholder="CMND"]');
+        const customerAddress = row.querySelector('td input[placeholder="Địa chỉ"]');
 
-    // Định dạng dữ liệu truyền qua URL
-    const queryParams = new URLSearchParams({
-        name,
-        checkin,
-        checkout,
-        numGuests,
-        numRooms,
-        roomTypes: selectedRoomTypes.join(','),
-    }).toString();
+        // Check if any of these fields are empty
+        if (customerName.value.trim() === '' || customerId.value.trim() === '' || customerAddress.value.trim() === '') {
+            alert('Vui lòng điền đầy đủ thông tin khách hàng (Tên khách hàng, CMND, Địa chỉ).');
+            return false; // Stop the form submission or action
+        }
+    }
 
-    // Chuyển hướng sang trang booking_confirm.html với dữ liệu trong URL
-    window.location.href = `booking_confirm.html?${queryParams}`;
+    // Validate the check-in and check-out dates
+    const checkinDate = document.getElementById('checkin').value;
+    const checkoutDate = document.getElementById('checkout').value;
+
+    // Check if both check-in and check-out dates are provided
+    if (!checkinDate || !checkoutDate) {
+        alert('Vui lòng chọn ngày nhận phòng và ngày trả phòng.');
+        return false; // Stop the form submission or action
+    }
+
+    const today = new Date().toISOString().split('T')[0]; // Get today's date in YYYY-MM-DD format
+
+    // Check if check-in date is at least today
+    if (checkinDate < today) {
+        alert('Ngày nhận phòng phải không nhỏ hơn ngày hôm nay.');
+        return false;
+    }
+
+    // Check if check-out date is at least today
+    if (checkoutDate < today) {
+        alert('Ngày trả phòng phải không nhỏ hơn ngày hôm nay.');
+        return false;
+    }
+
+    // Check if check-out date is later than or equal to check-in date
+    if (checkinDate > checkoutDate) {
+        alert('Ngày trả phòng phải không nhỏ hơn ngày nhận phòng.');
+        return false;
+    }
+
+    // Thu thập thông tin từ form
+    const bookingData = {
+        name: document.getElementById('name').value,
+        checkin: document.getElementById('checkin').value,
+        checkout: document.getElementById('checkout').value,
+        num_guests: document.getElementById('num_guests').value,
+        num_rooms: document.getElementById('num_rooms').value,
+
+        // Lấy danh sách các phòng đã chọn từ các phòng trong danh sách phòng khả dụng
+        selected_rooms: Array.from(selectedRooms),
+
+        // Lấy thông tin khách hàng
+        customers: Array.from(document.querySelectorAll('#customerTableBody tr')).map(row => ({
+            name: row.querySelector('input[placeholder="Tên khách hàng"]').value,
+            type: row.querySelector('select').value,
+            id: row.querySelector('input[placeholder="CMND"]').value,
+            address: row.querySelector('input[placeholder="Địa chỉ"]').value
+        }))
+    };
+
+    // Lưu dữ liệu vào localStorage và chuyển hướng
+    localStorage.setItem('bookingData', JSON.stringify(bookingData));
+    window.location.href = 'booking_confirm';
 });
 </script>
+
 {% endblock %}

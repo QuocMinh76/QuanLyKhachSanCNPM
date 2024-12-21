@@ -31,26 +31,11 @@
                 <td><input type="number" id="num_rooms" class="form-control" min="0" readonly/></td>
             </tr>
             <!-- Chọn loại phòng -->
-            <tr>
-                <td colspan="2">
-                    <h5 class="mb-3">Loại phòng</h5>
-                    <div class="row">
-                        {% for room_type in room_types %}
-                        <div class="col-2 form-check form-check-inline">
-                            <input class="form-check-input room-type-checkbox" type="checkbox"
-                                   value="{{ room_type.id }}" id="room_type_{{ room_type.id }}" name="room_type_id">
-                            <label class="form-check-label" for="room_type_{{ room_type.id }}">{{ room_type.name
-                                }}</label>
-                        </div>
-                        {% endfor %}
-                    </div>
-                </td>
-            </tr>
             <!-- Danh sách phòng khả dụng -->
             <tr>
                 <td colspan="2">
                     <h5 class="mb-3">Danh sách phòng đã chọn</h5>
-                    <div class="list-view-container mt-3" id="room-list"></div>
+                    <div class="list-view-container mt-3" id="roomListContainer"></div>
                 </td>
             </tr>
             <!-- Danh sách khách hàng -->
@@ -67,17 +52,6 @@
                         </tr>
                         </thead>
                         <tbody id="customerTableBody">
-                        <tr>
-                            <td><input type="text" class="form-control" placeholder="Tên khách hàng"></td>
-                            <td>
-                                <select class="form-select">
-                                    <option value="Domestic">Nội địa</option>
-                                    <option value="Foreign">Quốc tế</option>
-                                </select>
-                            </td>
-                            <td><input type="text" class="form-control" placeholder="CMND"></td>
-                            <td><input type="text" class="form-control" placeholder="Địa chỉ"></td>
-                        </tr>
                         </tbody>
                     </table>
                 </td>
@@ -97,6 +71,49 @@
     </form>
 </div>
 <script>
+document.addEventListener('DOMContentLoaded', function() {
+    const bookingData = JSON.parse(localStorage.getItem('bookingData'));
+
+    if (bookingData) {
+        // Hiển thị thông tin đặt phòng cơ bản
+        document.getElementById('name').value = bookingData.name;
+        document.getElementById('checkin').value = bookingData.checkin;
+        document.getElementById('checkout').value = bookingData.checkout;
+        document.getElementById('num_guests').value = bookingData.num_guests;
+        document.getElementById('num_rooms').value = bookingData.num_rooms;
+
+        // Hiển thị danh sách phòng đã chọn
+        bookingData.selected_rooms.forEach(room => {
+            const roomElement = `
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="${room.id}" checked disabled>
+                    <label class="form-check-label">${room.name}</label>
+                </div>
+            `;
+            roomListContainer.insertAdjacentHTML('beforeend', roomElement);
+            console.log(room)
+        });
+
+        // Hiển thị thông tin khách hàng
+        bookingData.customers.forEach(customer => {
+            const row = `
+                <tr>
+                    <td><input type="text" class="form-control" value="${customer.name}" placeholder="Tên khách hàng"></td>
+                    <td>
+                        <select class="form-select">
+                            <option value="Domestic" ${customer.type === 'Domestic' ? 'selected' : ''}>Nội địa</option>
+                            <option value="Foreign" ${customer.type === 'Foreign' ? 'selected' : ''}>Quốc tế</option>
+                        </select>
+                    </td>
+                    <td><input type="text" class="form-control" value="${customer.id}" placeholder="CMND"></td>
+                    <td><input type="text" class="form-control" value="${customer.address}" placeholder="Địa chỉ"></td>
+                </tr>
+            `;
+            customerTableBody.insertAdjacentHTML('beforeend', row);
+        });
+    }
+});
 </script>
+
 
 {% endblock %}

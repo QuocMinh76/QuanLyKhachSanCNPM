@@ -58,6 +58,11 @@
     text-align: center;
 }
 
+.fnc_button {
+        display: flex;
+        justify-content: space-between;
+    }
+
 .room-container {
             margin-top: 20px;
         }
