@@ -1,3 +1,13 @@
+function showHidePass(...fieldIds) {
+    fieldIds.forEach(id => {
+        var field = document.getElementById(id);
+        if (field) {
+            field.type = field.type === "password" ? "text" : "password";
+        }
+    });
+}
+
+
 function addComment(roomId) {
     const textarea = document.getElementById("comment")
     const content = textarea.value.trim();
