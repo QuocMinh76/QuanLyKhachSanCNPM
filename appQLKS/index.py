@@ -89,22 +89,13 @@ def hotel_homepage():
 def rent():
     return render_template('rent.html')
 
-@app.route("/room_detail")
-def room_detail():
-    return render_template('room_detail.html')
 
 @app.route('/booking')
 def booking():
     # Lấy danh sách loại phòng
     room_types = dao.load_room_types()
-    rooms = dao.get_rooms_by_type()
 
-    # Hiển thị danh sách phòng theo loại phòng đã chọn
-    if request.args.get('room_type_id'):
-        rooms = dao.get_rooms_by_type(request.args.get('room_type_id'))
-        return render_template('booking.html', room_types=room_types, rooms=rooms)
-
-    return render_template('booking.html', room_types=room_types, rooms=rooms)
+    return render_template('booking.html', room_types=room_types)
 
 
 @app.route('/booking_confirm')
