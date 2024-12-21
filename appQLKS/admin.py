@@ -32,11 +32,11 @@ class RoomView(ModelView):
 
 
 class CustomerTypeView(ModelView):
-    column_list = ['id', 'cust_type', 'cust_rate']
-    column_searchable_list = ['cust_type']
-    column_filters = ['cust_type']
+    column_list = ['id', 'name', 'cust_rate']
+    column_searchable_list = ['name']
+    column_filters = ['name']
     can_view_details = True
-    column_labels = dict(id='Mã loại khách hàng', cust_type='Tên loại', cust_rate='Hệ số')
+    column_labels = dict(id='Mã loại khách hàng', name='Tên loại', cust_rate='Hệ số')
 
 
 class UserView(ModelView):
