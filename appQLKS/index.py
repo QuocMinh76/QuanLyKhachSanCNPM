@@ -1,9 +1,10 @@
 import math
 
+import pytz
 from flask import render_template, request, redirect, session, jsonify
 from appQLKS import app, login
 import dao
-from flask_login import login_user, logout_user
+from flask_login import login_user, logout_user, login_required
 from appQLKS.models import UserRoles
 
 
@@ -19,7 +20,21 @@ def index():
     page_size = app.config["PAGE_SIZE"]
     total_room = dao.count_rooms()
 
-    return render_template('index.html', room_types=room_type, rooms=rooms, pages=math.ceil(total_room / page_size))
+    return render_template('index.html', room_types=room_type, rooms=rooms,
+                           pages=math.ceil(total_room / page_size))
+
+
+@app.route("/rooms/<room_id>")
+def room_details(room_id):
+    page = request.args.get('page', 1)
+
+    comments = dao.load_comments(room_id=room_id, page=int(page))
+
+    page_size = app.config["COMMENT_PAGE_SIZE"]
+    total_comment = dao.count_comments_of_room(room_id)
+
+    return render_template('room_detail.html', room=dao.get_room_by_id(room_id),
+                           comments=comments, pages=math.ceil(total_comment / page_size))
 
 
 @app.route("/register", methods=['get', 'post'])
@@ -51,7 +66,9 @@ def login_process():
         user = dao.auth_user(username=username, password=password)
         if user:
             login_user(user=user)
-            return redirect('/')
+
+            next = request.args.get('next')
+            return redirect('/' if next is None else next)
 
     return render_template('login.html')
 
@@ -82,22 +99,13 @@ def hotel_homepage():
 def rent():
     return render_template('rent.html')
 
-@app.route("/room_detail")
-def room_detail():
-    return render_template('room_detail.html')
 
 @app.route('/booking')
 def booking():
     # Lấy danh sách loại phòng
     room_types = dao.load_room_types()
-    rooms = dao.get_rooms_by_type()
 
-    # Hiển thị danh sách phòng theo loại phòng đã chọn
-    if request.args.get('room_type_id'):
-        rooms = dao.get_rooms_by_type(request.args.get('room_type_id'))
-        return render_template('booking.html', room_types=room_types, rooms=rooms)
-
-    return render_template('booking.html', room_types=room_types, rooms=rooms)
+    return render_template('booking.html', room_types=room_types)
 
 
 @app.route('/booking_confirm')
@@ -126,6 +134,24 @@ def get_rooms():
         room_list.append(room_data)
 
     return jsonify(room_list)
+
+
+@app.route("/api/rooms/<room_id>/comments", methods=['post'])
+@login_required
+def add_comment(room_id):
+    c = dao.add_comment(content=request.json.get('content'), room_id=room_id)
+
+    created_date_utc = c.created_date.astimezone(pytz.utc)
+
+    return jsonify({
+        "id": c.id,
+        "content": c.content,
+        "created_date": created_date_utc,
+        "user": {
+            "avatar": c.user.avatar,
+            "name": c.user.name
+        }
+    })
 
 
 @app.route("/thanhtoan")

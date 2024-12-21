@@ -19,7 +19,6 @@
                 <label for="checkout" class="form-label">Ngày trả phòng</label>
                 <input type="date" id="checkout" class="form-control"/>
             </div>
-
         </div>
         <br/>
         <!-- Hiển thị tổng số khách thuê -->
@@ -99,12 +98,6 @@
         </div>
     </form>
 </div>
-<style>
-    .fnc_button {
-        display: flex;
-        justify-content: space-between;
-    }
-</style>
 <script>
     // Get the container for the room list
     const roomListContainer = document.getElementById('room-list');
@@ -191,7 +184,7 @@
 function createRoomItem(room, type, type_name) {
     const roomItem = document.createElement('div');
     roomItem.classList.add('room-item');
-    roomItem.setAttribute('data-room-id', room.id); // Thêm data-room-id
+    roomItem.setAttribute('data-room-id', room. id); // Thêm data-room-id
 
     // Format giá phòng
     const formattedPrice = formatPrice(room.price);
@@ -303,7 +296,7 @@ function createRoomItem(room, type, type_name) {
 
             updateGuestCount();
         } else {
-            alert('Please fill in all fields before adding a new row.');
+            alert('Vui lòng điền đủ thông tin khách hàng hiện tại trước khi thêm khách hàng khác.');
         }
     });
 
@@ -324,6 +317,55 @@ function createRoomItem(room, type, type_name) {
 document.getElementById('confirmBookingButton').addEventListener('click', function(event) {
     event.preventDefault(); // Ngăn chặn hành vi submit mặc định
 
+    if (selectedRooms.size === 0) {
+        alert('Vui lòng chọn ít nhất một phòng để tiếp tục.');
+        return false; // Stop the form submission or action
+    }
+
+    // Check if any required customer fields are empty
+    const customerRows = document.querySelectorAll('#customerTableBody tr');
+    for (const row of customerRows) {
+        const customerName = row.querySelector('td input[placeholder="Tên khách hàng"]');
+        const customerId = row.querySelector('td input[placeholder="CMND"]');
+        const customerAddress = row.querySelector('td input[placeholder="Địa chỉ"]');
+
+        // Check if any of these fields are empty
+        if (customerName.value.trim() === '' || customerId.value.trim() === '' || customerAddress.value.trim() === '') {
+            alert('Vui lòng điền đầy đủ thông tin khách hàng (Tên khách hàng, CMND, Địa chỉ).');
+            return false; // Stop the form submission or action
+        }
+    }
+
+    // Validate the check-in and check-out dates
+    const checkinDate = document.getElementById('checkin').value;
+    const checkoutDate = document.getElementById('checkout').value;
+
+    // Check if both check-in and check-out dates are provided
+    if (!checkinDate || !checkoutDate) {
+        alert('Vui lòng chọn ngày nhận phòng và ngày trả phòng.');
+        return false; // Stop the form submission or action
+    }
+
+    const today = new Date().toISOString().split('T')[0]; // Get today's date in YYYY-MM-DD format
+
+    // Check if check-in date is at least today
+    if (checkinDate < today) {
+        alert('Ngày nhận phòng phải không nhỏ hơn ngày hôm nay.');
+        return false;
+    }
+
+    // Check if check-out date is at least today
+    if (checkoutDate < today) {
+        alert('Ngày trả phòng phải không nhỏ hơn ngày hôm nay.');
+        return false;
+    }
+
+    // Check if check-out date is later than or equal to check-in date
+    if (checkinDate > checkoutDate) {
+        alert('Ngày trả phòng phải không nhỏ hơn ngày nhận phòng.');
+        return false;
+    }
+
     // Thu thập thông tin từ form
     const bookingData = {
         name: document.getElementById('name').value,
@@ -332,14 +374,8 @@ document.getElementById('confirmBookingButton').addEventListener('click', functi
         num_guests: document.getElementById('num_guests').value,
         num_rooms: document.getElementById('num_rooms').value,
 
-        // Lấy danh sách các loại phòng đã chọn
-        room_types: Array.from(document.querySelectorAll('.room-type-checkbox:checked')).map(cb => cb.value),
-
         // Lấy danh sách các phòng đã chọn từ các phòng trong danh sách phòng khả dụng
-        selected_rooms: Array.from(document.querySelectorAll('.room-item.selected')).map(room => ({
-            id: room.getAttribute('data-room-id'),
-            name: room.querySelector('.room-name').innerText
-        })),
+        selected_rooms: Array.from(selectedRooms),
 
         // Lấy thông tin khách hàng
         customers: Array.from(document.querySelectorAll('#customerTableBody tr')).map(row => ({

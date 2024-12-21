@@ -17,6 +17,7 @@ app.secret_key = 'aweut9n8*@$*djhfjsadhfsdqefsfgasedq23i'
 
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = True
 app.config["PAGE_SIZE"] = 8
+app.config["COMMENT_PAGE_SIZE"] = 4
 
 db = SQLAlchemy(app)
 
