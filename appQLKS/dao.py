@@ -1,3 +1,4 @@
+from flask_login import current_user
 from appQLKS.models import (User, Room, RoomType, BookingOrder, BookingRoomInfo,
                             BookingCustInfo, Comment, RentingOrder, Bill)
 from appQLKS import app, db
@@ -16,19 +17,19 @@ def get_all_rooms():
 
 
 def load_rooms(room_type_id=None, kw=None, page=1):
-    products = Room.query
+    rooms = Room.query
 
     if kw:
-        products = products.filter(Room.name.contains(kw))
+        rooms = rooms.filter(Room.name.contains(kw))
 
     if room_type_id:
-        products = products.filter(Room.roomType_id.__eq__(room_type_id))
+        rooms = rooms.filter(Room.roomType_id.__eq__(room_type_id))
 
     page_size = app.config["PAGE_SIZE"]
     start = (page - 1) * page_size
-    products = products.slice(start, start + page_size)
+    rooms = rooms.slice(start, start + page_size)
 
-    return products.all()
+    return rooms.all()
 
 
 def load_booking_orders(kw=None):
@@ -46,12 +47,31 @@ def load_booking_orders(kw=None):
     return orders.all()
 
 
-def load_comments(room_id):
-    return Comment.query.filter(Comment.room_id.__eq__(room_id))
+def load_comments(room_id, page=1):
+    comments = Comment.query.filter(Comment.room_id.__eq__(room_id))
+
+    page_size = app.config["COMMENT_PAGE_SIZE"]
+    start = (page - 1) * page_size
+    comments = comments.slice(start, start + page_size)
+
+    return comments
 
 
 def count_rooms():
     return Room.query.count()
+
+
+def count_comments_of_room(room_id):
+    return Comment.query.filter(Comment.room_id.__eq__(room_id)).count()
+
+
+def add_comment(content, room_id):
+    c = Comment(content=content, room_id=room_id, user=current_user)
+
+    db.session.add(c)
+    db.session.commit()
+
+    return c
 
 
 def add_booking_order(session: Session, user_id, checkin_date, checkout_date, rooms: list, customers: list):
