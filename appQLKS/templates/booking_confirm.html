@@ -4,24 +4,20 @@
 <div class="container">
     <h2 class="text-center mt-4">XÁC NHẬN ĐẶT PHÒNG</h2>
     <form>
-
         <table class="table table-bordered">
             <tbody>
-            <!-- Tên người đặt -->
             <tr>
                 <td><label for="name" class="form-label">Tên người đặt</label></td>
-                <td><input type="text" id="name" class="form-control"/></td>
+                <td><input type="text" id="name" name="name" class="form-control"/></td>
             </tr>
-            <!-- Ngày nhận và trả phòng -->
             <tr>
                 <td><label for="checkin" class="form-label">Ngày nhận phòng</label></td>
-                <td><input type="date" id="checkin" class="form-control"/></td>
+                <td><input type="date" id="checkin" name="checkin" class="form-control"/></td>
             </tr>
             <tr>
                 <td><label for="checkout" class="form-label">Ngày trả phòng</label></td>
-                <td><input type="date" id="checkout" class="form-control"/></td>
+                <td><input type="date" id="checkout" name="checkout" class="form-control"/></td>
             </tr>
-            <!-- Tổng số khách và phòng -->
             <tr>
                 <td><label for="num_guests" class="form-label">Số lượng khách thuê</label></td>
                 <td><input type="number" id="num_guests" class="form-control" min="1" readonly/></td>
@@ -30,18 +26,19 @@
                 <td><label for="num_rooms" class="form-label">Số lượng phòng</label></td>
                 <td><input type="number" id="num_rooms" class="form-control" min="0" readonly/></td>
             </tr>
-            <!-- Chọn loại phòng -->
             <!-- Danh sách phòng khả dụng -->
             <tr>
-                <td colspan="2">
-                    <h5 class="mb-3">Danh sách phòng đã chọn</h5>
-                    <div class="list-view-container mt-3" id="roomListContainer"></div>
+                <td>
+                    <label>Danh sách phòng đã chọn</label>
+                </td>
+                <td>
+                    <div id="roomListContainer"></div>
+
                 </td>
             </tr>
-            <!-- Danh sách khách hàng -->
             <tr>
                 <td colspan="2">
-                    <h5 class="mb-3">Danh sách khách hàng</h5>
+                    <label class="mb-3">Danh sách khách hàng</label>
                     <table class="table table-bordered">
                         <thead>
                         <tr>
@@ -71,49 +68,53 @@
     </form>
 </div>
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const bookingData = JSON.parse(localStorage.getItem('bookingData'));
+    document.addEventListener('DOMContentLoaded', function() {
+        const bookingData = JSON.parse(localStorage.getItem('bookingData'));
 
-    if (bookingData) {
-        // Hiển thị thông tin đặt phòng cơ bản
-        document.getElementById('name').value = bookingData.name;
-        document.getElementById('checkin').value = bookingData.checkin;
-        document.getElementById('checkout').value = bookingData.checkout;
-        document.getElementById('num_guests').value = bookingData.num_guests;
-        document.getElementById('num_rooms').value = bookingData.num_rooms;
+        if (bookingData) {
+            // Hiển thị thông tin đặt phòng cơ bản
+            document.getElementById('name').value = bookingData.name;
+            document.getElementById('checkin').value = bookingData.checkin;
+            document.getElementById('checkout').value = bookingData.checkout;
+            document.getElementById('num_guests').value = bookingData.num_guests;
+            document.getElementById('num_rooms').value = bookingData.num_rooms;
 
-        // Hiển thị danh sách phòng đã chọn
-        bookingData.selected_rooms.forEach(room => {
-            const roomElement = `
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" value="${room.id}" checked disabled>
-                    <label class="form-check-label">${room.name}</label>
-                </div>
-            `;
-            roomListContainer.insertAdjacentHTML('beforeend', roomElement);
-            console.log(room)
-        });
+            // Kiểm tra nếu danh sách phòng đã chọn tồn tại và không rỗng
+            if (bookingData.selected_rooms && bookingData.selected_rooms.length > 0) {
+                bookingData.selected_rooms.forEach(room => {
+                    const roomElement = `
+                            <label class="form-check-label">${room.name}, </label>
+                    `;
+                    document.getElementById('roomListContainer').insertAdjacentHTML('beforeend', roomElement);
+                });
+            } else {
+                document.getElementById('roomListContainer').innerHTML = '<p>Không có phòng nào được chọn.</p>';
+            }
 
-        // Hiển thị thông tin khách hàng
-        bookingData.customers.forEach(customer => {
-            const row = `
-                <tr>
-                    <td><input type="text" class="form-control" value="${customer.name}" placeholder="Tên khách hàng"></td>
-                    <td>
-                        <select class="form-select">
-                            <option value="Domestic" ${customer.type === 'Domestic' ? 'selected' : ''}>Nội địa</option>
-                            <option value="Foreign" ${customer.type === 'Foreign' ? 'selected' : ''}>Quốc tế</option>
-                        </select>
-                    </td>
-                    <td><input type="text" class="form-control" value="${customer.id}" placeholder="CMND"></td>
-                    <td><input type="text" class="form-control" value="${customer.address}" placeholder="Địa chỉ"></td>
-                </tr>
-            `;
-            customerTableBody.insertAdjacentHTML('beforeend', row);
-        });
-    }
-});
+            // Hiển thị thông tin khách hàng
+            if (bookingData.customers && bookingData.customers.length > 0) {
+                bookingData.customers.forEach(customer => {
+                    const row = `
+                        <tr>
+                            <td><input type="text" class="form-control" value="${customer.name}" placeholder="Tên khách hàng"></td>
+                            <td>
+                                <select name="customer_type" class="form-select">
+                                    <option value="Domestic" ${customer.type === 'Domestic' ? 'selected' : ''}>Nội địa</option>
+                                    <option value="Foreign" ${customer.type === 'Foreign' ? 'selected' : ''}>Quốc tế</option>
+                                </select>
+                            </td>
+                            <td><input type="text" class="form-control" value="${customer.id}" placeholder="CMND"></td>
+                            <td><input type="text" class="form-control" value="${customer.address}" placeholder="Địa chỉ"></td>
+                        </tr>
+                    `;
+                    document.getElementById('customerTableBody').insertAdjacentHTML('beforeend', row);
+                });
+            } else {
+                document.getElementById('customerTableBody').innerHTML = '<tr><td colspan="4">Không có khách hàng nào được nhập.</td></tr>';
+            }
+        }
+    });
+
 </script>
-
 
 {% endblock %}

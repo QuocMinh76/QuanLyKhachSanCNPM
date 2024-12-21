@@ -90,11 +90,6 @@ def logout_process():
     return redirect('/login')
 
 
-@app.route("/hotel_homepage")
-def hotel_homepage():
-    return render_template('hotel_homepage.html')
-
-
 @app.route("/rent")
 def rent():
     return render_template('rent.html')
