@@ -1,22 +1,36 @@
 {% extends 'layout/base.html' %}
 
 {% block content %}
+<style>
+    .rounded-border {
+    border: 1px solid #ddd; /* Màu và độ dày của viền */
+    border-radius: 12px; /* Bo tròn các góc */
+    background-color: white; /* Màu nền nhạt */
+    padding: 5px; /* Khoảng cách bên trong */
+    margin-bottom: 10px; /* Khoảng cách phía dưới */
+    width: 100%;
+    }
+    .form-check-inline {
+    margin-right: 5px;
+    margin-bottom: 5px;
+    }
+}
+</style>
 <div class="container">
     <h2 class="text-center mt-4">ĐẶT PHÒNG</h2>
     <form>
-
         <div>
-            <label for="name" class="form-label">Tên người đặt</label>
+            <label for="name" class="form-label"><strong>Tên người đặt</strong></label>
             <input type="text" id="name" class="form-control"/>
         </div>
         <br/>
         <div class="row">
             <div class="col">
-                <label for="checkin" class="form-label">Ngày nhận phòng</label>
+                <label for="checkin" class="form-label"><strong>Ngày nhận phòng</strong></label>
                 <input type="date" id="checkin" class="form-control"/>
             </div>
             <div class="col">
-                <label for="checkout" class="form-label">Ngày trả phòng</label>
+                <label for="checkout" class="form-label"><strong>Ngày trả phòng</strong></label>
                 <input type="date" id="checkout" class="form-control"/>
             </div>
         </div>
@@ -24,21 +38,20 @@
         <!-- Hiển thị tổng số khách thuê -->
         <div class="row">
             <div class="col">
-                <label for="num_guests" class="form-label">Số lượng khách thuê đã thêm</label>
+                <label for="num_guests" class="form-label"><strong>Số lượng khách thuê đã thêm</strong></label>
                 <input type="number" id="num_guests" class="form-control" min="1" readonly/>
             </div>
             <!-- Hiển thị tổng số phòng thuê -->
             <div class="col">
-                <label for="num_rooms" class="form-label">Số lượng phòng đã chọn</label>
+                <label for="num_rooms" class="form-label"><strong>Số lượng phòng đã chọn</strong></label>
                 <input type="number" id="num_rooms" class="form-control" readonly min="0"/>
             </div>
         </div>
         <br/>
-        <h5 class="mb-3">Chọn loại phòng</h5>
-        <!-- Chọn loại phòng trong -->
-        <div class="row">
+        <p class="mb-3"><strong>Chọn loại phòng</strong></p>
+        <div class="row rounded-border p-2">
             {% for room_type in room_types %}
-            <div class="col-2 form-check form-check-inline">
+            <div class="col-2.5 form-check form-check-inline">
                 <input class="form-check-input room-type-checkbox" type="checkbox" value="{{ room_type.id }}"
                        id="room_type_{{ room_type.id }}" name="room_type_id">
                 <label class="form-check-label" for="room_type_{{ room_type.id }}">{{ room_type.name }}</label>
@@ -46,21 +59,18 @@
             {% endfor %}
         </div>
         <br/>
-        <!-- Hiển thị danh sách phòng theo loại đã chọn dưới dạng có thể tick chọn nhiều-->
-        <!--        tam de day mai an no chung voi danh sach-->
         <div class="row">
-            <h5 class="mb-3 col-11">Danh sách phòng khả dụng</h5>
+            <p class="mb-3 col-11"><strong>Danh sách phòng khả dụng</strong></p>
             <!-- Button to uncheck all selected rooms -->
             <button type="button" id="uncheckAllButton" class="btn btn-red col-1 btn-circle"><i
                     class="fa fa-trash"></i></button>
         </div>
-
         <div class="list-view-container mt-3" id="room-list">
         </div>
-
         <br/>
         <!-- hiển thị tiêu đề "Danh sách khách hàng" -->
-        <h5 class="mb-3">Danh sách khách hàng</h5>
+        <hp class="mb-3"><strong>Danh sách khách hàng</strong></hp>
+        <p></p>
         <!-- Hiển thị bảng danh sách khách hàng -->
         <table class="table table-bordered">
             <thead>
