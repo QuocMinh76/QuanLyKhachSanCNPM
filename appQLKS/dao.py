@@ -6,6 +6,7 @@ import hashlib
 import cloudinary.uploader
 from sqlalchemy import or_
 import json
+from sqlalchemy.orm import joinedload
 
 
 def load_room_types():
@@ -198,10 +199,6 @@ def auth_user(username, password, role=None):
     return u.first()
 
 
-def get_user_by_id(user_id):
-    return User.query.get(user_id)
-
-
 # Lấy danh sách phòng theo loại phòng
 # This function get all AVAILABLE rooms of a room type
 def get_rooms_by_type(room_type_id=None):
@@ -214,6 +211,24 @@ def get_rooms_by_type(room_type_id=None):
     rooms = rooms.filter(Room.available.__eq__(True))
 
     return rooms.order_by('id').all()
+
+
+def get_booking_order_details(booking_order_id):
+    """
+    Retrieve a booking order and all related data by booking order ID.
+
+    :param booking_order_id: The ID of the booking order.
+    :return: A BookingOrder object with all related data loaded, or None if not found.
+    """
+    return db.session.query(BookingOrder).options(
+        joinedload(BookingOrder.booking_room_info).joinedload(BookingRoomInfo.room),
+        joinedload(BookingOrder.booking_cust_info).joinedload(BookingCustInfo.customer),
+        joinedload(BookingOrder.renting_order)
+    ).filter(BookingOrder.id == booking_order_id).one_or_none()
+
+
+def get_user_by_id(user_id):
+    return User.query.get(user_id)
 
 
 def get_room_type_by_id(room_type_id):
@@ -229,4 +244,26 @@ def get_room_by_id(room_id):
 
 
 def get_customer_by_id(cust_id):
-    return CustomerType.query.get(cust_id)
+    return Customer.query.get(cust_id)
+
+
+if __name__ == "__main__":
+    with app.app_context():
+        booking_order_id = 1  # Replace with the desired booking order ID
+        details = get_booking_order_details(booking_order_id)
+
+        if details:
+            print("Booking Order Details:")
+            print(f"ID: {details.id}")
+            print(f"Check-in Date: {details.checkin_date}")
+            print(f"Check-out Date: {details.checkout_date}")
+            print("Room Info:")
+            for room_info in details.booking_room_info:
+                print(f"Room ID: {room_info.room_id}")
+            print("Customer Info:")
+            for cust_info in details.booking_cust_info:
+                print(f"Customer ID: {cust_info.cust_id}")
+            if details.renting_order:
+                print(f"Renting Order ID: {details.renting_order.id}")
+        else:
+            print("Booking order not found.")
