@@ -73,7 +73,7 @@ function createRoomItem(room) {
 
     if (selectedRooms.some(selectedRoom => selectedRoom.id === room.id)) {
         roomItem.classList.add('selected');
-        roomItem.style.backgroundColor = 'green';
+        roomItem.style.backgroundColor = 'rgb(117, 148, 101)';
     }
 
     roomItem.addEventListener('click', () => toggleRoomSelection(roomItem, room));
@@ -102,7 +102,7 @@ function reselectRooms() {
         const roomItem = document.querySelector(`[data-room-id="${room.id}"]`);
         if (roomItem) {
             roomItem.classList.add('selected');
-            roomItem.style.backgroundColor = 'green';
+            roomItem.style.backgroundColor = 'rgb(117, 148, 101)';
         }
     });
 }

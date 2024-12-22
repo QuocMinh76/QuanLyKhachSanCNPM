@@ -9,14 +9,14 @@
 </ul>
 <div class="row">
     {% for r in rooms %}
-    <div class="col-md-3 col-12 p-2">
+    <div class="col-md-4 col-12 p-2">
         <div class="card">
             <img class="card-img-top" src="{{ r.image }}" alt="{{ r.name }}">
             <div class="card-body">
                 <h4 class="card-title">{{ r.name }}</h4>
                 <p class="card-text">{{ "{:,.0f}".format(r.roomPrice) }} VNĐ</p>
-                <a href="/rooms/{{ r.id }}" class="btn btn-pink">Xem chi tiết</a>
-                <a href="/booking" class="btn btn-gr">Đặt phòng</a>
+                <a href="/rooms/{{ r.id }}" class="btn btn-pink btn-sm">Xem chi tiết</a>
+                    <a href="/booking" class="btn btn-gr btn-sm">Đặt phòng</a>
             </div>
         </div>
     </div>
