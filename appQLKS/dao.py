@@ -1,6 +1,6 @@
 from flask_login import current_user
-from appQLKS.models import (User, Room, RoomType, CustomerType, Customer, BookingOrder,
-                            BookingRoomInfo, BookingCustInfo, Comment, RentingOrder, Bill)
+from appQLKS.models import (User, Room, RoomType, CustomerType, Customer, BookingOrder, BookingRoomInfo,
+                            BookingCustInfo, Comment, RentingOrder, RentingDetails, Bill)
 from appQLKS import app, db
 import hashlib
 import cloudinary.uploader
@@ -115,8 +115,30 @@ def add_booking_order(user_id, checkin_date, checkout_date, rooms: list, custome
         raise e
 
 
-def add_renting_order(booking_order_id):
-    pass
+def add_renting_order(order_id, checkin, checkout, rooms_custs: list):
+    try:
+        # Create renting order
+        renting_order = RentingOrder(id=order_id, checkin_date=checkin,
+                                     checkout_date=checkout, pay_status=False)
+        db.session.add(renting_order)
+        db.session.flush()
+
+        # Add room-cust info
+        for rc in rooms_custs:
+            customer_id = rc['customerId']
+            room_id = rc['roomId']
+
+            renting_details = RentingDetails(rentingOrder_id=renting_order.id, room_id=room_id,
+                                             cust_id=customer_id)
+            db.session.add(renting_details)
+
+        db.session.commit()
+        return renting_order
+
+    except Exception as e:
+        # Rollback in case of an error
+        db.session.rollback()
+        raise e
 
 
 def add_user(name, username, password, avatar=None):
@@ -178,8 +200,18 @@ def process_booking_order(user_id, checkin, checkout, customers, selected_rooms)
             customers=added_cust
         )
 
-    except json.JSONDecodeError as e:
-        raise ValueError(f"Invalid JSON data: {e}")
+    except Exception as e:
+        # If something goes wrong, roll back the transaction
+        db.session.rollback()
+        raise Exception(f"Error during booking process: {e}")
+
+
+def process_renting_order(order_id, checkin, checkout, rooms_custs):
+    try:
+        customer_room_mapping = json.loads(rooms_custs)
+
+        add_renting_order(order_id=order_id, checkin=checkin, checkout=checkout,
+                          rooms_custs=customer_room_mapping)
 
     except Exception as e:
         # If something goes wrong, roll back the transaction

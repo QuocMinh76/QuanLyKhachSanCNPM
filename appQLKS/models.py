@@ -78,7 +78,7 @@ class RentingOrder(db.Model):
     checkout_date = Column(DateTime, nullable=False)
     created_date = Column(DateTime, default=lambda: datetime.utcnow()
                           .replace(tzinfo=pytz.utc).astimezone(pytz.timezone('Asia/Ho_Chi_Minh')))
-    status = Column(Boolean, default=False)
+    pay_status = Column(Boolean, default=False)
 
     details = relationship('RentingDetails', back_populates='renting_order', lazy=True)
     booking_order = relationship('BookingOrder', back_populates='renting_order')

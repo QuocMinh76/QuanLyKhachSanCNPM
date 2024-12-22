@@ -1,11 +1,11 @@
 import math
-
 import pytz
 from flask import render_template, request, redirect, session, jsonify
 from appQLKS import app, login
 import dao
 from flask_login import login_user, logout_user, login_required
 from appQLKS.models import UserRoles
+import json
 
 
 @app.route("/")
@@ -158,7 +158,27 @@ def rent(order_id):
 @app.route('/process_renting', methods=['POST'])
 @login_required
 def process_renting():
-    pass
+    order_id = request.form.get('id')
+    checkin_date = request.form.get('checkin_date')
+    checkout_date = request.form.get('checkout_date')
+
+    room_cust_data = request.form.get('cust_room')
+
+    try:
+        dao.process_renting_order(
+            order_id=order_id,
+            checkin=checkin_date,
+            checkout=checkout_date,
+            rooms_custs=room_cust_data
+        )
+    except ValueError as ve:
+        print(f"Validation Error: {ve}")
+        return "Invalid input data", 400
+    except Exception as e:
+        print(f"Error: {e}")
+        return "An error occurred while processing the renting order", 500
+
+    return redirect('/')
 
 
 @app.route('/find_order')
