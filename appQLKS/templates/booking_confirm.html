@@ -5,6 +5,7 @@
     <h2 class="text-center mt-4">XÁC NHẬN ĐẶT PHÒNG</h2>
     <form method="post" action="{{ url_for('process_booking') }}">
         <!-- Hidden fields for dynamic data -->
+
         <input type="hidden" name="id" value="{{ current_user.id }}" />
         <input type="hidden" id="hidden_name" name="name" />
         <input type="hidden" id="hidden_checkin" name="checkin" />
@@ -42,8 +43,7 @@
                     <label>Danh sách phòng đã chọn</label>
                 </td>
                 <td>
-                    <div id="roomListContainer"></div>
-
+                    <div id="roomListContainer" class="border rounded p-2"></div>
                 </td>
             </tr>
             <tr>
