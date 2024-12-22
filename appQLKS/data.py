@@ -19,7 +19,7 @@ if __name__ == '__main__':
     with app.app_context():
         u = User(name="admin", username="admin",
                  password=str(hashlib.md5("123456".strip().encode('utf-8')).hexdigest()),
-                 avatar="https://res.cloudinary.com/dxxwcby8l/image/upload/v1647056401/ipmsmnxjydrhpo21xrd8.jpg",
+                 avatar="https://res.cloudinary.com/dhhpxhskj/image/upload/v1734859482/default_admin_avt_gv720p.png",
                  user_role=UserRoles.ADMIN)
         db.session.add(u)
         db.session.commit()
