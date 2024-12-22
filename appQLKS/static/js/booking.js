@@ -86,7 +86,7 @@ function toggleRoomSelection(roomItem, room) {
 
     // Toggle the selection visually
     roomItem.classList.toggle('selected', isSelected);
-    roomItem.style.backgroundColor = isSelected ? 'green' : '';
+    roomItem.style.backgroundColor = isSelected ? 'rgb(117, 148, 101)' : '';
 
     if (isSelected) {
         selectedRooms.push(room);
