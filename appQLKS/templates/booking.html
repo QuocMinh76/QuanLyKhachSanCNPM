@@ -35,8 +35,8 @@
             </div>
         </div>
         <br/>
-        <!-- Hiển thị tổng số khách thuê -->
         <div class="row">
+            <!-- Hiển thị tổng số khách thuê -->
             <div class="col">
                 <label for="num_guests" class="form-label"><strong>Số lượng khách thuê đã thêm</strong></label>
                 <input type="number" id="num_guests" class="form-control" min="1" readonly/>
@@ -85,9 +85,10 @@
             <tr>
                 <td><input type="text" class="form-control" placeholder="Tên khách hàng"></td>
                 <td>
-                    <select class="form-select">
-                        <option value="Domestic">Nội địa</option>
-                        <option value="Foreign">Quốc tế</option>
+                    <select class="form-select customerTypeSelect">
+                        {% for type in cust_types %}
+                        <option value="{{ type.id }}">{{ type.name }}</option>
+                        {% endfor %}
                     </select>
                 </td>
                 <td><input type="text" class="form-control" placeholder="CMND"></td>

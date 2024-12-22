@@ -122,7 +122,39 @@ function uncheckAllRooms() {
     updateSelectedRoomCount();
 }
 
+function populateCustomerTypes(selectElement) {
+    fetch('/api/customer_types')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to fetch customer types');
+            }
+            return response.json();
+        })
+        .then(custTypes => {
+            if (custTypes.length === 0) {
+                const option = document.createElement('option');
+                option.textContent = 'No customer types available';
+                selectElement.appendChild(option);
+            } else {
+                selectElement.innerHTML = ''; // Clear any existing options
+                custTypes.forEach(type => {
+                    const option = document.createElement('option');
+                    option.value = type.id;
+                    option.textContent = type.name;
+                    selectElement.appendChild(option);
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Error loading customer types:', error);
+            const option = document.createElement('option');
+            option.textContent = 'Error loading customer types';
+            selectElement.appendChild(option);
+        });
+}
+
 function addCustomerRow() {
+    const customerTableBody = document.querySelector("#customerTableBody");
     const rows = customerTableBody.getElementsByTagName('tr');
     const lastRow = rows[rows.length - 1];
     const inputs = lastRow.querySelectorAll('input');
@@ -132,15 +164,17 @@ function addCustomerRow() {
         newRow.innerHTML = `
             <td><input type="text" class="form-control" placeholder="Tên khách hàng"></td>
             <td>
-                <select class="form-select">
-                    <option value="Nội địa">Nội địa</option>
-                    <option value="Quốc tế">Quốc tế</option>
+                <select class="form-select customerTypeSelect">
                 </select>
             </td>
             <td><input type="text" class="form-control" placeholder="CMND"></td>
             <td><input type="text" class="form-control" placeholder="Địa chỉ"></td>
         `;
         customerTableBody.appendChild(newRow);
+
+        // Populate the <select> element here
+        populateCustomerTypes(newRow.querySelector(".customerTypeSelect"));
+
         updateGuestCount();
     } else {
         alert('Vui lòng điền đủ thông tin khách hàng hiện tại trước khi thêm khách hàng khác.');
@@ -178,8 +212,11 @@ function confirmBooking(event) {
         selected_rooms: selectedRooms,
         customers: Array.from(customerTableBody.getElementsByTagName('tr')).map(row => ({
             name: row.querySelector('input[placeholder="Tên khách hàng"]').value,
-            type: row.querySelector('select').value,
-            id: row.querySelector('input[placeholder="CMND"]').value,
+            type: {
+                id: row.querySelector('select').value,
+                name: row.querySelector('select option:checked').textContent  // This captures the visible text
+            },
+            idNum: row.querySelector('input[placeholder="CMND"]').value,
             address: row.querySelector('input[placeholder="Địa chỉ"]').value
         }))
     };

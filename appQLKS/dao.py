@@ -1,6 +1,6 @@
 from flask_login import current_user
-from appQLKS.models import (User, Room, RoomType, BookingOrder, BookingRoomInfo,
-                            BookingCustInfo, Comment, RentingOrder, Bill)
+from appQLKS.models import (User, Room, RoomType, CustomerType, Customer, BookingOrder,
+                            BookingRoomInfo, BookingCustInfo, Comment, RentingOrder, Bill)
 from appQLKS import app, db
 import hashlib
 import cloudinary.uploader
@@ -55,6 +55,10 @@ def load_comments(room_id, page=1):
     comments = comments.slice(start, start + page_size)
 
     return comments
+
+
+def load_customer_type():
+    return CustomerType.query.order_by('id').all()
 
 
 def count_rooms():
@@ -130,6 +134,13 @@ def add_user(name, username, password, avatar):
     db.session.commit()
 
 
+def add_customer(name, idNum, address, cust_type_id):
+    customer = Customer(cust_name=name, custIdentity_num=idNum, custAddress=address, custType_id=cust_type_id)
+
+    db.session.add(customer)
+    db.session.commit()
+
+
 def auth_user(username, password, role=None):
     password = str(hashlib.md5(password.strip().encode('utf-8')).hexdigest())
 
@@ -170,4 +181,8 @@ def get_booking_order_by_id(booking_order_id):
 
 def get_room_by_id(room_id):
     return Room.query.get(room_id)
+
+
+def get_customer_by_id(cust_id):
+    return CustomerType.query.get(cust_id)
 
