@@ -51,6 +51,44 @@ function initializeRoomValidation() {
 // Initialize validation when the document is fully loaded
 document.addEventListener('DOMContentLoaded', initializeRoomValidation);
 
+document.addEventListener("DOMContentLoaded", function () {
+    const confirmButton = document.getElementById("confirmButton");
+    const customerRoomField = document.getElementById("cust_room"); // Reuse 'rooms' field for simplicity
+
+    confirmButton.addEventListener("click", function (event) {
+        // Ensure the hidden field exists
+        if (!customerRoomField) {
+            console.error("Hidden input field for customer-room mapping is missing.");
+            return;
+        }
+
+        // Collect customer-to-room mapping
+        const customerRoomMapping = [];
+
+        const roomOptions = document.querySelectorAll("select[name^='room_select_']");
+        roomOptions.forEach(select => {
+            const customerId = select.name.replace("room_select_", "");
+            const roomId = select.value;
+
+            if (roomId) {
+                customerRoomMapping.push({
+                    customerId: customerId,
+                    roomId: roomId
+                });
+            }
+        });
+
+        // Debugging: Log the customer-room mapping
+        console.log("Customer-Room Mapping:", customerRoomMapping);
+
+        // Serialize and store in the hidden input
+        customerRoomField.value = JSON.stringify(customerRoomMapping);
+
+        // Debugging: Verify hidden field value
+        console.log("Hidden Field Value:", customerRoomField.value);
+    });
+});
+
 // Mai xem lại cái qq dưới này
 // Function to check if all select tags have a selection
 function checkAllRowsSelected() {
