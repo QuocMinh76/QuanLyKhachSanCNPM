@@ -20,9 +20,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // Check if the selected room list exists and is not empty
         if (bookingData.selected_rooms && bookingData.selected_rooms.length > 0) {
-            bookingData.selected_rooms.forEach(room => {
+            bookingData.selected_rooms.forEach((room, index) => {
+                const isLast = index === bookingData.selected_rooms.length - 1;
                 const roomElement = `
-                    <label class="form-check-label">${room.name}, </label>
+                    <label class="form-check-label">${room.name}${isLast ? '' : ','}</label>
                 `;
                 document.getElementById('roomListContainer').insertAdjacentHTML('beforeend', roomElement);
             });

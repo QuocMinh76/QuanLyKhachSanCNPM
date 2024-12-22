@@ -26,7 +26,7 @@
                 <td>{{ o.checkin_date }}</td>
                 <td>{{ o.checkout_date }}</td>
                 <td>
-                    <button class="btn btn-pink">Lập phiếu</button>
+                    <a href="/rent/{{ o.id }}" class="btn btn-pink btn-sm">Lập phiếu</a>
                 </td>
             </tr>
             {% endfor %}

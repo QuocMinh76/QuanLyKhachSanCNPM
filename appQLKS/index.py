@@ -6,7 +6,6 @@ from appQLKS import app, login
 import dao
 from flask_login import login_user, logout_user, login_required
 from appQLKS.models import UserRoles
-import json
 
 
 @app.route("/")
@@ -91,11 +90,6 @@ def logout_process():
     return redirect('/login')
 
 
-@app.route("/rent")
-def rent():
-    return render_template('rent.html')
-
-
 @app.route('/booking')
 @login_required
 def booking():
@@ -138,6 +132,47 @@ def process_booking():
         return "An error occurred while processing your booking", 500
 
     return redirect('/')
+
+
+@app.route("/rent/<order_id>")
+def rent(order_id):
+    booking_order = dao.get_booking_order_details(order_id)
+    custs = []
+    rooms = []
+
+    for room_info in booking_order.booking_room_info:
+        room = dao.get_room_by_id(room_info.room_id)
+        rooms.append(room)
+
+    for cust_info in booking_order.booking_cust_info:
+        cust = dao.get_customer_by_id(cust_info.cust_id)
+        custs.append(cust)
+
+    # Create a dictionary mapping room ID to maxCust for each room
+    room_data = {room.id: room.roomType.maxCust for room in rooms}
+
+    return render_template('rent.html', order=booking_order, customers=custs,
+                           rooms=rooms, num_cust=len(custs), num_room=len(rooms), room_data=room_data)
+
+
+@app.route('/process_renting', methods=['POST'])
+@login_required
+def process_renting():
+    pass
+
+
+@app.route("/thanhtoan")
+def thanh_toan():
+    return render_template('thanhtoan.html')
+
+
+@app.route('/find_order')
+def find_booking_order():
+    kw = request.args.get('kw')
+
+    orders = dao.load_booking_orders(kw)
+
+    return render_template('find_booking_order.html', orders=orders)
 
 
 @app.route('/api/rooms', methods=['GET'])
@@ -187,20 +222,6 @@ def get_customer_types():
     response = jsonify([{'id': type.id, 'name': type.name} for type in cust_types])
     response.headers['Content-Type'] = 'application/json'  # Set content type explicitly
     return response
-
-
-@app.route("/thanhtoan")
-def thanh_toan():
-    return render_template('thanhtoan.html')
-
-
-@app.route('/find_order')
-def find_booking_order():
-    kw = request.args.get('kw')
-
-    orders = dao.load_booking_orders(kw)
-
-    return render_template('find_booking_order.html', orders=orders)
 
 
 @login.user_loader
