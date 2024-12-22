@@ -1,0 +1,49 @@
+{% extends 'layout/base.html' %}
+
+{% block content %}
+<div class="container">
+    <div class="card mb-4 shadow-sm">
+            <div class="card-body">
+                <h3 class="card-title">Thông Tin Đặt Phòng</h3>
+                <hr style="border: 1px solid black;"/>
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Mã Đơn: </strong>#</p>
+                        <p><strong>Tên Người Đặt: </strong>#</p>
+                        <p><strong>Ngày Nhận Phòng: </strong>#</p>
+                        <p><strong>Ngày Trả Phòng: </strong>#</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Ngày Đặt Phòng: </strong>#</p>
+                        <p><strong>Số Lượng Khách: </strong>#</p>
+                        <p><strong>Số Lượng Phòng: </strong>#</p>
+                        <p><strong>Tổng Tiền Của Đơn: </strong>#</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <h4 class="card-title">Chi tiết của đơn:</h4>
+            <table class="table table-hover table-bordered text-center">
+                <tr>
+                    <th scope="col">Phòng</th>
+                    <th scope="col">Khách Nội Địa</th>
+                    <th scope="col">Khách Quốc Tế</th>
+                    <th scope="col">Đơn Giá Phòng</th>
+                    <th scope="col">Tổng Giá Phòng</th>
+                </tr>
+                <tbody>
+                    <tr>
+                        <td>DatVe</td>
+                        <td>TenPhim</td>
+                        <td>TenRap</td>
+                        <td>TenPhong</td>
+                        <td>ToString("dd/MM/yyyy")</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

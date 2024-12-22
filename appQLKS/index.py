@@ -188,11 +188,21 @@ def get_customer_types():
     response.headers['Content-Type'] = 'application/json'  # Set content type explicitly
     return response
 
+@app.route("/find_rent")
+def find_rent():
+    return render_template('find_rent.html')
 
-@app.route("/thanhtoan")
-def thanh_toan():
-    return render_template('thanhtoan.html')
+@app.route("/invoice")
+def invoice():
+    return render_template('invoice.html')
 
+@app.route("/customer_orders")
+def customer_orders():
+    return render_template('customer_orders.html')
+
+@app.route("/customer_order_details")
+def customer_order_details():
+    return render_template('customer_order_details.html')
 
 @app.route('/find_order')
 def find_booking_order():
