@@ -5,13 +5,13 @@
     <h2 class="text-center mt-4">XÁC NHẬN ĐẶT PHÒNG</h2>
     <form method="post" action="{{ url_for('process_booking') }}">
         <!-- Hidden fields for dynamic data -->
-        <input type="hidden" id="hidden_name" name="name" />
-        <input type="hidden" id="hidden_checkin" name="checkin" />
-        <input type="hidden" id="hidden_checkout" name="checkout" />
-        <input type="hidden" id="hidden_num_guests" name="num_guests" />
-        <input type="hidden" id="hidden_num_rooms" name="num_rooms" />
-        <input type="hidden" id="hidden_selected_rooms" name="selected_rooms" />
-        <input type="hidden" id="hidden_customers" name="customers" />
+        <input type="hidden" id="hidden_name" name="name"/>
+        <input type="hidden" id="hidden_checkin" name="checkin"/>
+        <input type="hidden" id="hidden_checkout" name="checkout"/>
+        <input type="hidden" id="hidden_num_guests" name="num_guests"/>
+        <input type="hidden" id="hidden_num_rooms" name="num_rooms"/>
+        <input type="hidden" id="hidden_selected_rooms" name="selected_rooms"/>
+        <input type="hidden" id="hidden_customers" name="customers"/>
 
         <table class="table table-bordered">
             <tbody>
@@ -41,8 +41,7 @@
                     <label>Danh sách phòng đã chọn</label>
                 </td>
                 <td>
-                    <div id="roomListContainer"></div>
-
+                    <div id="roomListContainer" class="border rounded p-2"></div>
                 </td>
             </tr>
             <tr>

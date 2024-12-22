@@ -1,5 +1,121 @@
 {% extends 'admin/master.html' %}
 
 {% block body %}
-<h1 class="text-danger text-center mt-1">THỐNG KÊ BÁO CÁO</h1>
+<style>
+
+</style>
+<h1 class="text-danger text-center mt-1">THỐNG KÊ DOANH THU THEO THÁNG</h1>
+<div class="container mt-4">
+    <div class="row mb-3">
+        <div class="col-md-12 text-center">
+            <label for="selectMonth">Chọn tháng:</label>
+            <input type="month" id="selectMonth" class="form-control d-inline-block w-auto" lang="vi"/>
+        </div>
+    </div>
+
+    <h2 id="selectedMonthTitle" class="text-center">Doanh thu ...</h2>
+    <div class="row">
+        <div class="col-md-6">
+            <canvas id="barChart"></canvas>
+        </div>
+        <div class="col-md-6">
+            <canvas id="pieChart"></canvas>
+        </div>
+    </div>
+
+    <table class="table table-bordered mt-4">
+        <thead>
+        <tr>
+            <th>Loại phòng</th>
+            <th>Doanh thu</th>
+            <th>Số lượt thuê</th>
+            <th>Tỷ lệ</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td>L1</td>
+            <td>100</td>
+            <td>120</td>
+            <td>0.5</td>
+        </tr>
+        </tbody>
+        <tfoot>
+        <tr>
+            <td colspan="3" class="text-right">Tổng doanh thu:</td>
+            <td>100</td>
+        </tr>
+        </tfoot>
+    </table>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Xử lý sự kiện khi chọn tháng
+    document.getElementById('selectMonth').addEventListener('change', function () {
+        const selectedDate = new Date(this.value);
+        const selectedMonth = selectedDate.toLocaleString('vi-VN', { month: 'long' });
+        const selectedYear = selectedDate.getFullYear();
+
+        // Cập nhật tiêu đề
+        document.getElementById('selectedMonthTitle').textContent = `Doanh thu ${selectedMonth} năm ${selectedYear}`;
+
+        // Cập nhật dữ liệu doanh thu (nếu cần)
+        console.log(`Tháng được chọn: ${this.value}`);
+    });
+
+    // Dữ liệu mặc định cho biểu đồ
+    const barCtx = document.getElementById('barChart').getContext('2d');
+    new Chart(barCtx, {
+        type: 'bar',
+        data: {
+            labels: ['Loại 1', 'Loại 2', 'Loại 3'],
+            datasets: [{
+                label: 'Doanh thu',
+                data: [45, 10, 20],
+backgroundColor: [
+    'rgba(255, 99, 132, 0.2)',
+    'rgba(54, 162, 235, 0.2)',
+    'rgba(255, 206, 86, 0.2)',
+    'rgba(75, 192, 192, 0.2)',
+],
+           borderColor: [
+    'rgba(255, 99, 132, 1)',
+    'rgba(54, 162, 235, 1)',
+    'rgba(255, 206, 86, 1)',
+    'rgba(75, 192, 192, 1)',
+]            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    });
+
+    const pieCtx = document.getElementById('pieChart').getContext('2d');
+    new Chart(pieCtx, {
+        type: 'pie',
+        data: {
+            labels: ['Loại 1', 'Loại 2', 'Loại 3'],
+            datasets: [{
+                data: [50, 30, 20],
+backgroundColor: [
+    'rgba(255, 99, 132, 0.2)',
+    'rgba(54, 162, 235, 0.2)',
+    'rgba(255, 206, 86, 0.2)',
+    'rgba(75, 192, 192, 0.2)',
+],
+           borderColor: [
+    'rgba(255, 99, 132, 1)',
+    'rgba(54, 162, 235, 1)',
+    'rgba(255, 206, 86, 1)',
+    'rgba(75, 192, 192, 1)',
+],}]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    });
+</script>
 {% endblock %}
