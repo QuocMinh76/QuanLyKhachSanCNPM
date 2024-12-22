@@ -3,7 +3,16 @@
 {% block content %}
 <div class="container">
     <h2 class="text-center mt-4">XÁC NHẬN ĐẶT PHÒNG</h2>
-    <form>
+    <form method="post" action="{{ url_for('process_booking') }}">
+        <!-- Hidden fields for dynamic data -->
+        <input type="hidden" id="hidden_name" name="name" />
+        <input type="hidden" id="hidden_checkin" name="checkin" />
+        <input type="hidden" id="hidden_checkout" name="checkout" />
+        <input type="hidden" id="hidden_num_guests" name="num_guests" />
+        <input type="hidden" id="hidden_num_rooms" name="num_rooms" />
+        <input type="hidden" id="hidden_selected_rooms" name="selected_rooms" />
+        <input type="hidden" id="hidden_customers" name="customers" />
+
         <table class="table table-bordered">
             <tbody>
             <tr>
@@ -61,7 +70,7 @@
                 </button>
             </div>
             <div class="col d-flex justify-content-end">
-                <button type="submit" class="btn btn-gr" id="confirmBookingButton">Xác nhận Đặt phòng
+                <button type="submit" class="btn btn-gr">Xác nhận Đặt phòng
                 </button>
             </div>
         </div>

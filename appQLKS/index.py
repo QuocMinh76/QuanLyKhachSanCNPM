@@ -6,6 +6,7 @@ from appQLKS import app, login
 import dao
 from flask_login import login_user, logout_user, login_required
 from appQLKS.models import UserRoles
+import json
 
 
 @app.route("/")
@@ -99,14 +100,43 @@ def rent():
 def booking():
     # Lấy danh sách loại phòng
     room_types = dao.load_room_types()
+    cust_types = dao.load_customer_type()
 
-    return render_template('booking.html', room_types=room_types)
+    return render_template('booking.html', room_types=room_types,
+                           cust_types=cust_types)
 
 
 @app.route('/booking_confirm')
 def booking_confirm():
-
     return render_template('booking_confirm.html')
+
+
+@app.route('/process_booking', methods=['POST'])
+def process_booking():
+    # Retrieve data from the form
+    name = request.form.get('name')
+    checkin = request.form.get('checkin')
+    checkout = request.form.get('checkout')
+    num_guests = request.form.get('num_guests')
+    num_rooms = request.form.get('num_rooms')
+    selected_rooms = request.form.get('selected_rooms')
+    customers = request.form.get('customers')
+
+    if customers:  # Check if customers is not None
+        try:
+            customers_data = json.loads(customers)  # Parse the string into a list of dictionaries
+            for c in customers_data:
+                name = c["name"]
+                idNum = c["idNum"]
+                address = c["address"]
+                cust_type_id = c["type"]["id"]  # Access the 'id' from the nested 'type' dictionary
+                dao.add_customer(name=name, idNum=idNum, address=address, cust_type_id=cust_type_id)
+        except json.JSONDecodeError:
+            print("Error: Invalid JSON data")
+    else:
+        print("No customers data available")
+
+    return render_template('process_booking.html')
 
 
 @app.route('/api/rooms', methods=['GET'])
@@ -147,6 +177,15 @@ def add_comment(room_id):
             "name": c.user.name
         }
     })
+
+
+@app.route('/api/customer_types', methods=['GET'])
+def get_customer_types():
+    cust_types = dao.load_customer_type()
+    # Convert the list of customer types into a dictionary that can be easily used in JavaScript
+    response = jsonify([{'id': type.id, 'name': type.name} for type in cust_types])
+    response.headers['Content-Type'] = 'application/json'  # Set content type explicitly
+    return response
 
 
 @app.route("/thanhtoan")
