@@ -97,6 +97,7 @@ def rent():
 
 
 @app.route('/booking')
+@login_required
 def booking():
     # Lấy danh sách loại phòng
     room_types = dao.load_room_types()
@@ -107,36 +108,36 @@ def booking():
 
 
 @app.route('/booking_confirm')
+@login_required
 def booking_confirm():
     return render_template('booking_confirm.html')
 
 
 @app.route('/process_booking', methods=['POST'])
+@login_required
 def process_booking():
-    # Retrieve data from the form
-    name = request.form.get('name')
+    user_id = request.form.get('id')
     checkin = request.form.get('checkin')
     checkout = request.form.get('checkout')
-    num_guests = request.form.get('num_guests')
-    num_rooms = request.form.get('num_rooms')
     selected_rooms = request.form.get('selected_rooms')
     customers = request.form.get('customers')
 
-    if customers:  # Check if customers is not None
-        try:
-            customers_data = json.loads(customers)  # Parse the string into a list of dictionaries
-            for c in customers_data:
-                name = c["name"]
-                idNum = c["idNum"]
-                address = c["address"]
-                cust_type_id = c["type"]["id"]  # Access the 'id' from the nested 'type' dictionary
-                dao.add_customer(name=name, idNum=idNum, address=address, cust_type_id=cust_type_id)
-        except json.JSONDecodeError:
-            print("Error: Invalid JSON data")
-    else:
-        print("No customers data available")
+    try:
+        dao.process_booking_order(
+            user_id=user_id,
+            checkin=checkin,
+            checkout=checkout,
+            customers=customers,
+            selected_rooms=selected_rooms
+        )
+    except ValueError as ve:
+        print(f"Validation Error: {ve}")
+        return "Invalid input data", 400
+    except Exception as e:
+        print(f"Error: {e}")
+        return "An error occurred while processing your booking", 500
 
-    return render_template('process_booking.html')
+    return redirect('/')
 
 
 @app.route('/api/rooms', methods=['GET'])
