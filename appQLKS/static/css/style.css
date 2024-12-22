@@ -21,6 +21,25 @@
             color: white;
         }
 
+.btn-pink2{
+    background-color: rgb(255, 178, 165);
+    color: black;
+    border: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 5px 10px;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+    .btn:hover {
+            background-color: rgb(232, 129, 166);
+            color: white;
+        }
+
 .btn-mam{
     background-color: rgb(222, 130, 134);
     color: white;
@@ -57,6 +76,21 @@
     border: none;
     display: inline-flex;
     padding: 10px 20px;
+    font-size: 16px;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.btn-gr2{
+    background-color: rgb(117, 148, 101);
+    color: white;
+    border: none;
+    display: inline-flex;
+    padding: 5px 10px;
     font-size: 16px;
     align-items: center;
     justify-content: center;

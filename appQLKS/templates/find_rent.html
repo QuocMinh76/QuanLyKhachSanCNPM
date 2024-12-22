@@ -1,0 +1,38 @@
+{% extends 'layout/base.html' %}
+
+{% block content %}
+<h2 class="text-center mt-4">TRA CỨU THANH TOÁN</h2>
+<div class="mt-4">
+        <form class="d-flex">
+                <input class="form-control me-2" type="text"
+                       placeholder="Tìm theo tên khách hàng..." name="kw" style="border: 2px solid">
+                <button class="btn btn-pink" type="submit">Tìm</button>
+        </form>
+</div>
+<div class="mt-4">
+        {% if orders %}
+        <table class="table table-bordered text-center">
+            <tr>
+                <td>Mã phiếu thuê phòng</td>
+                <td>Người đặt đơn</td>
+                <td>Ngày nhận phòng</td>
+                <td>Ngày trả phòng</td>
+                <td></td>
+            </tr>
+            {% for o in orders %}
+            <tr>
+                <td>{{ o.id }}</td>
+                <td>{{ o.user.name }}</td>
+                <td>{{ o.checkin_date }}</td>
+                <td>{{ o.checkout_date }}</td>
+                <td>
+                    <button class="btn btn-pink2">Thanh toán</button>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+        {% else %}
+        <div class="alert alert-info mt-4">Không tìm thấy đơn đặt phòng!</div>
+        {% endif %}
+</div>
+{% endblock %}
