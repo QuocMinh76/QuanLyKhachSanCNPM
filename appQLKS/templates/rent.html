@@ -3,27 +3,32 @@
 {% block content %}
 <body>
     <div class="container mt-5">
-        <h2 class="text-center mb-4">LẬP PHIẾU ĐẶT PHÒNG</h2>
-        <form>
+        <h2 class="text-center mb-4">LẬP PHIẾU THUÊ PHÒNG</h2>
+        <form method="post" action="{{ url_for('process_booking') }}">
+            <h5 class="mb-3 mt-4">Thông tin cơ bản:</h5>
             <table class="table table-bordered text-center">
                 <tbody>
                     <tr>
                         <th>Nhân viên lập phiếu</th>
-                        <th>Thời gian lập phiếu</th>
                         <th>Ngày nhận phòng</th>
                         <th>Ngày trả phòng</th>
                         <th>Số lượng khách thuê</th>
+                        <th>Số lượng phòng thuê</th>
                     </tr>
                     <tr>
-                        <td>ABC</td>
-                        <td>hhddmm</td>
-                        <td>hhddmm</td>
-                        <td>hhddmm</td>
-                        <td>2</td>
+                        <td>{{ current_user.name }}</td>
+                        <td>{{ order.checkin_date.strftime('%d/%m/%Y') }}</td>
+                        <td>{{ order.checkout_date.strftime('%d/%m/%Y') }}</td>
+                        <td>{{ num_cust }}</td>
+                        <td>{{ num_room }}</td>
                     </tr>
                     <tr>
                         <th>Các phòng thuê</th>
-                        <td colspan="4">Phòng 1, Phòng 2</td>
+                        <td colspan="4">
+                            {% for room in rooms %}
+                            {{ room.name }}{% if not loop.last %}, {% endif %}
+                            {% endfor %}
+                        </td>
                     </tr>
                 </tbody>
             </table>
@@ -39,26 +44,34 @@
                     </tr>
                 </thead>
                 <tbody>
+                    {% for c in customers %}
                     <tr>
-                        <td>ABC</td>
-                        <td>Nội địa</td>
-                        <td>0837645354535</td>
-                        <td>HCM</td>
+                        <td>{{ c.cust_name }}</td>
+                        <td>{{ c.custType.name }}</td>
+                        <td>{{ c.custIdentity_num }}</td>
+                        <td>{{ c.custAddress }}</td>
                         <td>
-                            <select class="form-select">
-                                <option value="null"></option>
-                                <option value="Phòng 1">Phòng 1</option>
-                                <option value="Phòng 2">Phòng 2</option>
+                            <select id="room_select_{{ c.id }}" name="room_select_{{ c.id }}" class="form-select" data-max-cust="{{ room_data[c.id] }}">
+                                <option value="" disabled selected>Chọn phòng</option>
+                                {% for room in rooms %}
+                                <option value="{{ room.id }}" data-max-cust="{{ room.roomType.maxCust }}">
+                                    {{ room.name }}
+                                </option>
+                                {% endfor %}
                             </select>
                         </td>
                     </tr>
+                    {% endfor %}
                 </tbody>
             </table>
             <div class="d-flex justify-content-end">
-                <button type="submit" class="btn btn-success me-2">Xác nhận lập phiếu</button>
+                <button id="confirmButton" type="submit" class="btn btn-success me-2">Xác nhận lập phiếu</button>
                 <button type="button" class="btn btn-secondary">Hủy</button>
             </div>
         </form>
     </div>
+
+    <!-- Include the updated JavaScript file -->
+    <script src="{{ url_for('static', filename='js/rent.js') }}"></script>
 </body>
 {% endblock %}
