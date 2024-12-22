@@ -5,7 +5,7 @@ from appQLKS import app, db
 import hashlib
 import cloudinary.uploader
 from sqlalchemy import or_
-from sqlalchemy.orm import Session
+import json
 
 
 def load_room_types():
@@ -78,7 +78,7 @@ def add_comment(content, room_id):
     return c
 
 
-def add_booking_order(session: Session, user_id, checkin_date, checkout_date, rooms: list, customers: list):
+def add_booking_order(user_id, checkin_date, checkout_date, rooms: list, customers: list):
     try:
         # Create the booking order
         booking_order = BookingOrder(
@@ -86,8 +86,8 @@ def add_booking_order(session: Session, user_id, checkin_date, checkout_date, ro
             checkin_date=checkin_date,
             checkout_date=checkout_date
         )
-        session.add(booking_order)
-        session.flush()  # Flush to generate the ID for the booking order
+        db.session.add(booking_order)
+        db.session.flush()  # Flush to generate the ID for the booking order
 
         # Add room information
         for room_id in rooms:
@@ -95,7 +95,7 @@ def add_booking_order(session: Session, user_id, checkin_date, checkout_date, ro
                 bookingOrder_id=booking_order.id,
                 room_id=room_id
             )
-            session.add(room_info)
+            db.session.add(room_info)
 
         # Add customer information
         for customer_id in customers:
@@ -103,16 +103,14 @@ def add_booking_order(session: Session, user_id, checkin_date, checkout_date, ro
                 bookingOrder_id=booking_order.id,
                 cust_id=customer_id
             )
-            session.add(cust_info)
+            db.session.add(cust_info)
 
-        # Commit the transaction
-        session.commit()
-
+        db.session.commit()  # Commit the transaction
         return booking_order
 
     except Exception as e:
         # Rollback in case of an error
-        session.rollback()
+        db.session.rollback()
         raise e
 
 
@@ -120,11 +118,11 @@ def add_renting_order(booking_order_id):
     pass
 
 
-def add_user(name, username, password, avatar):
+def add_user(name, username, password, avatar=None):
     password = str(hashlib.md5(password.strip().encode('utf-8')).hexdigest())
 
     u = User(name=name, username=username, password=password,
-             avatar="https://res.cloudinary.com/dxxwcby8l/image/upload/v1647056401/ipmsmnxjydrhpo21xrd8.jpg")
+             avatar="https://res.cloudinary.com/dhhpxhskj/image/upload/v1734858820/default_avt_uy1yef.png")
 
     if avatar:
         res = cloudinary.uploader.upload(avatar)
@@ -135,10 +133,57 @@ def add_user(name, username, password, avatar):
 
 
 def add_customer(name, idNum, address, cust_type_id):
-    customer = Customer(cust_name=name, custIdentity_num=idNum, custAddress=address, custType_id=cust_type_id)
-
+    customer = Customer(
+        cust_name=name,
+        custIdentity_num=idNum,
+        custAddress=address,
+        custType_id=cust_type_id
+    )
     db.session.add(customer)
-    db.session.commit()
+    db.session.commit()  # Commit the transaction to save the customer
+    return customer
+
+
+def process_booking_order(user_id, checkin, checkout, customers, selected_rooms):
+    try:
+        # Directly use db.session for adding items
+        added_cust = []
+        rooms_info = []
+
+        # Process customers
+        if customers:
+            customers_data = json.loads(customers)
+            for c in customers_data:
+                customer = add_customer(
+                    name=c["name"],
+                    idNum=c["idNum"],
+                    address=c["address"],
+                    cust_type_id=c["type"]["id"]
+                )
+                added_cust.append(customer.id)
+
+        # Process selected rooms
+        if selected_rooms:
+            rooms_data = json.loads(selected_rooms)
+            for room in rooms_data:
+                rooms_info.append(room["id"])
+
+        # Add booking order
+        add_booking_order(
+            user_id=user_id,
+            checkin_date=checkin,
+            checkout_date=checkout,
+            rooms=rooms_info,
+            customers=added_cust
+        )
+
+    except json.JSONDecodeError as e:
+        raise ValueError(f"Invalid JSON data: {e}")
+
+    except Exception as e:
+        # If something goes wrong, roll back the transaction
+        db.session.rollback()
+        raise Exception(f"Error during booking process: {e}")
 
 
 def auth_user(username, password, role=None):
@@ -185,4 +230,3 @@ def get_room_by_id(room_id):
 
 def get_customer_by_id(cust_id):
     return CustomerType.query.get(cust_id)
-
