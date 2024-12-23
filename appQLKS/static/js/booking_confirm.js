@@ -61,3 +61,127 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 });
+
+//document.getElementById('confirmBookingButton').addEventListener('click', function () {
+//    // Lấy dữ liệu đặt phòng từ localStorage
+//    const bookingData = JSON.parse(localStorage.getItem('bookingData'));
+//    console.log('Dữ liệu đặt phòng trước khi cập nhật:', bookingData);
+//
+//    if (bookingData && bookingData.selected_rooms && bookingData.selected_rooms.length > 0) {
+//        // Cập nhật trạng thái phòng trong bookingData
+//        bookingData.selected_rooms.forEach(room => {
+//            room.status = 'Unavailable'; // Đặt trạng thái phòng là "Không sẵn sàng"
+//        });
+//
+//        console.log('Dữ liệu đặt phòng sau khi cập nhật trạng thái phòng:', bookingData);
+//
+//        // Cập nhật lại bookingData vào localStorage
+//        localStorage.setItem('bookingData', JSON.stringify(bookingData));
+//
+//        // Gửi yêu cầu cập nhật trạng thái phòng trên server
+//        fetch('/api/update_rooms_status', {
+//            method: 'POST',
+//            headers: {
+//                'Content-Type': 'application/json',
+//            },
+//            body: JSON.stringify({ rooms: bookingData.selected_rooms })
+//        })
+//        .then(response => response.json())
+//        .then(data => {
+//            console.log('Kết quả trả về từ server:', data);
+//            if (data.success) {
+//                alert('Đặt phòng thành công và trạng thái phòng đã được cập nhật.');
+//            } else {
+//                alert('Có lỗi xảy ra khi cập nhật trạng thái phòng.');
+//            }
+//        })
+//        .catch(error => {
+//            console.error('Error:', error);
+//            alert('Có lỗi xảy ra khi cập nhật trạng thái phòng.');
+//        });
+//    } else {
+//        alert('Không có phòng nào được chọn.');
+//    }
+//});
+
+let bookingStartTime = null; // Biến lưu thời gian bắt đầu đặt phòng
+
+document.getElementById('confirmBookingButton').addEventListener('click', function (event) {
+    event.preventDefault(); // Ngừng hành động mặc định của nút (nếu có)
+
+    const bookingData = JSON.parse(localStorage.getItem('bookingData'));
+    console.log('Dữ liệu đặt phòng trước khi cập nhật:', bookingData);
+
+    if (bookingData && bookingData.selected_rooms && bookingData.selected_rooms.length > 0) {
+        bookingData.selected_rooms.forEach(room => {
+            room.status = 'Unavailable';
+        });
+
+        console.log('Dữ liệu đặt phòng sau khi cập nhật trạng thái phòng:', bookingData);
+        localStorage.setItem('bookingData', JSON.stringify(bookingData));
+        bookingStartTime = new Date().getTime();
+
+        fetch('/api/update_rooms_status', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ rooms: bookingData.selected_rooms })
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('Kết quả trả về từ server:', data);
+            if (data.success) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Đặt phòng thành công!',
+                    text: 'Trạng thái phòng đã được cập nhật.',
+                    confirmButtonText: 'OK',
+                    timer: 3000000
+                }).then(() => {
+                    // Chuyển hướng về trang chủ khi người dùng nhấn OK
+                    window.location.href = '/';
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Lỗi!',
+                    text: 'Có lỗi xảy ra khi cập nhật trạng thái phòng.',
+                    confirmButtonText: 'Thử lại',
+                    timer: 3000000
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Lỗi!',
+                text: 'Có lỗi xảy ra khi cập nhật trạng thái phòng.',
+                confirmButtonText: 'Thử lại',
+                timer: 3000000
+            });
+        });
+
+        setTimeout(() => {
+            const currentTime = new Date().getTime();
+            if (currentTime - bookingStartTime >= 5000) {
+                const updatedBookingData = JSON.parse(localStorage.getItem('bookingData'));
+                updatedBookingData.selected_rooms.forEach(room => {
+                    room.status = 'Available';
+                });
+                localStorage.setItem('bookingData', JSON.stringify(updatedBookingData));
+                console.log('Trạng thái phòng đã được cập nhật lại sau 30 giây.');
+            }
+        }, 5000);
+
+    } else {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Không có phòng nào được chọn!',
+            text: 'Vui lòng chọn phòng trước khi tiếp tục.',
+            confirmButtonText: 'OK',
+            timer: 3000000
+        });
+    }
+});

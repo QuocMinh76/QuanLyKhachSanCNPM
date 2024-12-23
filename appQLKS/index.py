@@ -236,7 +236,7 @@ def get_rooms():
     rooms = dao.get_rooms_by_type(room_type_id)
 
     room_list = []
-    for room, type_name in rooms:
+    for room, type_name, max_cust in rooms:
         room_data = {
             "id": room.id,
             "name": room.name,
@@ -245,7 +245,8 @@ def get_rooms():
             "status": "Available" if room.available else "Unavailable",
             "price": room.roomPrice,
             "type": room.roomType_id,
-            "type_name": type_name
+            "type_name": type_name,
+            "max_cust": max_cust
         }
         room_list.append(room_data)
 
@@ -305,6 +306,35 @@ def customer_orders():
 @app.route("/customer_order_details")
 def customer_order_details():
     return render_template('customer_order_details.html')
+
+
+@app.route('/api/update_rooms_status', methods=['POST'])
+def update_rooms_status():
+    data = request.get_json()
+    print('Dữ liệu nhận được từ client:', data)
+
+    if 'rooms' in data:
+        rooms = data['rooms']
+        success = True
+
+        # Duyệt qua các phòng đã đặt và cập nhật trạng thái trong cơ sở dữ liệu
+        for room in rooms:
+            room_id = room.get('id')
+            print(f'Cập nhật trạng thái cho phòng ID {room_id}')
+            # Giả sử bạn có phương thức `update_room_status` để cập nhật trạng thái phòng trong DB
+            success = dao.update_room_status(room_id, available=False)
+            if not success:
+                break  # Nếu có lỗi trong quá trình cập nhật, thoát vòng lặp
+
+        if success:
+            print('Cập nhật trạng thái phòng thành công.')
+            return jsonify({'success': True})
+        else:
+            print('Lỗi trong quá trình cập nhật trạng thái phòng.')
+            return jsonify({'success': False, 'message': 'Không thể cập nhật trạng thái phòng'})
+    else:
+        print('Dữ liệu không hợp lệ:', data)
+        return jsonify({'success': False, 'message': 'Dữ liệu không hợp lệ'})
 
 
 @login.user_loader
