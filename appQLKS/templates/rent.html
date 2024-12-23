@@ -4,7 +4,13 @@
 <body>
     <div class="container mt-5">
         <h2 class="text-center mb-4">LẬP PHIẾU THUÊ PHÒNG</h2>
-        <form method="post" action="{{ url_for('process_booking') }}">
+        <form method="post" action="{{ url_for('process_renting') }}">
+
+            <input type="hidden" value="{{ order.id }}" name="id">
+            <input type="hidden" name="checkin_date" value="{{ order.checkin_date }}">
+            <input type="hidden" name="checkout_date" value="{{ order.checkout_date }}">
+            <input type="hidden" name="cust_room" id="cust_room">
+
             <h5 class="mb-3 mt-4">Thông tin cơ bản:</h5>
             <table class="table table-bordered text-center">
                 <tbody>

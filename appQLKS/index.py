@@ -1,11 +1,11 @@
 import math
-
 import pytz
 from flask import render_template, request, redirect, session, jsonify
 from appQLKS import app, login
 import dao
 from flask_login import login_user, logout_user, login_required
 from appQLKS.models import UserRoles
+import json
 
 
 @app.route("/")
@@ -158,12 +158,27 @@ def rent(order_id):
 @app.route('/process_renting', methods=['POST'])
 @login_required
 def process_renting():
-    pass
+    order_id = request.form.get('id')
+    checkin_date = request.form.get('checkin_date')
+    checkout_date = request.form.get('checkout_date')
 
+    room_cust_data = request.form.get('cust_room')
 
-@app.route("/thanhtoan")
-def thanh_toan():
-    return render_template('thanhtoan.html')
+    try:
+        dao.process_renting_order(
+            order_id=order_id,
+            checkin=checkin_date,
+            checkout=checkout_date,
+            rooms_custs=room_cust_data
+        )
+    except ValueError as ve:
+        print(f"Validation Error: {ve}")
+        return "Invalid input data", 400
+    except Exception as e:
+        print(f"Error: {e}")
+        return "An error occurred while processing the renting order", 500
+
+    return redirect('/')
 
 
 @app.route('/find_order')
@@ -223,31 +238,27 @@ def get_customer_types():
     response.headers['Content-Type'] = 'application/json'  # Set content type explicitly
     return response
 
+
 @app.route("/find_rent")
 def find_rent():
     return render_template('find_rent.html')
+
 
 @app.route("/invoice")
 def invoice():
     return render_template('invoice.html')
 
+
 @app.route("/customer_orders")
 def customer_orders():
     return render_template('customer_orders.html')
+
 
 @app.route("/customer_order_details")
 def customer_order_details():
     return render_template('customer_order_details.html')
 
-@app.route('/find_order')
-def find_booking_order():
-    kw = request.args.get('kw')
 
-    orders = dao.load_booking_orders(kw)
-
-    return render_template('find_booking_order.html', orders=orders)
-
-  
 @login.user_loader
 def load_user(user_id):
     return dao.get_user_by_id(user_id)
