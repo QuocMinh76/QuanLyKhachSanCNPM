@@ -13,7 +13,7 @@
         {% if orders %}
         <table class="table table-bordered text-center">
             <tr>
-                <td>Mã phiếu thuê phòng</td>
+                <td>Mã phiếu</td>
                 <td>Người đặt đơn</td>
                 <td>Ngày nhận phòng</td>
                 <td>Ngày trả phòng</td>
@@ -22,17 +22,17 @@
             {% for o in orders %}
             <tr>
                 <td>{{ o.id }}</td>
-                <td>{{ o.user.name }}</td>
-                <td>{{ o.checkin_date }}</td>
-                <td>{{ o.checkout_date }}</td>
+                <td>{{ o.booking_order.user.name }}</td>
+                <td>{{ o.checkin_date.strftime('%d/%m/%Y') }}</td>
+                <td>{{ o.checkout_date.strftime('%d/%m/%Y') }}</td>
                 <td>
-                    <button class="btn btn-pink2">Thanh toán</button>
+                    <a href="/invoice/{{ o.id }}" class="btn btn-pink2 btn-sm">Thanh toán</a>
                 </td>
             </tr>
             {% endfor %}
         </table>
         {% else %}
-        <div class="alert alert-info mt-4">Không tìm thấy đơn đặt phòng!</div>
+        <div class="alert alert-info mt-4">Không tìm thấy phiếu thuê phòng!</div>
         {% endif %}
 </div>
 {% endblock %}

@@ -12,11 +12,11 @@
         <div class="row">
             <div class="col">
                 <label for="checkin" class="form-label"><strong>Ngày nhận phòng</strong></label>
-                <input type="date" id="checkin" class="form-control"/>
+                <input type="date" id="checkin" value="{{ date.strftime('%Y-%m-%d') }}" class="form-control"/>
             </div>
             <div class="col">
                 <label for="checkout" class="form-label"><strong>Ngày trả phòng</strong></label>
-                <input type="date" id="checkout" class="form-control"/>
+                <input type="date" id="checkout" value="{{ date.strftime('%Y-%m-%d') }}" class="form-control"/>
             </div>
         </div>
         <br/>
