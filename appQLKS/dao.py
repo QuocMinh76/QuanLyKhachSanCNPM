@@ -328,6 +328,12 @@ def get_renting_order_details(renting_order_id):
 
     return renting_order
 
+def get_room_cust_info_of_renting_order(renting_order_id):
+    results = RentingDetails.query.filter(RentingDetails.rentingOrder_id == renting_order_id).all()
+    if not results:
+        return {}
+    response = [{"cust_id": record.cust_id, "room_id": record.room_id} for record in results]
+    return response
 
 def get_user_by_id(user_id):
     return User.query.get(user_id)
@@ -340,6 +346,8 @@ def get_room_type_by_id(room_type_id):
 def get_booking_order_by_id(booking_order_id):
     return BookingOrder.query.get(booking_order_id)
 
+def get_renting_order_by_id(renting_order_id):
+    return RentingOrder.query.get(renting_order_id)
 
 def get_renting_order_by_id(renting_order_id):
     return RentingOrder.query.get(renting_order_id)
