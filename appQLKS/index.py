@@ -11,13 +11,13 @@ from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfbase.cidfonts import UnicodeCIDFont
 from reportlab.pdfgen import canvas
 from reportlab.platypus import Table, TableStyle, SimpleDocTemplate, Paragraph
-
-from appQLKS import app, login
+from flask import render_template, request, redirect, session, jsonify
+from appQLKS import app, login, db
 import dao
 from flask_login import login_user, logout_user, login_required, current_user
-from appQLKS.models import UserRoles
-from io import BytesIO
+from appQLKS.models import UserRoles, Bill, RentingDetails, RentingOrder, RoomType
 from datetime import datetime
+from io import BytesIO
 
 @app.route("/")
 def index():
@@ -201,11 +201,35 @@ def invoice(order_id):
     num_room = len(booking_order.booking_room_info)
     num_cust = len(booking_order.booking_cust_info)
 
-    renting_details = renting_order.details
+    renting_details = dao.get_renting_order_room_details(order_id)
     print(renting_details)
 
+    total_price = dao.calculate_total_price_for_renting_order(order_id)
+
     return render_template('invoice.html', b_order=booking_order, r_order=renting_order,
-                           details=renting_details, num_cust=num_cust, num_room=num_room)
+                           details=renting_details, num_cust=num_cust, num_room=num_room, total_price=total_price)
+
+
+@app.route('/process_invoice', methods=['POST'])
+@login_required
+def process_invoice():
+    order_id = request.form.get('order_id')
+    checkin_date = request.form.get('checkin_date')
+    checkout_date = request.form.get('checkout_date')
+    total_domestic_cust = int(request.form.get('total_domestic_cust'))
+    total_foreign_cust = int(request.form.get('total_foreign_cust'))
+    total_price = request.form.get('total_price')
+
+    dao.process_bill(
+        order_id=order_id,
+        checkin=checkin_date,
+        checkout=checkout_date,
+        total_domestic_cust=total_domestic_cust,
+        total_foreign_cust=total_foreign_cust,
+        total_price=total_price
+    )
+
+    return redirect('/')
 
 
 @app.route('/find_order')
@@ -223,7 +247,7 @@ def get_rooms():
     rooms = dao.get_rooms_by_type(room_type_id)
 
     room_list = []
-    for room, type_name in rooms:
+    for room, type_name, max_cust in rooms:
         room_data = {
             "id": room.id,
             "name": room.name,
@@ -232,7 +256,8 @@ def get_rooms():
             "status": "Available" if room.available else "Unavailable",
             "price": room.roomPrice,
             "type": room.roomType_id,
-            "type_name": type_name
+            "type_name": type_name,
+            "max_cust": max_cust
         }
         room_list.append(room_data)
 
@@ -294,11 +319,44 @@ def customer_order_details():
     return render_template('customer_order_details.html')
 
 
-@login.user_loader
-def load_user(user_id):
-    return dao.get_user_by_id(user_id)
+@app.route('/api/update_rooms_status', methods=['POST'])
+def update_rooms_status():
+    data = request.get_json()
+    print('Dữ liệu nhận được từ client:', data)
 
+    if 'rooms' in data:
+        rooms = data['rooms']
+        success = True
 
+        # Duyệt qua các phòng đã đặt và cập nhật trạng thái trong cơ sở dữ liệu
+        for room in rooms:
+            room_id = room.get('id')
+            print(f'Cập nhật trạng thái cho phòng ID {room_id}')
+            # Giả sử bạn có phương thức `update_room_status` để cập nhật trạng thái phòng trong DB
+            success = dao.update_room_status(room_id, available=False)
+            if not success:
+                break  # Nếu có lỗi trong quá trình cập nhật, thoát vòng lặp
+
+        if success:
+            print('Cập nhật trạng thái phòng thành công.')
+            return jsonify({'success': True})
+        else:
+            print('Lỗi trong quá trình cập nhật trạng thái phòng.')
+            return jsonify({'success': False, 'message': 'Không thể cập nhật trạng thái phòng'})
+    else:
+        print('Dữ liệu không hợp lệ:', data)
+        return jsonify({'success': False, 'message': 'Dữ liệu không hợp lệ'})
+
+@app.route('/api/monthly_statistics', methods=['GET'])
+def get_monthly_statistics():
+    month = request.args.get('month')
+    if not month:
+        return jsonify({'error': 'Month parameter is required'}), 400
+
+    statistics = dao.get_monthly_statistics(month)
+    return jsonify(statistics)
+
+  
 # Đăng ký font hỗ trợ Unicode (DejaVuSans)
 font_path = os.path.join('static', 'fonts', 'DejaVuSerif.ttf')
 pdfmetrics.registerFont(TTFont('DejaVuSerif', font_path))
@@ -416,6 +474,19 @@ def export_pdf(order_id):
 
     # Trả về file PDF
     return send_file(buffer, as_attachment=True, download_name=f"phieu_thue_{order.id}.pdf", mimetype='application/pdf')
+
+  
+@login.user_loader
+def load_user(user_id):
+    return dao.get_user_by_id(user_id)
+  
+
+@app.context_processor
+def common_response_data():
+    return {
+        'user_roles': UserRoles
+    }
+
 
 if __name__ == '__main__':
     with app.app_context():

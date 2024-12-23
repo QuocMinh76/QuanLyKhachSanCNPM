@@ -1,10 +1,13 @@
+from datetime import datetime
+
+from dateutil.relativedelta import relativedelta
 from flask_login import current_user
 from appQLKS.models import (User, Room, RoomType, CustomerType, Customer, BookingOrder, BookingRoomInfo,
                             BookingCustInfo, Comment, RentingOrder, RentingDetails, Bill)
 from appQLKS import app, db
 import hashlib
 import cloudinary.uploader
-from sqlalchemy import or_, func
+from sqlalchemy import or_, func, case
 import json
 from sqlalchemy.orm import joinedload, aliased
 from collections import defaultdict
@@ -19,7 +22,7 @@ def get_all_rooms():
 
 
 def load_rooms(room_type_id=None, kw=None, page=1):
-    rooms = Room.query
+    rooms = Room.query.filter(Room.available.__eq__(True))
 
     if kw:
         rooms = rooms.filter(Room.name.contains(kw))
@@ -160,6 +163,14 @@ def add_renting_order(order_id, checkin, checkout, rooms_custs: list):
         raise e
 
 
+def add_bill(order_id, checkin, checkout, domestic_cust_num, foreign_cust_num, total_price):
+    bill = Bill(id=order_id, checkin_date=checkin, checkout_date=checkout, domesticCust=domestic_cust_num,
+                foreignCust=foreign_cust_num, finalPrice=total_price)
+
+    db.session.add(bill)
+    db.session.commit()
+
+
 def add_user(name, username, password, avatar=None):
     password = str(hashlib.md5(password.strip().encode('utf-8')).hexdigest())
 
@@ -241,6 +252,27 @@ def process_renting_order(order_id, checkin, checkout, rooms_custs):
         raise Exception(f"Error during booking process: {e}")
 
 
+def process_bill(order_id, checkin, checkout, total_domestic_cust, total_foreign_cust, total_price):
+    try:
+        renting_order = get_renting_order_by_id(order_id)
+
+        add_bill(
+            order_id=renting_order.id,
+            checkin=checkin,
+            checkout=checkout,
+            domestic_cust_num=total_domestic_cust,
+            foreign_cust_num=total_foreign_cust,
+            total_price=total_price
+        )
+
+        update_renting_order_state(renting_order)
+
+    except Exception as e:
+        # If something goes wrong, roll back the transaction
+        db.session.rollback()
+        raise Exception(f"Error during booking process: {e}")
+
+
 def auth_user(username, password, role=None):
     password = str(hashlib.md5(password.strip().encode('utf-8')).hexdigest())
 
@@ -256,7 +288,7 @@ def auth_user(username, password, role=None):
 # Lấy danh sách phòng theo loại phòng
 # This function get all AVAILABLE rooms of a room type
 def get_rooms_by_type(room_type_id=None):
-    rooms = (db.session.query(Room, RoomType.name.label('type_name'))
+    rooms = (db.session.query(Room, RoomType.name.label('type_name'), RoomType.maxCust.label('max_cust'))
              .join(RoomType, Room.roomType_id.__eq__(RoomType.id)))
 
     if room_type_id:
@@ -317,6 +349,10 @@ def get_booking_order_by_id(booking_order_id):
 def get_renting_order_by_id(renting_order_id):
     return RentingOrder.query.get(renting_order_id)
 
+def get_renting_order_by_id(renting_order_id):
+    return RentingOrder.query.get(renting_order_id)
+
+
 def get_room_by_id(room_id):
     return Room.query.get(room_id)
 
@@ -337,14 +373,38 @@ def update_renting_order_state(renting_order):
     db.session.commit()
 
 
-def calculate_price_of_room(room_id, customers: list):
-    room = get_room_by_id(room_id)
+def calculate_room_final_price(renting_order_id, room_id):
+    # Fetch room details, including its type
+    room = db.session.query(Room).filter(Room.id == room_id).first()
+    if not room:
+        raise ValueError("Room not found.")
 
-    pass
+    # Get base price and maxCust from the room's type
+    room_base_price = room.roomType.basePrice
+    max_cust = room.roomType.maxCust
+    over_max_rate = room.roomType.overMaxRate
 
+    # Count customers in the room and group by customer type
+    customer_counts = count_customers_in_room(renting_order_id, room_id)
 
-def calculate_total_price():
-    pass
+    # Calculate total number of customers in the room
+    total_customers = sum(data['cust_num'] for data in customer_counts.values())
+
+    # Start with the base price
+    final_price = room_base_price
+
+    # Check if any customer type has a rate > 1 (foreign customers)
+    max_rate = max(data['cust_rate'] for data in customer_counts.values()) if customer_counts else 1
+    final_price *= max_rate
+
+    if total_customers == 0:
+        # No customers, treat as `maxCust - 1`
+        pass  # Price remains the base price
+    elif total_customers >= max_cust:
+        # Apply overMaxRate surcharge if customers reach maxCust
+        final_price += room_base_price * over_max_rate
+
+    return final_price
 
 
 def count_customers_in_room(renting_order_id, room_id):
@@ -378,7 +438,137 @@ def count_customers_in_room(renting_order_id, room_id):
     return dict(result)
 
 
+def calculate_total_price_for_renting_order(renting_order_id):
+    # Get unique room IDs associated with the renting order
+    unique_room_ids = db.session.query(
+        RentingDetails.room_id
+    ).filter(
+        RentingDetails.rentingOrder_id == renting_order_id
+    ).distinct().all()
+
+    # Convert the list of tuples to a flat list
+    unique_room_ids = [room_id[0] for room_id in unique_room_ids]
+
+    if not unique_room_ids:
+        raise ValueError("No rooms found for the given renting order.")
+
+    # Initialize total price
+    total_price = 0.0
+
+    # Iterate through each unique room in the renting order
+    for room_id in unique_room_ids:
+        room_price = calculate_room_final_price(renting_order_id, room_id)
+        total_price += room_price
+
+    return total_price
+
+
+def get_renting_order_room_details(renting_order_id):
+    # Query to get room details and calculate customer counts with conditional aggregation
+    room_details_query = db.session.query(
+        Room.id.label('room_id'),
+        Room.name.label('room_name'),
+        Room.roomPrice.label('room_base_price'),
+
+        # Conditional aggregation for default customers ('Nội địa')
+        func.count(
+            case(
+                (CustomerType.name == 'Nội địa', 1),  # Condition for 'Nội địa'
+                else_=None  # Exclude non-'Nội địa' customers
+            )
+        ).label('num_of_default_cust'),
+
+        # Conditional aggregation for other customers (not 'Nội địa')
+        func.count(
+            case(
+                (CustomerType.name != 'Nội địa', 1),  # Condition for not 'Nội địa'
+                else_=None  # Exclude 'Nội địa' customers
+            )
+        ).label('num_of_other_cust')
+    ).join(
+        RentingDetails, RentingDetails.room_id == Room.id
+    ).join(
+        Customer, Customer.id == RentingDetails.cust_id
+    ).join(
+        CustomerType, CustomerType.id == Customer.custType_id
+    ).filter(
+        RentingDetails.rentingOrder_id == renting_order_id
+    ).group_by(
+        Room.id, Room.name, Room.roomPrice
+    ).all()
+
+    # Initialize the result list
+    result = []
+
+    for room in room_details_query:
+        # Calculate room final price using the previous function
+        room_final_price = calculate_room_final_price(renting_order_id, room.room_id)
+
+        # Append room details to the result
+        result.append({
+            'room_id': room.room_id,
+            'room_name': room.room_name,
+            'num_of_default_cust': room.num_of_default_cust,
+            'num_of_other_cust': room.num_of_other_cust,
+            'room_base_price': room.room_base_price,
+            'room_final_price': room_final_price
+        })
+
+    return result
+
+  
+def update_room_status(room_id, available):
+    try:
+        room = db.session.query(Room).filter_by(id=room_id).first()
+        if room:
+            print(f'Cập nhật trạng thái phòng ID {room_id} thành {available}')
+            room.available = available
+            db.session.commit()
+            return True
+        print(f'Không tìm thấy phòng với ID {room_id}')
+        return False
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error updating room status: {e}")
+        return False
+
+def get_monthly_statistics(month):
+    # Phân tích dữ liệu doanh thu và tần suất
+    start_date = datetime.strptime(month, '%Y-%m')
+    end_date = start_date + relativedelta(months=1)
+
+    # Thống kê doanh thu
+    revenue_query = (
+        db.session.query(
+            RoomType.name.label('room_type'),
+            func.sum(Bill.finalPrice).label('total_revenue'),
+            func.count(Bill.id).label('rental_count')
+        )
+        .join(RentingOrder, RentingOrder.id == Bill.id)
+        .join(BookingOrder, BookingOrder.id == RentingOrder.id)
+        .join(BookingRoomInfo, BookingRoomInfo.bookingOrder_id == BookingOrder.id)
+        .join(Room, Room.id == BookingRoomInfo.room_id)
+        .join(RoomType, RoomType.id == Room.roomType_id)
+        .filter(Bill.created_date >= start_date, Bill.created_date < end_date)
+        .group_by(RoomType.name)
+    ).all()
+
+    # Chuyển đổi kết quả thành dictionary
+    revenue_data = [
+        {
+            'room_type': r.room_type,
+            'total_revenue': r.total_revenue,
+            'rental_count': r.rental_count,
+            'rate': (r.rental_count / sum(x.rental_count for x in revenue_query)) * 100
+        }
+        for r in revenue_query
+    ]
+
+    return {'revenue_data': revenue_data}
+
+
 if __name__ == '__main__':
     with app.app_context():
         res = count_customers_in_room(4, 9)
         print(res)
+
