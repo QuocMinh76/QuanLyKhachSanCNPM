@@ -48,7 +48,6 @@ class CustomerType(db.Model):
 
 class Customer(db.Model):
     id = Column(Integer, primary_key=True, autoincrement=True)
-    cust_active = Column(Boolean, default=True)
     cust_name = Column(String(100), nullable=False)
     custIdentity_num = Column(String(100), nullable=False)
     custAddress = Column(String(100), nullable=False)
