@@ -1,10 +1,10 @@
 import math
 import pytz
 from flask import render_template, request, redirect, session, jsonify
-from appQLKS import app, login
+from appQLKS import app, login, db
 import dao
 from flask_login import login_user, logout_user, login_required
-from appQLKS.models import UserRoles
+from appQLKS.models import UserRoles, Bill, RentingDetails, RentingOrder, RoomType
 from datetime import datetime
 
 
@@ -335,6 +335,15 @@ def update_rooms_status():
     else:
         print('Dữ liệu không hợp lệ:', data)
         return jsonify({'success': False, 'message': 'Dữ liệu không hợp lệ'})
+
+@app.route('/api/monthly_statistics', methods=['GET'])
+def get_monthly_statistics():
+    month = request.args.get('month')
+    if not month:
+        return jsonify({'error': 'Month parameter is required'}), 400
+
+    statistics = dao.get_monthly_statistics(month)
+    return jsonify(statistics)
 
 
 @login.user_loader
