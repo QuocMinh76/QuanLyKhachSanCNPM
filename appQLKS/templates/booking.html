@@ -1,37 +1,22 @@
 {% extends 'layout/base.html' %}
 
 {% block content %}
-<style>
-    .rounded-border {
-    border: 1px solid #ddd; /* Màu và độ dày của viền */
-    border-radius: 12px; /* Bo tròn các góc */
-    background-color: white; /* Màu nền nhạt */
-    padding: 5px; /* Khoảng cách bên trong */
-    margin-bottom: 10px; /* Khoảng cách phía dưới */
-    width: 100%;
-    }
-    .form-check-inline {
-    margin-right: 5px;
-    margin-bottom: 5px;
-    }
-}
-</style>
 <div class="container">
     <h2 class="text-center mt-4">ĐẶT PHÒNG</h2>
     <form>
         <div>
             <label for="name" class="form-label"><strong>Tên người đặt</strong></label>
-            <input type="text" id="name" class="form-control"/>
+            <input type="text" id="name" class="form-control" value="{{ current_user.name }}" readonly/>
         </div>
         <br/>
         <div class="row">
             <div class="col">
                 <label for="checkin" class="form-label"><strong>Ngày nhận phòng</strong></label>
-                <input type="date" id="checkin" class="form-control"/>
+                <input type="date" id="checkin" value="{{ date.strftime('%Y-%m-%d') }}" class="form-control"/>
             </div>
             <div class="col">
                 <label for="checkout" class="form-label"><strong>Ngày trả phòng</strong></label>
-                <input type="date" id="checkout" class="form-control"/>
+                <input type="date" id="checkout" value="{{ date.strftime('%Y-%m-%d') }}" class="form-control"/>
             </div>
         </div>
         <br/>

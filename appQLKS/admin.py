@@ -89,11 +89,11 @@ class BillView(ModelView):
 
 
 class CustomerView(ModelView):
-    column_list = ['id', 'cust_name', 'custIdentity_num', 'cust_active', 'custAddress', 'custType_id']
+    column_list = ['id', 'cust_name', 'custIdentity_num', 'custAddress', 'custType_id']
     column_searchable_list = ['cust_name', 'custIdentity_num']
     column_filters = ['cust_name', 'custType_id', 'custAddress']
     column_labels = dict(id='Mã khách hàng', cust_name='Tên khách hàng', custIdentity_num='CMND',
-                         cust_active='Trạng thái', custAddress='Địa chỉ', custType_id='Loại khách hàng')
+                         custAddress='Địa chỉ', custType_id='Loại khách hàng')
     can_view_details = True
 
 

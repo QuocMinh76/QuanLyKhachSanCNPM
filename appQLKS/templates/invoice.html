@@ -8,15 +8,15 @@
             <hr style="border: 1px solid black;"/>
             <div class="row">
                 <div class="col-md-6">
-                    <p><strong>Mã Đơn: </strong>#</p>
-                    <p><strong>Tên Người Đặt: </strong>#</p>
-                    <p><strong>Ngày Nhận Phòng: </strong>#</p>
-                    <p><strong>Ngày Trả Phòng: </strong>#</p>
+                    <p><strong>Mã Đơn: </strong>{{ b_order.id }}</p>
+                    <p><strong>Tên Người Đặt: </strong>{{ b_order.user.name }}</p>
+                    <p><strong>Ngày Nhận Phòng: </strong>{{ b_order.checkin_date.strftime('%d/%m/%Y') }}</p>
+                    <p><strong>Ngày Trả Phòng: </strong>{{ b_order.checkout_date.strftime('%d/%m/%Y') }}</p>
                 </div>
                 <div class="col-md-6">
-                    <p><strong>Ngày Đặt Phòng: </strong>#</p>
-                    <p><strong>Số Lượng Khách: </strong>#</p>
-                    <p><strong>Số Lượng Phòng: </strong>#</p>
+                    <p><strong>Ngày Lập Phiếu: </strong>{{ r_order.created_date.strftime('%d/%m/%Y') }}</p>
+                    <p><strong>Số Lượng Khách: </strong> {{ num_cust }}</p>
+                    <p><strong>Số Lượng Phòng: </strong>{{ num_room }}</p>
                     <p><strong>Tổng Tiền Của Đơn: </strong>#</p>
                 </div>
             </div>
@@ -28,12 +28,13 @@
             <table class="table table-hover table-bordered text-center">
                 <tr>
                     <th scope="col">Phòng</th>
-                    <th scope="col">Khách Nội Địa</th>
-                    <th scope="col">Khách Quốc Tế</th>
+                    <th scope="col">Số khách Nội Địa</th>
+                    <th scope="col">Số khách Quốc Tế</th>
                     <th scope="col">Đơn Giá Phòng</th>
                     <th scope="col">Tổng Giá Phòng</th>
                 </tr>
                 <tbody>
+                {% for rd in details %}
                 <tr>
                     <td>DatVe</td>
                     <td>TenPhim</td>
@@ -41,6 +42,7 @@
                     <td>TenPhong</td>
                     <td>ToString("dd/MM/yyyy")</td>
                 </tr>
+                {% endfor %}
                 </tbody>
             </table>
         </div>
