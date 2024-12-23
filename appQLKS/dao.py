@@ -1,3 +1,6 @@
+from datetime import timedelta, datetime
+
+import pytz
 from flask_login import current_user
 from appQLKS.models import (User, Room, RoomType, CustomerType, Customer, BookingOrder, BookingRoomInfo,
                             BookingCustInfo, Comment, RentingOrder, RentingDetails, Bill)
@@ -100,6 +103,8 @@ def add_comment(content, room_id):
 
 def add_booking_order(user_id, checkin_date, checkout_date, rooms: list, customers: list):
     try:
+        deadline_date = app.config['BOOKING_DEADLINE_DAYS']
+
         # Create the booking order
         booking_order = BookingOrder(
             user_id=user_id,
@@ -108,6 +113,9 @@ def add_booking_order(user_id, checkin_date, checkout_date, rooms: list, custome
         )
         db.session.add(booking_order)
         db.session.flush()  # Flush to generate the ID for the booking order
+
+        if booking_order.created_date:  # Assuming created_date is auto-set
+            booking_order.deadline_date = booking_order.created_date + timedelta(days=deadline_date)
 
         # Add room information
         for room_id in rooms:
@@ -505,7 +513,7 @@ def get_renting_order_room_details(renting_order_id):
 
     return result
 
-  
+
 def update_room_status(room_id, available):
     try:
         room = db.session.query(Room).filter_by(id=room_id).first()
@@ -522,9 +530,22 @@ def update_room_status(room_id, available):
         return False
 
 
+def get_expired_booking_orders():
+    with db.session.begin():
+        now = datetime.utcnow().replace(tzinfo=pytz.utc).astimezone(pytz.timezone('Asia/Ho_Chi_Minh'))
+        return BookingOrder.query.filter(BookingOrder.deadline_date < now,
+                                         BookingOrder.is_cancelled.__eq__(False)).all()
+
+
+def update_booking_order_status_and_rooms(order):
+    order.is_cancelled = True
+    for booking_room in order.booking_room_info:
+        room = booking_room.room
+        room.available = True
+    db.session.commit()
+
 
 if __name__ == '__main__':
     with app.app_context():
         res = count_customers_in_room(4, 9)
         print(res)
-

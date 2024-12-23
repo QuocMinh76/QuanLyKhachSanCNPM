@@ -64,7 +64,9 @@ class BookingOrder(db.Model):
     checkout_date = Column(DateTime, nullable=False)
     created_date = Column(DateTime, default=lambda: datetime.utcnow()
                           .replace(tzinfo=pytz.utc).astimezone(pytz.timezone('Asia/Ho_Chi_Minh')))
+    deadline_date = Column(DateTime)
     is_processed = Column(Boolean, default=False)
+    is_cancelled = Column(Boolean, default=False)
 
     booking_room_info = relationship('BookingRoomInfo', back_populates='booking_order', lazy=True)
     booking_cust_info = relationship('BookingCustInfo', back_populates='booking_order', lazy=True)
