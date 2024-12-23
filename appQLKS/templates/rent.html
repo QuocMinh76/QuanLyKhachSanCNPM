@@ -51,7 +51,7 @@
                 </thead>
                 <tbody>
                     {% for c in customers %}
-                    <tr>
+                    <tr data-customer-count="{{ c.customer_count }}">
                         <td>{{ c.cust_name }}</td>
                         <td>{{ c.custType.name }}</td>
                         <td>{{ c.custIdentity_num }}</td>
@@ -72,12 +72,11 @@
             </table>
             <div class="d-flex justify-content-end">
                 <button id="confirmButton" type="submit" class="btn btn-success me-2">Xác nhận lập phiếu</button>
-                <button type="button" class="btn btn-secondary">Hủy</button>
+                <a href="/find_order" class="btn btn-secondary">Hủy</a>
             </div>
         </form>
     </div>
 
-    <!-- Include the updated JavaScript file -->
     <script src="{{ url_for('static', filename='js/rent.js') }}"></script>
 </body>
 {% endblock %}

@@ -90,10 +90,9 @@ class Bill(db.Model):
                 primary_key=True, unique=True)
     checkin_date = Column(DateTime, nullable=False)
     checkout_date = Column(DateTime, nullable=False)
-    totalCust = Column(Integer, nullable=False)
+    domesticCust = Column(Integer, nullable=False)
     foreignCust = Column(Integer, nullable=False)
-    basePrice = Column(Float, nullable=False)
-    extraCharge = Column(Float, default=0)
+    finalPrice = Column(Float, nullable=False)
     created_date = Column(DateTime, default=lambda: datetime.utcnow()
                           .replace(tzinfo=pytz.utc).astimezone(pytz.timezone('Asia/Ho_Chi_Minh')))
 
