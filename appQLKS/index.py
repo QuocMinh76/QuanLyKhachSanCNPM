@@ -190,11 +190,35 @@ def invoice(order_id):
     num_room = len(booking_order.booking_room_info)
     num_cust = len(booking_order.booking_cust_info)
 
-    renting_details = renting_order.details
+    renting_details = dao.get_renting_order_room_details(order_id)
     print(renting_details)
 
+    total_price = dao.calculate_total_price_for_renting_order(order_id)
+
     return render_template('invoice.html', b_order=booking_order, r_order=renting_order,
-                           details=renting_details, num_cust=num_cust, num_room=num_room)
+                           details=renting_details, num_cust=num_cust, num_room=num_room, total_price=total_price)
+
+
+@app.route('/process_invoice', methods=['POST'])
+@login_required
+def process_invoice():
+    order_id = request.form.get('order_id')
+    checkin_date = request.form.get('checkin_date')
+    checkout_date = request.form.get('checkout_date')
+    total_domestic_cust = int(request.form.get('total_domestic_cust'))
+    total_foreign_cust = int(request.form.get('total_foreign_cust'))
+    total_price = request.form.get('total_price')
+
+    dao.process_bill(
+        order_id=order_id,
+        checkin=checkin_date,
+        checkout=checkout_date,
+        total_domestic_cust=total_domestic_cust,
+        total_foreign_cust=total_foreign_cust,
+        total_price=total_price
+    )
+
+    return redirect('/')
 
 
 @app.route('/find_order')
@@ -286,6 +310,13 @@ def customer_order_details():
 @login.user_loader
 def load_user(user_id):
     return dao.get_user_by_id(user_id)
+
+
+@app.context_processor
+def common_response_data():
+    return {
+        'user_roles': UserRoles
+    }
 
 
 if __name__ == '__main__':
