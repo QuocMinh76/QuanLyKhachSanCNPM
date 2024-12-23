@@ -53,53 +53,53 @@ document.addEventListener("DOMContentLoaded", function () {
     const confirmButton = document.getElementById("confirmButton");
     const customerRoomField = document.getElementById("cust_room"); // Reuse 'rooms' field for simplicity
 
-confirmButton.addEventListener("click", function (event) {
-    // Ensure the hidden field exists
-    if (!customerRoomField) {
-        console.error("Hidden input field for customer-room mapping is missing.");
-        return;
-    }
-
-    // Collect customer-to-room mapping
-    const customerRoomMapping = [];
-
-    const roomOptions = document.querySelectorAll("select[name^='room_select_']");
-    roomOptions.forEach(select => {
-        const customerId = select.name.replace("room_select_", "");
-        const roomId = select.value;
-
-        if (roomId) {
-            customerRoomMapping.push({
-                customerId: customerId,
-                roomId: roomId
-            });
+    confirmButton.addEventListener("click", function (event) {
+        // Ensure the hidden field exists
+        if (!customerRoomField) {
+            console.error("Hidden input field for customer-room mapping is missing.");
+            return;
         }
+
+        // Collect customer-to-room mapping
+        const customerRoomMapping = [];
+
+        const roomOptions = document.querySelectorAll("select[name^='room_select_']");
+        roomOptions.forEach(select => {
+            const customerId = select.name.replace("room_select_", "");
+            const roomId = select.value;
+
+            if (roomId) {
+                customerRoomMapping.push({
+                    customerId: customerId,
+                    roomId: roomId
+                });
+            }
+        });
+
+        // Debugging: Log the customer-room mapping
+        console.log("Customer-Room Mapping:", customerRoomMapping);
+
+        // Serialize and store in the hidden input
+        customerRoomField.value = JSON.stringify(customerRoomMapping);
+
+        // Debugging: Verify hidden field value
+        console.log("Hidden Field Value:", customerRoomField.value);
+
+        // Trường hợp confirmBookingButton đã bấm trước, thì xác nhận lại trạng thái phòng sau 30 giây
+        setTimeout(() => {
+            // Sau 30 giây, cần cập nhật lại trạng thái phòng
+            const bookingData = JSON.parse(localStorage.getItem('bookingData'));
+            if (bookingData && bookingData.selected_rooms) {
+                bookingData.selected_rooms.forEach(room => {
+                    if (room.status !== 'Unavailable') {
+                        room.status = 'Available'; // Đặt lại trạng thái phòng thành "Sẵn sàng"
+                    }
+                });
+                localStorage.setItem('bookingData', JSON.stringify(bookingData));
+                console.log('Trạng thái phòng đã được cập nhật lại sau 30 giây');
+            }
+        }, 5000); // 30 giây
     });
-
-    // Debugging: Log the customer-room mapping
-    console.log("Customer-Room Mapping:", customerRoomMapping);
-
-    // Serialize and store in the hidden input
-    customerRoomField.value = JSON.stringify(customerRoomMapping);
-
-    // Debugging: Verify hidden field value
-    console.log("Hidden Field Value:", customerRoomField.value);
-
-    // Trường hợp confirmBookingButton đã bấm trước, thì xác nhận lại trạng thái phòng sau 30 giây
-    setTimeout(() => {
-        // Sau 30 giây, cần cập nhật lại trạng thái phòng
-        const bookingData = JSON.parse(localStorage.getItem('bookingData'));
-        if (bookingData && bookingData.selected_rooms) {
-            bookingData.selected_rooms.forEach(room => {
-                if (room.status !== 'Unavailable') {
-                    room.status = 'Available'; // Đặt lại trạng thái phòng thành "Sẵn sàng"
-                }
-            });
-            localStorage.setItem('bookingData', JSON.stringify(bookingData));
-            console.log('Trạng thái phòng đã được cập nhật lại sau 30 giây');
-        }
-    }, 5000); // 30 giây
-});
 });
 
 // Mai xem lại cái qq dưới này

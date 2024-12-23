@@ -5,6 +5,9 @@ from flask_login import current_user, logout_user
 from flask import redirect, flash
 from appQLKS.models import (RoomType, Room, CustomerType, UserRoles, User,
                             BookingOrder, RentingOrder, Bill, Customer)
+import hashlib
+from flask import request
+import cloudinary.uploader
 
 
 class AuthenticatedView(ModelView):
@@ -57,6 +60,23 @@ class UserView(AuthenticatedView):
             flash('The admin user cannot be deleted.', 'error')
             return False
         return super().delete_model(model)
+
+    def on_model_change(self, form, model, is_created):
+        # Hash the password before saving
+        if form.password.data:
+            model.password = hashlib.md5(form.password.data.strip().encode('utf-8')).hexdigest()
+
+        # Upload avatar to Cloudinary if a file is provided
+        if 'avatar' in request.files and request.files['avatar'].filename:
+            avatar_file = request.files['avatar']
+            res = cloudinary.uploader.upload(avatar_file)
+            model.avatar = res.get("secure_url")
+        else:
+            # Set a default avatar if none is uploaded
+            if not model.avatar:
+                model.avatar = "https://res.cloudinary.com/dhhpxhskj/image/upload/v1734858820/default_avt_uy1yef.png"
+
+        super(UserView, self).on_model_change(form, model, is_created)
 
 
 class BookingOrderView(AuthenticatedView):
