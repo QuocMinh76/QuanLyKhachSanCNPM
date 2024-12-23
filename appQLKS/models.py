@@ -64,6 +64,7 @@ class BookingOrder(db.Model):
     checkout_date = Column(DateTime, nullable=False)
     created_date = Column(DateTime, default=lambda: datetime.utcnow()
                           .replace(tzinfo=pytz.utc).astimezone(pytz.timezone('Asia/Ho_Chi_Minh')))
+    is_processed = Column(Boolean, default=False)
 
     booking_room_info = relationship('BookingRoomInfo', back_populates='booking_order', lazy=True)
     booking_cust_info = relationship('BookingCustInfo', back_populates='booking_order', lazy=True)
@@ -104,7 +105,7 @@ class RoomType(db.Model):
     name = Column(String(100), nullable=False)
     basePrice = Column(Float, default=0)
     maxCust = Column(Integer, default=3)
-    overMaxRate = Column(Float, default=1.25)
+    overMaxRate = Column(Float, default=0.25)
 
     rooms = relationship('Room', backref='roomType', lazy=True)
 

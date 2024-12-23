@@ -4,9 +4,10 @@ from appQLKS.models import (User, Room, RoomType, CustomerType, Customer, Bookin
 from appQLKS import app, db
 import hashlib
 import cloudinary.uploader
-from sqlalchemy import or_
+from sqlalchemy import or_, func
 import json
-from sqlalchemy.orm import joinedload
+from sqlalchemy.orm import joinedload, aliased
+from collections import defaultdict
 
 
 def load_room_types():
@@ -37,13 +38,31 @@ def load_booking_orders(kw=None):
     orders = BookingOrder.query
 
     if kw:
-        # Join with the User table and filter by user ID or name
         orders = orders.join(User).filter(
             or_(
-                BookingOrder.id == kw,  # Search by user ID
+                BookingOrder.id == kw,  # Search by order ID
                 User.name.ilike(f"%{kw}%")  # Search by username (case-insensitive)
             )
         )
+
+    orders = orders.filter(BookingOrder.is_processed.__eq__(False))
+
+    return orders.all()
+
+
+def load_renting_orders(kw=None):
+    orders = RentingOrder.query
+
+    if kw:
+        # Join with the User table and filter by user ID or name
+        orders = orders.join(User).filter(
+            or_(
+                RentingOrder.id == kw,  # Search by order ID
+                User.name.ilike(f"%{kw}%")  # Search by username (case-insensitive)
+            )
+        )
+
+    orders = orders.filter(RentingOrder.pay_status.__eq__(False))
 
     return orders.all()
 
@@ -210,6 +229,9 @@ def process_renting_order(order_id, checkin, checkout, rooms_custs):
     try:
         customer_room_mapping = json.loads(rooms_custs)
 
+        booking_order = get_booking_order_by_id(order_id)
+        update_booking_order_state(booking_order)
+
         add_renting_order(order_id=order_id, checkin=checkin, checkout=checkout,
                           rooms_custs=customer_room_mapping)
 
@@ -259,6 +281,22 @@ def get_booking_order_details(booking_order_id):
     ).filter(BookingOrder.id == booking_order_id).one_or_none()
 
 
+def get_renting_order_details(renting_order_id):
+    renting_order = db.session.query(RentingOrder) \
+        .options(
+        joinedload(RentingOrder.details)
+        .joinedload(RentingDetails.room),
+        joinedload(RentingOrder.details)
+        .joinedload(RentingDetails.customer),
+        joinedload(RentingOrder.booking_order),
+        joinedload(RentingOrder.bill)
+    ) \
+        .filter(RentingOrder.id == renting_order_id) \
+        .one_or_none()
+
+    return renting_order
+
+
 def get_user_by_id(user_id):
     return User.query.get(user_id)
 
@@ -279,23 +317,60 @@ def get_customer_by_id(cust_id):
     return Customer.query.get(cust_id)
 
 
-if __name__ == "__main__":
-    with app.app_context():
-        booking_order_id = 1  # Replace with the desired booking order ID
-        details = get_booking_order_details(booking_order_id)
+def update_booking_order_state(booking_order):
+    booking_order.is_processed = True
 
-        if details:
-            print("Booking Order Details:")
-            print(f"ID: {details.id}")
-            print(f"Check-in Date: {details.checkin_date}")
-            print(f"Check-out Date: {details.checkout_date}")
-            print("Room Info:")
-            for room_info in details.booking_room_info:
-                print(f"Room ID: {room_info.room_id}")
-            print("Customer Info:")
-            for cust_info in details.booking_cust_info:
-                print(f"Customer ID: {cust_info.cust_id}")
-            if details.renting_order:
-                print(f"Renting Order ID: {details.renting_order.id}")
-        else:
-            print("Booking order not found.")
+    db.session.commit()
+
+
+def update_renting_order_state(renting_order):
+    renting_order.pay_status = True
+
+    db.session.commit()
+
+
+def calculate_price_of_room(room_id, customers: list):
+    room = get_room_by_id(room_id)
+
+    pass
+
+
+def calculate_total_price():
+    pass
+
+
+def count_customers_in_room(renting_order_id, room_id):
+    # Alias for customer_type to access customer_type data in the join
+    customer_type_alias = aliased(CustomerType)
+
+    # Query to get customer type name, count of customers, and cust_rate
+    query = db.session.query(
+        customer_type_alias.name.label("customer_type"),
+        func.count(Customer.id).label("cust_num"),
+        customer_type_alias.cust_rate.label("cust_rate")
+    ).join(
+        RentingDetails, RentingDetails.cust_id == Customer.id
+    ).join(
+        customer_type_alias, customer_type_alias.id == Customer.custType_id
+    ).filter(
+        RentingDetails.rentingOrder_id == renting_order_id,
+        RentingDetails.room_id == room_id
+    ).group_by(
+        customer_type_alias.name, customer_type_alias.cust_rate
+    ).all()
+
+    # Format the result as a dictionary
+    result = defaultdict(dict)
+    for row in query:
+        result[row.customer_type] = {
+            "cust_num": row.cust_num,
+            "cust_rate": row.cust_rate
+        }
+
+    return dict(result)
+
+
+if __name__ == '__main__':
+    with app.app_context():
+        res = count_customers_in_room(4, 9)
+        print(res)

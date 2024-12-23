@@ -5,7 +5,7 @@ from appQLKS import app, login
 import dao
 from flask_login import login_user, logout_user, login_required
 from appQLKS.models import UserRoles
-import json
+from datetime import datetime
 
 
 @app.route("/")
@@ -96,9 +96,10 @@ def booking():
     # Lấy danh sách loại phòng
     room_types = dao.load_room_types()
     cust_types = dao.load_customer_type()
+    current_date = datetime.now()
 
     return render_template('booking.html', room_types=room_types,
-                           cust_types=cust_types)
+                           cust_types=cust_types, date=current_date)
 
 
 @app.route('/booking_confirm')
@@ -181,6 +182,21 @@ def process_renting():
     return redirect('/')
 
 
+@app.route("/invoice/<order_id>")
+def invoice(order_id):
+    booking_order = dao.get_booking_order_details(order_id)
+    renting_order = dao.get_renting_order_details(order_id)
+
+    num_room = len(booking_order.booking_room_info)
+    num_cust = len(booking_order.booking_cust_info)
+
+    renting_details = renting_order.details
+    print(renting_details)
+
+    return render_template('invoice.html', b_order=booking_order, r_order=renting_order,
+                           details=renting_details, num_cust=num_cust, num_room=num_room)
+
+
 @app.route('/find_order')
 def find_booking_order():
     kw = request.args.get('kw')
@@ -241,12 +257,20 @@ def get_customer_types():
 
 @app.route("/find_rent")
 def find_rent():
-    return render_template('find_rent.html')
+    kw = request.args.get('kw')
+
+    orders = dao.load_renting_orders(kw)
+
+    return render_template('find_rent.html', orders=orders)
 
 
-@app.route("/invoice")
-def invoice():
-    return render_template('invoice.html')
+@app.route("/find_rent_print")
+def find_rent_print():
+    kw = request.args.get('kw')
+
+    orders = dao.load_renting_orders(kw)
+
+    return render_template('find_rent_print.html', orders=orders)
 
 
 @app.route("/customer_orders")
