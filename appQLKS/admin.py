@@ -12,9 +12,10 @@ class AuthenticatedView(ModelView):
         return current_user.is_authenticated and current_user.user_role.__eq__(UserRoles.ADMIN)
 
 
-class RoomTypeView(ModelView):
+class RoomTypeView(AuthenticatedView):
     can_export = True
     column_list = ['id', 'name', 'basePrice', 'maxCust', 'overMaxRate', 'rooms']
+    form_excluded_columns = ['rooms']  # Exclude these fields
     column_searchable_list = ['name']
     column_filters = ['name']
     can_view_details = True
@@ -22,8 +23,9 @@ class RoomTypeView(ModelView):
                          maxCust='Khách tối đa', overMaxRate='Phí phụ thu', rooms='Các phòng')
 
 
-class RoomView(ModelView):
+class RoomView(AuthenticatedView):
     column_list = ['id', 'name', 'roomPrice', 'available', 'roomType_id']
+    form_excluded_columns = ['booking_room_info', 'renting_details', 'comments']  # Exclude these fields
     column_searchable_list = ['name']
     column_filters = ['name']
     can_view_details = True
@@ -31,17 +33,19 @@ class RoomView(ModelView):
                          available='Trạng thái', roomType_id='Loại phòng')
 
 
-class CustomerTypeView(ModelView):
+class CustomerTypeView(AuthenticatedView):
     column_list = ['id', 'name', 'cust_rate']
+    form_excluded_columns = ['customers']
     column_searchable_list = ['name']
     column_filters = ['name']
     can_view_details = True
     column_labels = dict(id='Mã loại khách hàng', name='Tên loại', cust_rate='Hệ số')
 
 
-class UserView(ModelView):
+class UserView(AuthenticatedView):
     column_list = ['id', 'name', 'username', 'active', 'user_role']
     column_searchable_list = ['name', 'username']
+    form_excluded_columns = ['orders', 'comments']
     column_filters = ['name', 'username', 'user_role']
     can_view_details = True
     column_labels = dict(id='Mã người dùng', name='Tên người dùng', username='Tên đăng nhập',
@@ -55,8 +59,9 @@ class UserView(ModelView):
         return super().delete_model(model)
 
 
-class BookingOrderView(ModelView):
+class BookingOrderView(AuthenticatedView):
     column_list = ['id', 'user_id', 'checkin_date', 'checkout_date', 'created_date']
+    form_excluded_columns = ['booking_room_info', 'booking_cust_info', 'renting_order']
     column_searchable_list = ['user_id', 'checkin_date', 'checkout_date', 'created_date']
     column_filters = ['user_id', 'checkin_date', 'checkout_date', 'created_date']
     can_view_details = True
@@ -65,32 +70,38 @@ class BookingOrderView(ModelView):
                          checkout_date='Ngày trả phòng', created_date='Ngày tạo đơn')
 
 
-class RentingOrderView(ModelView):
+class RentingOrderView(AuthenticatedView):
     column_list = ['bookingOrder_id', 'checkin_date', 'checkout_date', 'created_date']
+    form_excluded_columns = ['details', 'booking_order', 'bill']
     column_searchable_list = ['checkin_date', 'checkout_date', 'created_date']
     column_filters = ['checkin_date', 'checkout_date', 'created_date']
     can_view_details = True
     can_delete = False
+    can_create = False
+    can_edit = False
     column_labels = dict(bookingOrder_id='Mã phiếu thuê', checkin_date='Ngày nhận phòng',
                          checkout_date='Ngày trả phòng', created_date='Ngày tạo phiếu')
 
 
-class BillView(ModelView):
+class BillView(AuthenticatedView):
     column_list = ['rentingOrder_id', 'checkin_date', 'checkout_date', 'totalCust', 'foreignCust',
                    'basePrice', 'extraCharge', 'created_date']
     column_searchable_list = ['checkin_date', 'checkout_date', 'created_date']
     column_filters = ['checkin_date', 'checkout_date', 'created_date']
     can_view_details = True
     can_delete = False
+    can_edit = False
+    can_create = False
     column_labels = dict(rentingOrder_id='Mã hóa đơn', checkin_date='Ngày nhận phòng',
                          checkout_date='Ngày trả phòng', totalCust='Tổng số khách hàng',
-                         foreignCust='Số khách hàng ngoại quốc', basePrice='Giá gốc',
+                         foreignCust='Số khách hàng ngoại quốc', finalPrice='Giá gốc',
                          extraCharge='Phụ thu', created_date='Ngày tạo phiếu')
 
 
-class CustomerView(ModelView):
+class CustomerView(AuthenticatedView):
     column_list = ['id', 'cust_name', 'custIdentity_num', 'custAddress', 'custType_id']
     column_searchable_list = ['cust_name', 'custIdentity_num']
+    form_excluded_columns = ['booking_room_info', 'renting_details']
     column_filters = ['cust_name', 'custType_id', 'custAddress']
     column_labels = dict(id='Mã khách hàng', cust_name='Tên khách hàng', custIdentity_num='CMND',
                          custAddress='Địa chỉ', custType_id='Loại khách hàng')

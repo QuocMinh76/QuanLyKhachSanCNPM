@@ -1,40 +1,38 @@
-// Function to handle the change event for room selection
+//// Function to handle the change event for room selection
 function handleRoomSelectionChange(event) {
     const selectElement = event.target; // The select element that was changed
     const selectedRoomId = selectElement.value; // The selected room ID
-    const row = selectElement.closest('tr'); // The closest row to this select
-    const customerCountElement = row.querySelector('td:nth-child(4)'); // Find customer count in the row
-    const customerCount = parseInt(customerCountElement.textContent.trim(), 10); // Get customer count
 
     // Get the maxCust value from the selected option's data-max-cust attribute
-    const maxCust = parseInt(selectElement.selectedOptions[0].dataset.maxCust, 10);
+    const maxCust = parseInt(selectElement.selectedOptions[0]?.dataset.maxCust, 10);
 
-    // If the customer count exceeds maxCust, show an alert and retain the previous selection
-    if (selectedRoomId && customerCount > maxCust) {
-        alert('Số lượng khách vượt quá số khách tối đa cho phòng này!');
-        selectElement.value = selectElement.dataset.previousValue || ""; // Reset to previous value if available
-        return; // Stop further processing
+    if (!selectedRoomId || isNaN(maxCust)) {
+        return; // Exit if no room is selected or maxCust is invalid
     }
 
-    // Now, check the total number of selections of this room across all rows
+    // Count the total number of customers assigned to the selected room across all select elements
     const allSelectElements = document.querySelectorAll('select.form-select');
-    let roomCount = 0;
+    let roomCustomerCount = 0;
 
     allSelectElements.forEach(select => {
         if (select.value === selectedRoomId) {
-            roomCount++; // Count how many times the room has been selected
+            roomCustomerCount++; // Increment the count if the same room is selected
         }
     });
 
-    // If roomCount exceeds the maxCust for the selected room, show an alert and retain the previous selection
-    if (roomCount > maxCust) {
+    // If the customer count exceeds maxCust, show an alert and retain the previous selection
+    if (roomCustomerCount > maxCust) {
         alert('Phòng này đã đủ số lượng khách, vui lòng chọn phòng khác!');
         selectElement.value = selectElement.dataset.previousValue || ""; // Retain the previous value
+    } else {
+        // If the selection is valid, store the current selection as the previous value
+        selectElement.dataset.previousValue = selectedRoomId;
     }
-
-    // If the selection is valid, store the current selection as the previous value
-    selectElement.dataset.previousValue = selectElement.value;
 }
+
+document.querySelectorAll('select.form-select').forEach(select => {
+    select.addEventListener('change', handleRoomSelectionChange);
+});
 
 // Function to initialize event listeners for all room select elements
 function initializeRoomValidation() {
