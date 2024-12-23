@@ -1,7 +1,7 @@
 {% extends 'layout/base.html' %}
 
 {% block content %}
-<h2 class="text-center mt-4">TRA CỨU ĐƠN ĐẶT PHÒNG</h2>
+<h2 class="text-center mt-4">TRA CỨU THANH TOÁN</h2>
 <div class="mt-4">
         <form class="d-flex">
                 <input class="form-control me-2" type="text"
@@ -13,7 +13,7 @@
         {% if orders %}
         <table class="table table-bordered text-center">
             <tr>
-                <td>Mã đơn</td>
+                <td>Mã phiếu thuê phòng</td>
                 <td>Người đặt đơn</td>
                 <td>Ngày nhận phòng</td>
                 <td>Ngày trả phòng</td>
@@ -26,7 +26,7 @@
                 <td>{{ o.checkin_date }}</td>
                 <td>{{ o.checkout_date }}</td>
                 <td>
-                    <a href="/rent/{{ o.id }}" class="btn btn-pink btn-sm">Lập phiếu</a>
+                    <button class="btn btn-pink2">Thanh toán</button>
                 </td>
             </tr>
             {% endfor %}

@@ -1,11 +1,12 @@
 from flask_login import current_user
-from appQLKS.models import (User, Room, RoomType, CustomerType, Customer, BookingOrder,
-                            BookingRoomInfo, BookingCustInfo, Comment, RentingOrder, Bill)
+from appQLKS.models import (User, Room, RoomType, CustomerType, Customer, BookingOrder, BookingRoomInfo,
+                            BookingCustInfo, Comment, RentingOrder, RentingDetails, Bill)
 from appQLKS import app, db
 import hashlib
 import cloudinary.uploader
 from sqlalchemy import or_
 import json
+from sqlalchemy.orm import joinedload
 
 
 def load_room_types():
@@ -114,8 +115,30 @@ def add_booking_order(user_id, checkin_date, checkout_date, rooms: list, custome
         raise e
 
 
-def add_renting_order(booking_order_id):
-    pass
+def add_renting_order(order_id, checkin, checkout, rooms_custs: list):
+    try:
+        # Create renting order
+        renting_order = RentingOrder(id=order_id, checkin_date=checkin,
+                                     checkout_date=checkout, pay_status=False)
+        db.session.add(renting_order)
+        db.session.flush()
+
+        # Add room-cust info
+        for rc in rooms_custs:
+            customer_id = rc['customerId']
+            room_id = rc['roomId']
+
+            renting_details = RentingDetails(rentingOrder_id=renting_order.id, room_id=room_id,
+                                             cust_id=customer_id)
+            db.session.add(renting_details)
+
+        db.session.commit()
+        return renting_order
+
+    except Exception as e:
+        # Rollback in case of an error
+        db.session.rollback()
+        raise e
 
 
 def add_user(name, username, password, avatar=None):
@@ -177,8 +200,18 @@ def process_booking_order(user_id, checkin, checkout, customers, selected_rooms)
             customers=added_cust
         )
 
-    except json.JSONDecodeError as e:
-        raise ValueError(f"Invalid JSON data: {e}")
+    except Exception as e:
+        # If something goes wrong, roll back the transaction
+        db.session.rollback()
+        raise Exception(f"Error during booking process: {e}")
+
+
+def process_renting_order(order_id, checkin, checkout, rooms_custs):
+    try:
+        customer_room_mapping = json.loads(rooms_custs)
+
+        add_renting_order(order_id=order_id, checkin=checkin, checkout=checkout,
+                          rooms_custs=customer_room_mapping)
 
     except Exception as e:
         # If something goes wrong, roll back the transaction
@@ -198,10 +231,6 @@ def auth_user(username, password, role=None):
     return u.first()
 
 
-def get_user_by_id(user_id):
-    return User.query.get(user_id)
-
-
 # Lấy danh sách phòng theo loại phòng
 # This function get all AVAILABLE rooms of a room type
 def get_rooms_by_type(room_type_id=None):
@@ -214,6 +243,24 @@ def get_rooms_by_type(room_type_id=None):
     rooms = rooms.filter(Room.available.__eq__(True))
 
     return rooms.order_by('id').all()
+
+
+def get_booking_order_details(booking_order_id):
+    """
+    Retrieve a booking order and all related data by booking order ID.
+
+    :param booking_order_id: The ID of the booking order.
+    :return: A BookingOrder object with all related data loaded, or None if not found.
+    """
+    return db.session.query(BookingOrder).options(
+        joinedload(BookingOrder.booking_room_info).joinedload(BookingRoomInfo.room),
+        joinedload(BookingOrder.booking_cust_info).joinedload(BookingCustInfo.customer),
+        joinedload(BookingOrder.renting_order)
+    ).filter(BookingOrder.id == booking_order_id).one_or_none()
+
+
+def get_user_by_id(user_id):
+    return User.query.get(user_id)
 
 
 def get_room_type_by_id(room_type_id):
@@ -229,4 +276,26 @@ def get_room_by_id(room_id):
 
 
 def get_customer_by_id(cust_id):
-    return CustomerType.query.get(cust_id)
+    return Customer.query.get(cust_id)
+
+
+if __name__ == "__main__":
+    with app.app_context():
+        booking_order_id = 1  # Replace with the desired booking order ID
+        details = get_booking_order_details(booking_order_id)
+
+        if details:
+            print("Booking Order Details:")
+            print(f"ID: {details.id}")
+            print(f"Check-in Date: {details.checkin_date}")
+            print(f"Check-out Date: {details.checkout_date}")
+            print("Room Info:")
+            for room_info in details.booking_room_info:
+                print(f"Room ID: {room_info.room_id}")
+            print("Customer Info:")
+            for cust_info in details.booking_cust_info:
+                print(f"Customer ID: {cust_info.cust_id}")
+            if details.renting_order:
+                print(f"Renting Order ID: {details.renting_order.id}")
+        else:
+            print("Booking order not found.")

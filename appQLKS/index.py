@@ -1,5 +1,4 @@
 import math
-
 import pytz
 from flask import render_template, request, redirect, session, jsonify
 from appQLKS import app, login
@@ -91,11 +90,6 @@ def logout_process():
     return redirect('/login')
 
 
-@app.route("/rent")
-def rent():
-    return render_template('rent.html')
-
-
 @app.route('/booking')
 @login_required
 def booking():
@@ -138,6 +132,62 @@ def process_booking():
         return "An error occurred while processing your booking", 500
 
     return redirect('/')
+
+
+@app.route("/rent/<order_id>")
+def rent(order_id):
+    booking_order = dao.get_booking_order_details(order_id)
+    custs = []
+    rooms = []
+
+    for room_info in booking_order.booking_room_info:
+        room = dao.get_room_by_id(room_info.room_id)
+        rooms.append(room)
+
+    for cust_info in booking_order.booking_cust_info:
+        cust = dao.get_customer_by_id(cust_info.cust_id)
+        custs.append(cust)
+
+    # Create a dictionary mapping room ID to maxCust for each room
+    room_data = {room.id: room.roomType.maxCust for room in rooms}
+
+    return render_template('rent.html', order=booking_order, customers=custs,
+                           rooms=rooms, num_cust=len(custs), num_room=len(rooms), room_data=room_data)
+
+
+@app.route('/process_renting', methods=['POST'])
+@login_required
+def process_renting():
+    order_id = request.form.get('id')
+    checkin_date = request.form.get('checkin_date')
+    checkout_date = request.form.get('checkout_date')
+
+    room_cust_data = request.form.get('cust_room')
+
+    try:
+        dao.process_renting_order(
+            order_id=order_id,
+            checkin=checkin_date,
+            checkout=checkout_date,
+            rooms_custs=room_cust_data
+        )
+    except ValueError as ve:
+        print(f"Validation Error: {ve}")
+        return "Invalid input data", 400
+    except Exception as e:
+        print(f"Error: {e}")
+        return "An error occurred while processing the renting order", 500
+
+    return redirect('/')
+
+
+@app.route('/find_order')
+def find_booking_order():
+    kw = request.args.get('kw')
+
+    orders = dao.load_booking_orders(kw)
+
+    return render_template('find_booking_order.html', orders=orders)
 
 
 @app.route('/api/rooms', methods=['GET'])
@@ -189,18 +239,24 @@ def get_customer_types():
     return response
 
 
-@app.route("/thanhtoan")
-def thanh_toan():
-    return render_template('thanhtoan.html')
+@app.route("/find_rent")
+def find_rent():
+    return render_template('find_rent.html')
 
 
-@app.route('/find_order')
-def find_booking_order():
-    kw = request.args.get('kw')
+@app.route("/invoice")
+def invoice():
+    return render_template('invoice.html')
 
-    orders = dao.load_booking_orders(kw)
 
-    return render_template('find_booking_order.html', orders=orders)
+@app.route("/customer_orders")
+def customer_orders():
+    return render_template('customer_orders.html')
+
+
+@app.route("/customer_order_details")
+def customer_order_details():
+    return render_template('customer_order_details.html')
 
 
 @login.user_loader
