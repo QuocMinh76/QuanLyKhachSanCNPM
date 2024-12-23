@@ -15,7 +15,7 @@ document.querySelectorAll('.room-type-checkbox').forEach(checkbox => {
 document.getElementById('uncheckAllButton').addEventListener('click', uncheckAllRooms);
 document.getElementById('addRowButton').addEventListener('click', addCustomerRow);
 document.getElementById('removeRowButton').addEventListener('click', removeCustomerRow);
-document.getElementById('confirmBookingButton').addEventListener('click', confirmBooking);
+document.getElementById('bookingButton').addEventListener('click', getBooking);
 
 // Functions
 function handleCheckboxChange() {
@@ -61,41 +61,61 @@ function displayRooms(rooms) {
     });
 }
 
+function toggleRoomSelection(roomItem, room) {
+    const index = selectedRooms.findIndex(selectedRoom => selectedRoom.id === room.id);
+    const isSelected = index === -1; // Nếu không có trong mảng, chọn nó
+
+    // In ra thông tin chi tiết
+    console.log(`Phòng: ${room.name}`);
+    console.log(`ID phòng: ${room.id}`);
+    console.log(`Được chọn hay không: ${isSelected ? 'Chưa chọn' : 'Đã chọn'}`);
+
+    // Toggle sự chọn lựa một cách trực quan
+    roomItem.classList.toggle('selected', isSelected);
+    roomItem.style.backgroundColor = isSelected ? 'rgb(117, 148, 101)' : '';
+
+    // Thêm hoặc xóa phòng khỏi selectedRooms
+    if (isSelected) {
+        selectedRooms.push(room);
+        console.log(`Đã thêm phòng ${room.name} vào danh sách chọn.`);
+    } else {
+        selectedRooms.splice(index, 1);
+        console.log(`Đã xóa phòng ${room.name} khỏi danh sách chọn.`);
+    }
+
+    updateSelectedRoomCount();
+}
+
 function createRoomItem(room) {
     const roomItem = document.createElement('div');
     roomItem.classList.add('room-item');
     roomItem.setAttribute('data-room-id', room.id);
+
+    // In ra thông tin chi tiết của phòng
+    console.log(`Tạo phòng: ${room.name}`);
+    console.log(`ID phòng: ${room.id}`);
+    console.log(`Loại phòng: ${room.type_name}`);
+    console.log(`Giá phòng: ${formatPrice(room.price)}`);
+    console.log(`Sức chứa: ${(room.max_cust)}`);
 
     roomItem.innerHTML = `
         <div class="room-name">${room.name}</div>
         <div class="room-type">${room.type_name} - ${formatPrice(room.price)}</div>
     `;
 
+    // Kiểm tra xem phòng đã được chọn chưa và áp dụng style tương ứng
     if (selectedRooms.some(selectedRoom => selectedRoom.id === room.id)) {
         roomItem.classList.add('selected');
         roomItem.style.backgroundColor = 'rgb(117, 148, 101)';
+        console.log(`Phòng ${room.name} đã được chọn.`);
     }
 
     roomItem.addEventListener('click', () => toggleRoomSelection(roomItem, room));
+
     return roomItem;
 }
 
-function toggleRoomSelection(roomItem, room) {
-    const index = selectedRooms.findIndex(selectedRoom => selectedRoom.id === room.id);
-    const isSelected = index === -1; // If not in the array, we select it
 
-    // Toggle the selection visually
-    roomItem.classList.toggle('selected', isSelected);
-    roomItem.style.backgroundColor = isSelected ? 'rgb(117, 148, 101)' : '';
-
-    if (isSelected) {
-        selectedRooms.push(room);
-    } else {
-        selectedRooms.splice(index, 1);
-    }
-
-    updateSelectedRoomCount();
-}
 
 function reselectRooms() {
     selectedRooms.forEach(room => {
@@ -198,10 +218,32 @@ function formatPrice(price) {
     return new Intl.NumberFormat('vi-VN', { style: 'decimal', maximumFractionDigits: 0 }).format(price) + ' VNĐ';
 }
 
-function confirmBooking(event) {
+function getBooking(event) {
     event.preventDefault();
 
     if (!validateBookingForm()) return;
+selectedRooms.forEach(room => {
+    console.log('Room Name:', room.name);
+    console.log('Room Type:', room.type_name);
+    console.log('Max Cust:', room.max_cust);
+});
+
+
+        // Kiểm tra tổng số khách nhập vào không vượt quá số khách tối đa của các phòng đã chọn
+let totalMaxCust = 0;
+selectedRooms.forEach((room) => {
+    if (room.max_cust && typeof room.max_cust === 'number') {
+        totalMaxCust += room.max_cust;
+    }
+});
+
+console.log("Tổng số khách tối đa của các phòng đã chọn:", totalMaxCust);
+    const totalGuests = document.getElementById('num_guests').value; // Lấy số khách đã nhập vào
+
+    if (totalGuests > totalMaxCust) {
+        alert(`Số khách không được vượt quá ${totalMaxCust} người (tổng số khách tối đa của các phòng đã chọn).`);
+        return;
+    }
 
     const bookingData = {
         name: document.getElementById('name').value,

@@ -19,7 +19,7 @@ def get_all_rooms():
 
 
 def load_rooms(room_type_id=None, kw=None, page=1):
-    rooms = Room.query
+    rooms = Room.query.filter(Room.available.__eq__(True))
 
     if kw:
         rooms = rooms.filter(Room.name.contains(kw))
@@ -256,7 +256,7 @@ def auth_user(username, password, role=None):
 # Lấy danh sách phòng theo loại phòng
 # This function get all AVAILABLE rooms of a room type
 def get_rooms_by_type(room_type_id=None):
-    rooms = (db.session.query(Room, RoomType.name.label('type_name'))
+    rooms = (db.session.query(Room, RoomType.name.label('type_name'), RoomType.maxCust.label('max_cust'))
              .join(RoomType, Room.roomType_id.__eq__(RoomType.id)))
 
     if room_type_id:
@@ -368,6 +368,23 @@ def count_customers_in_room(renting_order_id, room_id):
         }
 
     return dict(result)
+
+
+def update_room_status(room_id, available):
+    try:
+        room = db.session.query(Room).filter_by(id=room_id).first()
+        if room:
+            print(f'Cập nhật trạng thái phòng ID {room_id} thành {available}')
+            room.available = available
+            db.session.commit()
+            return True
+        print(f'Không tìm thấy phòng với ID {room_id}')
+        return False
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error updating room status: {e}")
+        return False
+
 
 
 if __name__ == '__main__':
