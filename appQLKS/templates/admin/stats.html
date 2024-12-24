@@ -11,7 +11,7 @@
     }
 </style>
 
-<h1 class="text-danger text-center mt-3">THỐNG KÊ DOANH THU THEO THÁNG</h1>
+<h1 class="text-danger text-center mt-3">THỐNG KÊ DOANH THU VÀ TẦN SUẤT THEO THÁNG</h1>
 
 <div class="container mt-4">
     <div class="row mb-3">
@@ -56,6 +56,20 @@
             </tr>
         </tfoot>
     </table>
+
+    <h3 class="mt-5">Bảng Thống Kê Tần Suất Sử Dụng Phòng</h3>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Phòng</th>
+                <th>Số ngày thuê</th>
+                <th>Tỷ lệ (%)</th>
+            </tr>
+        </thead>
+        <tbody id="frequencyTableBody">
+            <!-- Dữ liệu sẽ được điền bằng JS -->
+        </tbody>
+    </table>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -82,18 +96,19 @@
                 `Thống kê ${monthNames[parseInt(month) - 1]} năm ${year}`;
 
             // Cập nhật bảng và biểu đồ
-            updateTable(data.revenue_data);
+            updateRevenueTable(data.revenue_data);
+            updateFrequencyTable(data.frequency_data);
             updateCharts(data.revenue_data);
         } else {
             alert('Không thể tải dữ liệu, vui lòng thử lại sau.');
         }
     });
 
-    function updateTable(data) {
+    function updateRevenueTable(data) {
         const tableBody = document.getElementById('revenueTableBody');
         tableBody.innerHTML = ''; // Xóa dữ liệu cũ
 
-        let totalRate = 0;
+        let totalRevenue = 0;
 
         data.forEach(item => {
             const row = `
@@ -105,10 +120,26 @@
                 </tr>
             `;
             tableBody.innerHTML += row;
-            totalRate += item.rate;
+            totalRevenue += item.total_revenue;
         });
 
-        document.getElementById('totalRevenueRate').textContent = `${totalRate.toFixed(2)}%`;
+        document.getElementById('totalRevenueRate').textContent = `${totalRevenue.toLocaleString()} VND`;
+    }
+
+    function updateFrequencyTable(data) {
+        const tableBody = document.getElementById('frequencyTableBody');
+        tableBody.innerHTML = ''; // Xóa dữ liệu cũ
+
+        data.forEach(item => {
+            const row = `
+                <tr>
+                    <td>${item.room_name}</td>
+                    <td>${item.rental_days}</td>
+                    <td>${item.rate.toFixed(2)}%</td>
+                </tr>
+            `;
+            tableBody.innerHTML += row;
+        });
     }
 
     function updateCharts(data) {

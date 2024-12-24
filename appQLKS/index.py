@@ -19,6 +19,7 @@ from appQLKS.models import UserRoles, Bill, RentingDetails, RentingOrder, RoomTy
 from datetime import datetime
 from io import BytesIO
 
+
 @app.route("/")
 def index():
     room_type = dao.load_room_types()
@@ -346,6 +347,7 @@ def update_rooms_status():
         print('Dữ liệu không hợp lệ:', data)
         return jsonify({'success': False, 'message': 'Dữ liệu không hợp lệ'})
 
+
 @app.route('/api/monthly_statistics', methods=['GET'])
 def get_monthly_statistics():
     month = request.args.get('month')
@@ -355,7 +357,7 @@ def get_monthly_statistics():
     statistics = dao.get_monthly_statistics(month)
     return jsonify(statistics)
 
-  
+
 # Đăng ký font hỗ trợ Unicode (DejaVuSans)
 font_path = os.path.join('static', 'fonts', 'DejaVuSerif.ttf')
 pdfmetrics.registerFont(TTFont('DejaVuSerif', font_path))
@@ -410,7 +412,8 @@ def export_pdf(order_id):
     # Thông tin cơ bản
     basic_info_data = [
         ["Nhân viên lập phiếu", "Ngày nhận phòng", "Ngày trả phòng", "Số lượng khách thuê", "Số lượng phòng thuê"],
-        [current_user.name, order.checkin_date.strftime('%d/%m/%Y'), order.checkout_date.strftime('%d/%m/%Y') , len(custs), len(rooms)]
+        [current_user.name, order.checkin_date.strftime('%d/%m/%Y'), order.checkout_date.strftime('%d/%m/%Y'),
+         len(custs), len(rooms)]
     ]
     basic_info_table = Table(basic_info_data, colWidths=[140, 100, 100, 130, 130])
     basic_info_table.setStyle(TableStyle([
@@ -429,14 +432,12 @@ def export_pdf(order_id):
     new_custom_style.fontSize = 11  # Kích thước chữ nhỏ hơn
     new_custom_style.alignment = 0  # Căn trái
 
-
     # Thêm dòng trống
     elements.append(Paragraph("<br/>", custom_style))  # Dòng trống
     elements.append(Paragraph("<br/>", custom_style))  # Dòng trống
     elements.append(Paragraph("Các phòng thuê: " + ", ".join(room.name for room in rooms), new_custom_style))
     elements.append(Paragraph("<br/>", custom_style))  # Dòng trống
     elements.append(Paragraph("<br/>", custom_style))  # Dòng trống
-
 
     # Danh sách khách hàng
     customer_data = [["Tên khách hàng", "Loại khách hàng", "CMND", "Địa chỉ", "Phòng"]]
@@ -465,7 +466,8 @@ def export_pdf(order_id):
     n_custom_style.alignment = 1  # Căn trái
     elements.append(Paragraph("<br/>", custom_style))  # Dòng trống
     elements.append(Paragraph("<br/>", custom_style))  # Dòng trống
-    elements.append(Paragraph("Cảm ơn quý khách đã sử dụng dịch vụ thuê phòng khách sạn của chúng tôi!", n_custom_style))  # Dòng trống
+    elements.append(Paragraph("Cảm ơn quý khách đã sử dụng dịch vụ thuê phòng khách sạn của chúng tôi!",
+                              n_custom_style))  # Dòng trống
 
     # Tạo PDF
     pdf.build(elements)
@@ -474,11 +476,11 @@ def export_pdf(order_id):
     # Trả về file PDF
     return send_file(buffer, as_attachment=True, download_name=f"phieu_thue_{order.id}.pdf", mimetype='application/pdf')
 
-  
+
 @login.user_loader
 def load_user(user_id):
     return dao.get_user_by_id(user_id)
-  
+
 
 @app.context_processor
 def common_response_data():
@@ -492,13 +494,3 @@ if __name__ == '__main__':
         from appQLKS import admin
 
         app.run(debug=True)
-
-
-
-
-
-
-
-
-
-
