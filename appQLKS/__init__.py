@@ -11,9 +11,9 @@ from logging.handlers import RotatingFileHandler
 
 app = Flask(__name__)
 
-# app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+pymysql://root:%s@localhost/hoteldb?charset=utf8mb4" % quote("1234") #minh
+app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+pymysql://root:%s@localhost/hoteldb?charset=utf8mb4" % quote("1234") #minh
 # app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+pymysql://root:%s@localhost/hoteldb?charset=utf8mb4" % quote("My123456") #my
-app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+pymysql://root:%s@localhost/hoteldb?charset=utf8mb4" % quote("0420") #kiet
+# app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+pymysql://root:%s@localhost/hoteldb?charset=utf8mb4" % quote("0420") #kiet
 
 app.secret_key = 'aweut9n8*@$*djhfjsadhfsdqefsfgasedq23i'
 
@@ -23,14 +23,18 @@ app.config["COMMENT_PAGE_SIZE"] = 4
 app.config["BOOKING_DEADLINE_DAYS"] = 28
 app.config["CHECK_INTERVAL_HOURS"] = 24
 
+# Remove Flask's default log handler to prevent it from logging to the file
+app.logger.handlers = []
+
 # Set up logging to a file with rotation
 log_handler = RotatingFileHandler('app.log', maxBytes=1000000, backupCount=3)
 log_handler.setLevel(logging.INFO)
 log_handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
 
-# Add the handler to the logger
-logger = logging.getLogger()
+# Add the handler to the custom logger
+logger = logging.getLogger("task_logger")  # Use a specific logger name for your tasks
 logger.addHandler(log_handler)
+logger.setLevel(logging.INFO)
 
 
 def clear_log_on_shutdown():

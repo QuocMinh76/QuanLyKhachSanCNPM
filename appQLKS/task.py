@@ -1,8 +1,11 @@
 # task.py
+import logging
 from apscheduler.schedulers.background import BackgroundScheduler
 
 # Create the scheduler instance
 scheduler = BackgroundScheduler()
+
+logger = logging.getLogger("task_logger")
 
 
 def check_booking_orders():
@@ -10,19 +13,19 @@ def check_booking_orders():
     from appQLKS import app
 
     with app.app_context():
-        app.logger.info("Checking expired booking orders...")
+        logger.info("Checking expired booking orders...")
         try:
             expired_orders = get_expired_booking_orders()
             if expired_orders:
                 for order in expired_orders:
                     update_booking_order_status_and_rooms(order)
-                    app.logger.info(f"Booking Order {order.id} has been cancelled and rooms availability updated.")
+                    logger.info(f"Booking Order {order.id} has been cancelled and rooms availability updated.")
             else:
-                app.logger.info("No expired orders found.")
+                logger.info("No expired orders found.")
 
-            app.logger.info("Periodic task running: Checked booking orders for expiration.")
+            logger.info("Periodic task running: Checked booking orders for expiration.")
         except Exception as e:
-            app.logger.error(f"Error occurred while checking booking orders: {e}")
+            logger.error(f"Error occurred while checking booking orders: {e}")
 
 
 def schedule_periodic_task():
