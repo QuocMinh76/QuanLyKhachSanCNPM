@@ -189,3 +189,13 @@
     margin-right: 5px;
     margin-bottom: 5px;
     }
+
+
+.img-hotel {
+    border: 1px solid rgb(232, 129, 166); /* Blue border for the frame */
+    padding: 10px; /* Adds space between the image and the frame */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Soft shadow to add depth */
+    max-width: 100%; /* Ensures the image fits within the container */
+    height: 280px; /* Maintains aspect ratio */
+    display: block; /* Removes any unwanted inline spacing */
+}
