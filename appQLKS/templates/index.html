@@ -11,7 +11,7 @@
     {% for r in rooms %}
     <div class="col-md-4 col-12 p-2">
         <div class="card">
-            <img class="card-img-top" src="{{ r.image }}" alt="{{ r.name }}">
+            <img class="card-img-top img-hotel" src="{{ r.image }}" alt="{{ r.name }}">
             <div class="card-body">
                 <h4 class="card-title">{{ r.name }}</h4>
                 <p class="card-text">{{ "{:,.0f}".format(r.roomPrice) }} VNĐ</p>
