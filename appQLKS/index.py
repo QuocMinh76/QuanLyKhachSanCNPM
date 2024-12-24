@@ -202,7 +202,6 @@ def invoice(order_id):
     num_cust = len(booking_order.booking_cust_info)
 
     renting_details = dao.get_renting_order_room_details(order_id)
-    print(renting_details)
 
     total_price = dao.calculate_total_price_for_renting_order(order_id)
 
