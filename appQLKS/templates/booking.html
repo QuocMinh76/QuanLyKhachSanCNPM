@@ -1,0 +1,100 @@
+{% extends 'layout/base.html' %}
+
+{% block content %}
+<div class="container">
+    <h2 class="text-center mt-4">ĐẶT PHÒNG</h2>
+    <form>
+        <div>
+            <label for="name" class="form-label"><strong>Tên người đặt</strong></label>
+            <input type="text" id="name" class="form-control" value="{{ current_user.name }}" readonly/>
+        </div>
+        <br/>
+        <div class="row">
+            <div class="col">
+                <label for="checkin" class="form-label"><strong>Ngày nhận phòng</strong></label>
+                <input type="date" id="checkin" value="{{ date.strftime('%Y-%m-%d') }}" class="form-control"/>
+            </div>
+            <div class="col">
+                <label for="checkout" class="form-label"><strong>Ngày trả phòng</strong></label>
+                <input type="date" id="checkout" value="{{ date.strftime('%Y-%m-%d') }}" class="form-control"/>
+            </div>
+        </div>
+        <br/>
+        <div class="row">
+            <!-- Hiển thị tổng số khách thuê -->
+            <div class="col">
+                <label for="num_guests" class="form-label"><strong>Số lượng khách thuê đã thêm</strong></label>
+                <input type="number" id="num_guests" class="form-control" min="1" readonly/>
+            </div>
+            <!-- Hiển thị tổng số phòng thuê -->
+            <div class="col">
+                <label for="num_rooms" class="form-label"><strong>Số lượng phòng đã chọn</strong></label>
+                <input type="number" id="num_rooms" class="form-control" readonly min="0"/>
+            </div>
+        </div>
+        <br/>
+        <p class="mb-3"><strong>Chọn loại phòng</strong></p>
+        <div class="row rounded-border p-2">
+            {% for room_type in room_types %}
+            <div class="col-2.5 form-check form-check-inline">
+                <input class="form-check-input room-type-checkbox" type="checkbox" value="{{ room_type.id }}"
+                       id="room_type_{{ room_type.id }}" name="room_type_id">
+                <label class="form-check-label" for="room_type_{{ room_type.id }}">{{ room_type.name }}</label>
+            </div>
+            {% endfor %}
+        </div>
+        <br/>
+        <div class="row">
+            <p class="mb-3 col-11"><strong>Danh sách phòng khả dụng</strong></p>
+            <!-- Button to uncheck all selected rooms -->
+            <button type="button" id="uncheckAllButton" class="btn btn-red col-1 btn-circle"><i
+                    class="fa fa-trash"></i></button>
+        </div>
+        <div class="list-view-container mt-3" id="room-list">
+        </div>
+        <br/>
+        <!-- hiển thị tiêu đề "Danh sách khách hàng" -->
+        <hp class="mb-3"><strong>Danh sách khách hàng</strong></hp>
+        <p></p>
+        <!-- Hiển thị bảng danh sách khách hàng -->
+        <table class="table table-bordered">
+            <thead>
+            <tr>
+                <th>Tên khách hàng</th>
+                <th>Loại khách hàng</th>
+                <th>CMND</th>
+                <th>Địa chỉ</th>
+            </tr>
+            </thead>
+            <tbody id="customerTableBody">
+            <tr>
+                <td><input type="text" class="form-control" placeholder="Tên khách hàng"></td>
+                <td>
+                    <select class="form-select customerTypeSelect">
+                        {% for type in cust_types %}
+                        <option value="{{ type.id }}">{{ type.name }}</option>
+                        {% endfor %}
+                    </select>
+                </td>
+                <td><input type="text" class="form-control" placeholder="CMND"></td>
+                <td><input type="text" class="form-control" placeholder="Địa chỉ"></td>
+            </tr>
+            </tbody>
+        </table>
+
+        <div class="row" id="fnc_button">
+            <div class="col">
+                <button type="button" class="btn btn-pink btn-circle rounded-circle" id="addRowButton"><strong>&plus;</strong></button>
+                <button type="button" class="btn btn-pink btn-circle rounded-circle" id="removeRowButton"><strong>&minus;</strong>
+                </button>
+            </div>
+            <div class="col d-flex justify-content-end gap-2">
+                <button type="submit" class="btn btn-gr" id="bookingButton">Đặt phòng</button>
+                <a href="/" class="btn btn-red">Hủy</a>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script src="{{ url_for('static', filename='js/booking.js') }}"></script>
+{% endblock %}

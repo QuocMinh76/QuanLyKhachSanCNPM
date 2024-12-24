@@ -1,0 +1,33 @@
+{% extends 'layout/base.html' %}
+
+{% block content %}
+
+{% block search %}
+{% include 'layout/search_box.html' %}
+{% endblock %}
+
+{% if rooms %}
+<ul class="pagination mt-4">
+    {% for i in range(1, pages + 1) %}
+    <li class="page-item"><a class="page-link" href="/?page={{ i }}">{{ i }}</a></li>
+    {% endfor %}
+</ul>
+<div class="row">
+    {% for r in rooms %}
+    <div class="col-md-4 col-12 p-2">
+        <div class="card">
+            <img class="card-img-top img-hotel" src="{{ r.image }}" alt="{{ r.name }}">
+            <div class="card-body">
+                <h4 class="card-title">{{ r.name }}</h4>
+                <p class="card-text">{{ "{:,.0f}".format(r.roomPrice) }} VNĐ</p>
+                <a href="/rooms/{{ r.id }}" class="btn btn-pink btn-sm">Xem chi tiết</a>
+                    <a href="/booking" class="btn btn-gr btn-sm">Đặt phòng</a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="alert alert-info mt-4">Không tìm thấy phòng tương ứng!</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,38 @@
+{% extends 'layout/base.html' %}
+
+{% block content %}
+<h2 class="text-center mt-4">TRA CỨU HOÁ ĐƠN</h2>
+<div class="mt-4">
+        <form class="d-flex">
+                <input class="form-control me-2" type="text"
+                       placeholder="Tìm theo tên khách hàng..." name="kw" style="border: 2px solid">
+                <button class="btn btn-pink" type="submit">Tìm</button>
+        </form>
+</div>
+<div class="mt-4">
+        {% if bills %}
+        <table class="table table-bordered text-center">
+            <tr>
+                <td>Mã phiếu</td>
+                <td>Người đặt đơn</td>
+                <td>Ngày nhận phòng</td>
+                <td>Ngày trả phòng</td>
+                <td></td>
+            </tr>
+            {% for b in bills %}
+            <tr>
+                <td>{{ b.id }}</td>
+                <td>{{ b.renting_order.booking_order.user.name }}</td>
+                <td>{{ b.checkin_date.strftime('%d/%m/%Y') }}</td>
+                <td>{{ b.checkout_date.strftime('%d/%m/%Y') }}</td>
+                <td>
+                    <a href="/export_invoice/{{ b.id }}" class="btn btn-pink2 btn-sm">Xuất hóa đơn</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+        {% else %}
+        <div class="alert alert-info mt-4">Không tìm thấy hóa đơn!</div>
+        {% endif %}
+</div>
+{% endblock %}

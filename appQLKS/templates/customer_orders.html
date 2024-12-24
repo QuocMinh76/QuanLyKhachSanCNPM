@@ -1,0 +1,33 @@
+{% extends 'layout/base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="text-center mb-4">Danh sách phiếu đã thanh toán</h1>
+    {% if bills %}
+    <table class="table table-bordered table-striped text-center">
+        <thead>
+        <tr>
+            <th>Mã phiếu</th>
+            <th>Tên người đặt</th>
+            <th>Ngày lập phiếu</th>
+            <th>Hành động</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for b in bills %}
+        <tr>
+            <td>{{ b.id }}</td>
+            <td>{{ b.renting_order.booking_order.user.name }}</td>
+            <td>{{ b.renting_order.created_date.strftime('%d/%m/%Y') }}</td>
+            <td>
+                <a href="/customer_order_details/{{ b.id }}" class="btn btn-gr2 btn-sm">Xem chi tiết</a>
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="alert alert-info mt-4">Chưa có đơn nào!</div>
+    {% endif %}
+</div>
+{% endblock %}

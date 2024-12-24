@@ -1,0 +1,82 @@
+{% extends 'layout/base.html' %}
+
+{% block content %}
+<div class="container">
+    <h2 class="text-center mt-4">XÁC NHẬN ĐẶT PHÒNG</h2>
+    <form method="post" action="{{ url_for('process_booking') }}">
+        <!-- Hidden fields for dynamic data -->
+
+        <input type="hidden" name="id" value="{{ current_user.id }}"/>
+        <input type="hidden" id="hidden_name" name="name"/>
+        <input type="hidden" id="hidden_checkin" name="checkin"/>
+        <input type="hidden" id="hidden_checkout" name="checkout"/>
+        <input type="hidden" id="hidden_num_guests" name="num_guests"/>
+        <input type="hidden" id="hidden_num_rooms" name="num_rooms"/>
+        <input type="hidden" id="hidden_selected_rooms" name="selected_rooms"/>
+        <input type="hidden" id="hidden_customers" name="customers"/>
+
+        <table class="table table-bordered">
+            <tbody>
+            <tr>
+                <td><label for="name" class="form-label">Tên người đặt</label></td>
+                <td><input type="text" id="name" name="name" class="form-control"/></td>
+            </tr>
+            <tr>
+                <td><label for="checkin" class="form-label">Ngày nhận phòng</label></td>
+                <td><input type="date" id="checkin" name="checkin" class="form-control"/></td>
+            </tr>
+            <tr>
+                <td><label for="checkout" class="form-label">Ngày trả phòng</label></td>
+                <td><input type="date" id="checkout" name="checkout" class="form-control"/></td>
+            </tr>
+            <tr>
+                <td><label for="num_guests" class="form-label">Số lượng khách thuê</label></td>
+                <td><input type="number" id="num_guests" class="form-control" min="1" readonly/></td>
+            </tr>
+            <tr>
+                <td><label for="num_rooms" class="form-label">Số lượng phòng</label></td>
+                <td><input type="number" id="num_rooms" class="form-control" min="0" readonly/></td>
+            </tr>
+            <!-- Danh sách phòng khả dụng -->
+            <tr>
+                <td>
+                    <label>Danh sách phòng đã chọn</label>
+                </td>
+                <td>
+                    <div id="roomListContainer" class="border rounded p-2"></div>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    <label class="mb-3">Danh sách khách hàng</label>
+                    <table class="table table-bordered">
+                        <thead>
+                        <tr>
+                            <th>Tên khách hàng</th>
+                            <th>Loại khách hàng</th>
+                            <th>CMND</th>
+                            <th>Địa chỉ</th>
+                        </tr>
+                        </thead>
+                        <tbody id="customerTableBody">
+                        </tbody>
+                    </table>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+        <div class="row" id="fnc_button">
+            <div class="col">
+                <button type="submit" class="btn btn-red" id="cancelBookingButton">Huỷ Đặt phòng
+                </button>
+            </div>
+            <div class="col d-flex justify-content-end">
+                <button type="submit" class="btn btn-gr" id="confirmBookingButton">Xác nhận Đặt phòng
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="{{ url_for('static', filename='js/booking_confirm.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,202 @@
+{% extends 'admin/master.html' %}
+
+{% block body %}
+<style>
+    h1, h2 {
+        font-weight: bold;
+    }
+    .chart-container {
+        position: relative;
+        height: 300px;
+    }
+</style>
+
+<h1 class="text-danger text-center mt-3">THỐNG KÊ DOANH THU VÀ TẦN SUẤT THEO THÁNG</h1>
+
+<div class="container mt-4">
+    <div class="row mb-3">
+        <div class="col-md-12 text-center">
+            <label for="selectMonth">Chọn tháng:</label>
+            <input type="month" id="selectMonth" class="form-control d-inline-block w-auto" lang="vi">
+        </div>
+    </div>
+
+    <h2 id="selectedMonthTitle" class="text-center">Thống kê tháng...</h2>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="chart-container">
+                <canvas id="barChart"></canvas>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="chart-container">
+                <canvas id="pieChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <h3 class="mt-5">Bảng Thống Kê Doanh Thu</h3>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Loại phòng</th>
+                <th>Doanh thu</th>
+                <th>Số lượt thuê</th>
+                <th>Tỷ lệ (%)</th>
+            </tr>
+        </thead>
+        <tbody id="revenueTableBody">
+            <!-- Dữ liệu sẽ được điền bằng JS -->
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="3" class="text-right font-weight-bold">Tổng cộng:</td>
+                <td id="totalRevenueRate">-</td>
+            </tr>
+        </tfoot>
+    </table>
+
+    <h3 class="mt-5">Bảng Thống Kê Tần Suất Sử Dụng Phòng</h3>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Phòng</th>
+                <th>Số ngày thuê</th>
+                <th>Tỷ lệ (%)</th>
+            </tr>
+        </thead>
+        <tbody id="frequencyTableBody">
+            <!-- Dữ liệu sẽ được điền bằng JS -->
+        </tbody>
+    </table>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.getElementById('selectMonth').addEventListener('change', async function () {
+        const selectedMonth = this.value;
+        if (!selectedMonth) {
+            alert('Vui lòng chọn tháng!');
+            return;
+        }
+
+        const response = await fetch(`/api/monthly_statistics?month=${selectedMonth}`);
+        if (response.ok) {
+            const data = await response.json();
+
+            // Cập nhật tiêu đề
+            const [year, month] = selectedMonth.split("-");
+            const monthNames = [
+                "Tháng 1", "Tháng 2", "Tháng 3", "Tháng 4",
+                "Tháng 5", "Tháng 6", "Tháng 7", "Tháng 8",
+                "Tháng 9", "Tháng 10", "Tháng 11", "Tháng 12"
+            ];
+            document.getElementById('selectedMonthTitle').textContent =
+                `Thống kê ${monthNames[parseInt(month) - 1]} năm ${year}`;
+
+            // Cập nhật bảng và biểu đồ
+            updateRevenueTable(data.revenue_data);
+            updateFrequencyTable(data.frequency_data);
+            updateCharts(data.revenue_data);
+        } else {
+            alert('Không thể tải dữ liệu, vui lòng thử lại sau.');
+        }
+    });
+
+    function updateRevenueTable(data) {
+        const tableBody = document.getElementById('revenueTableBody');
+        tableBody.innerHTML = ''; // Xóa dữ liệu cũ
+
+        let totalRevenue = 0;
+
+        data.forEach(item => {
+            const row = `
+                <tr>
+                    <td>${item.room_type}</td>
+                    <td>${item.total_revenue.toLocaleString()} VND</td>
+                    <td>${item.rental_count}</td>
+                    <td>${item.rate.toFixed(2)}%</td>
+                </tr>
+            `;
+            tableBody.innerHTML += row;
+            totalRevenue += item.total_revenue;
+        });
+
+        document.getElementById('totalRevenueRate').textContent = `${totalRevenue.toLocaleString()} VND`;
+    }
+
+    function updateFrequencyTable(data) {
+        const tableBody = document.getElementById('frequencyTableBody');
+        tableBody.innerHTML = ''; // Xóa dữ liệu cũ
+
+        data.forEach(item => {
+            const row = `
+                <tr>
+                    <td>${item.room_name}</td>
+                    <td>${item.rental_days}</td>
+                    <td>${item.rate.toFixed(2)}%</td>
+                </tr>
+            `;
+            tableBody.innerHTML += row;
+        });
+    }
+
+    function updateCharts(data) {
+        const labels = data.map(item => item.room_type);
+        const revenueData = data.map(item => item.total_revenue);
+        const rentalData = data.map(item => item.rental_count);
+
+        // Cập nhật biểu đồ cột
+        barChart.data.labels = labels;
+        barChart.data.datasets[0].data = revenueData;
+        barChart.update();
+
+        // Cập nhật biểu đồ tròn
+        pieChart.data.labels = labels;
+        pieChart.data.datasets[0].data = rentalData;
+        pieChart.update();
+    }
+
+    // Khởi tạo biểu đồ
+    const barChart = new Chart(document.getElementById('barChart').getContext('2d'), {
+        type: 'bar',
+        data: {
+            labels: [],
+            datasets: [{
+                label: 'Doanh thu (VND)',
+                data: [],
+                backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Doanh thu (VND)'
+                    }
+                }
+            }
+        }
+    });
+
+    const pieChart = new Chart(document.getElementById('pieChart').getContext('2d'), {
+        type: 'pie',
+        data: {
+            labels: [],
+            datasets: [{
+                data: [],
+                backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF']
+            }]
+        },
+        options: {
+            responsive: true
+        }
+    });
+</script>
+{% endblock %}
