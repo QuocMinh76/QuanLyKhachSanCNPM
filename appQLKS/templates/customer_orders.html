@@ -6,19 +6,23 @@
     <table class="table table-bordered table-striped text-center">
         <thead>
         <tr>
+            <th>Mã đơn</th>
             <th>Tên người đặt</th>
-            <th>Ngày đặt</th>
+            <th>Ngày lập phiếu</th>
             <th>Hành động</th>
         </tr>
         </thead>
         <tbody>
+        {% for b in bills %}
         <tr>
-            <td>DDP123456</td>
-            <td>2024-12-01</td>
+            <td>{{ b.id }}</td>
+            <td>{{ b.renting_order.booking_order.user.name }}</td>
+            <td>{{ b.renting_order.created_date.strftime('%d/%m/%Y') }}</td>
             <td>
-                <a href="#" class="btn btn-gr2 btn-sm">Xem chi tiết</a>
+                <a href="/customer_order_details/{{ b.id }}" class="btn btn-gr2 btn-sm">Xem chi tiết</a>
             </td>
         </tr>
+        {% endfor %}
         </tbody>
     </table>
 </div>

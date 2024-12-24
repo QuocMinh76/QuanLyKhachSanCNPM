@@ -72,6 +72,7 @@ def register_view():
 
 @app.route("/login", methods=['get', 'post'])
 def login_process():
+    msg = ''
     if request.method.__eq__('POST'):
         username = request.form.get('username')
         password = request.form.get('password')
@@ -81,8 +82,10 @@ def login_process():
 
             next = request.args.get('next')
             return redirect('/' if next is None else next)
+        else:
+            msg = 'Tên đăng nhập hoặc mật khẩu không đúng!'
 
-    return render_template('login.html')
+    return render_template('login.html', msg=msg)
 
 
 @app.route("/login-admin", methods=['post'])
@@ -310,13 +313,26 @@ def find_rent_print():
 
 
 @app.route("/customer_orders")
+@login_required
 def customer_orders():
-    return render_template('customer_orders.html')
+    bills = dao.get_bills_of_user(current_user.id)
+
+    return render_template('customer_orders.html', bills=bills)
 
 
-@app.route("/customer_order_details")
-def customer_order_details():
-    return render_template('customer_order_details.html')
+@app.route("/customer_order_details/<bill_id>")
+def customer_order_details(bill_id):
+    bill = dao.get_bill_by_id(bill_id)
+    booking_order = dao.get_booking_order_details(bill_id)
+
+    renting_details = dao.get_renting_order_room_details(bill_id)
+
+    total_price = dao.calculate_total_price_for_renting_order(bill_id)
+
+    return render_template('customer_order_details.html', bill=bill,
+                           num_room=len(booking_order.booking_room_info),
+                           num_cust=len(booking_order.booking_cust_info),
+                           details=renting_details, price=total_price)
 
 
 @app.route('/api/update_rooms_status', methods=['POST'])
