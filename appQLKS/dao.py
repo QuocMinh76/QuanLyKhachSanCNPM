@@ -49,6 +49,7 @@ def load_booking_orders(kw=None):
         )
 
     orders = orders.filter(BookingOrder.is_processed.__eq__(False))
+    orders = orders.filter(BookingOrder.is_cancelled.__eq__(False))
 
     return orders.all()
 
@@ -290,6 +291,19 @@ def auth_user(username, password, role=None):
     return u.first()
 
 
+def get_bills_of_user(user_id):
+    # Start the query from Bill
+    bills = Bill.query
+
+    # Join the necessary tables in the correct order
+    bills = bills.join(RentingOrder).join(BookingOrder).join(User)
+
+    # Filter by the user_id
+    bills = bills.filter(User.id == user_id)
+
+    return bills.all()
+
+
 # Lấy danh sách phòng theo loại phòng
 # This function get all AVAILABLE rooms of a room type
 def get_rooms_by_type(room_type_id=None):
@@ -305,12 +319,6 @@ def get_rooms_by_type(room_type_id=None):
 
 
 def get_booking_order_details(booking_order_id):
-    """
-    Retrieve a booking order and all related data by booking order ID.
-
-    :param booking_order_id: The ID of the booking order.
-    :return: A BookingOrder object with all related data loaded, or None if not found.
-    """
     return db.session.query(BookingOrder).options(
         joinedload(BookingOrder.booking_room_info).joinedload(BookingRoomInfo.room),
         joinedload(BookingOrder.booking_cust_info).joinedload(BookingCustInfo.customer),
@@ -358,8 +366,8 @@ def get_renting_order_by_id(renting_order_id):
     return RentingOrder.query.get(renting_order_id)
 
 
-def get_renting_order_by_id(renting_order_id):
-    return RentingOrder.query.get(renting_order_id)
+def get_bill_by_id(bill_id):
+    return Bill.query.get(bill_id)
 
 
 def get_room_by_id(room_id):
@@ -614,7 +622,8 @@ def get_monthly_statistics(month):
             Room.name.label('room_name'),
             func.count(RentingDetails.id).label('rental_days')
         )
-        .join(RentingOrder, RentingOrder.id == RentingDetails.rentingOrder_id)
+        .join(RentingOrder, RentingOrder.id == RentingDetails.rentingOrder_id)  # Join RentingOrder to RentingDetails
+        .join(Room, Room.id == RentingDetails.room_id)  # Correct join between RentingDetails and Room
         .filter(RentingOrder.checkin_date >= start_date, RentingOrder.checkin_date < end_date)
         .group_by(Room.name)
     ).all()
@@ -648,5 +657,5 @@ def update_booking_order_status_and_rooms(order):
 
 if __name__ == '__main__':
     with app.app_context():
-        res = count_customers_in_room(4, 9)
+        res = get_monthly_statistics('2024-12')
         print(res)

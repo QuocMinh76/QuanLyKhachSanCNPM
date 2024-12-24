@@ -61,14 +61,21 @@
             </div>
 
             <div class="d-flex justify-content-center gap-4 mt-4">
-                <button type="submit" id="submitDetails" class="btn btn-gr">Thanh toán tiền mặt</button>
-                <button type="submit" class="btn btn-blossom">Thanh toán VNPay</button>
+                <button type="submit" id="submitDetails" class="btn btn-gr">Thanh toán</button>
                 <a href="/find_rent" class="btn btn-red">Hủy thanh toán</a>
             </div>
         </form>
     </div>
 
 <script>
+    document.addEventListener("DOMContentLoaded", function () {
+    const submitDetails = document.getElementById("submitDetails");
+
+    submitDetails.addEventListener("click", function () {
+        // Hiển thị thông báo
+        alert("Thanh toán thành công!");
+    });
+});
     function calculateTotals() {
         let totalDefaultCust = 0;
         let totalOtherCust = 0;
