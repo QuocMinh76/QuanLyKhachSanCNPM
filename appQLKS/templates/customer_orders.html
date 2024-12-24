@@ -2,11 +2,12 @@
 
 {% block content %}
 <div class="container mt-5">
-    <h1 class="text-center mb-4">Danh sách đặt phòng</h1>
+    <h1 class="text-center mb-4">Danh sách phiếu đã thanh toán</h1>
+    {% if bills %}
     <table class="table table-bordered table-striped text-center">
         <thead>
         <tr>
-            <th>Mã đơn</th>
+            <th>Mã phiếu</th>
             <th>Tên người đặt</th>
             <th>Ngày lập phiếu</th>
             <th>Hành động</th>
@@ -25,5 +26,8 @@
         {% endfor %}
         </tbody>
     </table>
+    {% else %}
+    <div class="alert alert-info mt-4">Chưa có đơn nào!</div>
+    {% endif %}
 </div>
 {% endblock %}
