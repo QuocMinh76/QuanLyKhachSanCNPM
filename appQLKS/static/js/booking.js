@@ -275,8 +275,20 @@ function validateBookingForm() {
 
     const rows = customerTableBody.getElementsByTagName('tr');
     for (const row of rows) {
-        if (['Tên khách hàng', 'CMND', 'Địa chỉ'].some(placeholder => row.querySelector(`input[placeholder="${placeholder}"]`).value.trim() === '')) {
+        const nameInput = row.querySelector('input[placeholder="Tên khách hàng"]');
+        const cmndInput = row.querySelector('input[placeholder="CMND"]');
+        const addressInput = row.querySelector('input[placeholder="Địa chỉ"]');
+
+        // Check if any field is empty
+        if ([nameInput, cmndInput, addressInput].some(input => input.value.trim() === '')) {
             alert('Vui lòng điền đầy đủ thông tin khách hàng.');
+            return false;
+        }
+
+        // Check if CMND contains only numbers
+        if (!/^\d+$/.test(cmndInput.value.trim())) {
+            alert('Số CMND chỉ được chứa chữ số.');
+            cmndInput.focus();
             return false;
         }
     }
