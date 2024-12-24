@@ -1,9 +1,9 @@
-from flask import Flask
+from flask import Flask, flash, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 from urllib.parse import quote
 import cloudinary
 import os
-from flask_login import LoginManager
+from flask_login import LoginManager, login_manager
 import atexit # To register shutdown callback
 from task import scheduler
 import logging
@@ -11,9 +11,9 @@ from logging.handlers import RotatingFileHandler
 
 app = Flask(__name__)
 
-# app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+pymysql://root:%s@localhost/hoteldb?charset=utf8mb4" % quote("1234") #minh
+app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+pymysql://root:%s@localhost/hoteldb?charset=utf8mb4" % quote("1234") #minh
 # app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+pymysql://root:%s@localhost/hoteldb?charset=utf8mb4" % quote("My123456") #my
-app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+pymysql://root:%s@localhost/hoteldb?charset=utf8mb4" % quote("0420") #kiet
+# app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+pymysql://root:%s@localhost/hoteldb?charset=utf8mb4" % quote("0420") #kiet
 
 app.secret_key = 'aweut9n8*@$*djhfjsadhfsdqefsfgasedq23i'
 
@@ -39,8 +39,12 @@ logger.setLevel(logging.INFO)
 
 def clear_log_on_shutdown():
     log_file_path = 'app.log'  # Adjust the log file path as needed
+    log_file_path2 = 'task_log.log'  # Adjust the log file path as needed
     if os.path.exists(log_file_path):
         with open(log_file_path, 'w'):  # Open in write mode to truncate
+            pass  # This will clear the file content
+    if os.path.exists(log_file_path2):
+        with open(log_file_path2, 'w'):  # Open in write mode to truncate
             pass  # This will clear the file content
 
 
@@ -51,6 +55,17 @@ cloudinary.config(cloud_name='dhhpxhskj',
                   api_secret='jNqe-OCxgo98G-K6_OAL0nuvyEk')
 
 login = LoginManager(app)
+
+login.login_view = 'login_process'
+
+
+def custom_unauthorized():
+    return redirect(url_for('login_process'))
+
+
+# Assign the custom handler to the login manager
+login.unauthorized_handler = custom_unauthorized
+
 
 from task import schedule_periodic_task
 

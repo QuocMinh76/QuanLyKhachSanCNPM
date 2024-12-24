@@ -80,18 +80,20 @@ class UserView(AuthenticatedView):
 
 
 class BookingOrderView(AuthenticatedView):
-    column_list = ['id', 'user_id', 'checkin_date', 'checkout_date', 'created_date']
+    column_list = ['id', 'user_id', 'checkin_date', 'checkout_date', 'created_date',
+                   'deadline_date', 'is_processed', 'is_cancelled']
     form_excluded_columns = ['booking_room_info', 'booking_cust_info', 'renting_order']
     column_searchable_list = ['user_id', 'checkin_date', 'checkout_date', 'created_date']
     column_filters = ['user_id', 'checkin_date', 'checkout_date', 'created_date']
     can_view_details = True
     can_delete = False
     column_labels = dict(id='Mã đơn đặt', user_id='Người đặt', checkin_date='Ngày nhận phòng',
-                         checkout_date='Ngày trả phòng', created_date='Ngày tạo đơn')
+                         checkout_date='Ngày trả phòng', created_date='Ngày tạo đơn', deadline_date='Hạn nhận phòng',
+                         is_processed='Đã lập phiếu', is_cancelled='Đã hủy')
 
 
 class RentingOrderView(AuthenticatedView):
-    column_list = ['bookingOrder_id', 'checkin_date', 'checkout_date', 'created_date']
+    column_list = ['id', 'checkin_date', 'checkout_date', 'created_date', 'pay_status']
     form_excluded_columns = ['details', 'booking_order', 'bill']
     column_searchable_list = ['checkin_date', 'checkout_date', 'created_date']
     column_filters = ['checkin_date', 'checkout_date', 'created_date']
@@ -99,23 +101,23 @@ class RentingOrderView(AuthenticatedView):
     can_delete = False
     can_create = False
     can_edit = False
-    column_labels = dict(bookingOrder_id='Mã phiếu thuê', checkin_date='Ngày nhận phòng',
-                         checkout_date='Ngày trả phòng', created_date='Ngày tạo phiếu')
+    column_labels = dict(id='Mã phiếu thuê', checkin_date='Ngày nhận phòng', checkout_date='Ngày trả phòng',
+                         created_date='Ngày tạo phiếu', pay_status='Đã thanh toán')
 
 
 class BillView(AuthenticatedView):
-    column_list = ['rentingOrder_id', 'checkin_date', 'checkout_date', 'totalCust', 'foreignCust',
-                   'basePrice', 'extraCharge', 'created_date']
+    column_list = ['id', 'checkin_date', 'checkout_date', 'domesticCust', 'foreignCust',
+                   'finalPrice', 'created_date']
     column_searchable_list = ['checkin_date', 'checkout_date', 'created_date']
     column_filters = ['checkin_date', 'checkout_date', 'created_date']
     can_view_details = True
     can_delete = False
     can_edit = False
     can_create = False
-    column_labels = dict(rentingOrder_id='Mã hóa đơn', checkin_date='Ngày nhận phòng',
-                         checkout_date='Ngày trả phòng', totalCust='Tổng số khách hàng',
-                         foreignCust='Số khách hàng ngoại quốc', finalPrice='Giá gốc',
-                         extraCharge='Phụ thu', created_date='Ngày tạo phiếu')
+    column_labels = dict(id='Mã hóa đơn', checkin_date='Ngày nhận phòng',
+                         checkout_date='Ngày trả phòng', domesticCust='Tổng số khách nội địa',
+                         foreignCust='Tổng số khách quốc tế', finalPrice='Tổng tiền',
+                         created_date='Ngày tạo phiếu')
 
 
 class CustomerView(AuthenticatedView):
