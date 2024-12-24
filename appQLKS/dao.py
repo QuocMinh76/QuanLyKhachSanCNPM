@@ -64,17 +64,30 @@ def load_renting_orders(kw=None):
     orders = RentingOrder.query
 
     if kw:
-        # Join with the User table and filter by user ID or name
-        orders = orders.join(User).filter(
+        orders = orders.join(BookingOrder).join(User).filter(
             or_(
                 RentingOrder.id == kw,  # Search by order ID
                 User.name.ilike(f"%{kw}%")  # Search by username (case-insensitive)
             )
         )
 
-    orders = orders.filter(RentingOrder.pay_status.__eq__(False))
+    orders = orders.filter(RentingOrder.pay_status.is_(False))
 
-    return orders.all()
+    return orders.options(joinedload(RentingOrder.booking_order)).all()
+
+
+def load_bills(kw=None):
+    query = Bill.query
+
+    if kw:
+        query = query.join(Bill.renting_order).join(RentingOrder.booking_order).join(User).filter(
+            or_(
+                Bill.id == kw,  # Filter by RentingOrder ID
+                User.name.ilike(f"%{kw}%")  # Filter by user name (case-insensitive)
+            )
+        )
+
+    return query.all()
 
 
 def load_comments(room_id, page=1):

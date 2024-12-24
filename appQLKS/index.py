@@ -30,7 +30,8 @@ def index():
     min_price = request.args.get('min_price')
     max_price = request.args.get('max_price')
 
-    rooms = dao.load_rooms(room_type_id=room_type_id, kw=kw, min_price=min_price, max_price=max_price, page=int(page))
+    rooms = dao.load_rooms(room_type_id=room_type_id, kw=kw, min_price=min_price,
+                           max_price=max_price, page=int(page))
 
     page_size = app.config["PAGE_SIZE"]
     total_room = dao.count_rooms()
@@ -315,6 +316,15 @@ def find_rent_print():
     return render_template('find_rent_print.html', orders=orders)
 
 
+@app.route("/find_bill")
+def find_bill():
+    kw = request.args.get('kw')
+
+    bills = dao.load_bills(kw)
+
+    return render_template('find_bill.html', bills=bills)
+
+
 @app.route("/customer_orders")
 @login_required
 def customer_orders():
@@ -491,6 +501,114 @@ def export_pdf(order_id):
 
     # Trả về file PDF
     return send_file(buffer, as_attachment=True, download_name=f"phieu_thue_{order.id}.pdf", mimetype='application/pdf')
+
+
+@app.route('/export_invoice/<order_id>')
+def export_invoices(order_id):
+    order = dao.get_bill_by_id(order_id)
+    booking_order = dao.get_booking_order_details(order_id)
+    rooms = [dao.get_room_by_id(room_info.room_id) for room_info in booking_order.booking_room_info]
+    custs = [dao.get_customer_by_id(cust_info.cust_id) for cust_info in booking_order.booking_cust_info]
+    total_price = dao.calculate_total_price_for_renting_order(order_id)
+    renting_details = dao.get_renting_order_room_details(order_id)
+
+    if not order:
+        return "Phiếu thuê không tồn tại", 404
+
+    # Tạo file PDF
+    buffer = BytesIO()
+    pdf = SimpleDocTemplate(buffer, pagesize=letter)
+    styles = getSampleStyleSheet()
+
+    # Định nghĩa style chung
+    title_style = ParagraphStyle(
+        'TitleStyle',
+        parent=styles['Normal'],
+        fontName='DejaVuSerif',
+        fontSize=14,
+        alignment=1,  # Căn giữa
+    )
+
+    content_style = ParagraphStyle(
+        'ContentStyle',
+        parent=styles['Normal'],
+        fontName='DejaVuSerif',
+        fontSize=10,
+        leading=12,
+        wordWrap='CJK',  # Tự động xuống dòng
+        alignment=1,  # Căn trái
+    )
+
+    elements = []
+
+    # Tiêu đề
+    elements.append(Paragraph("HÓA ĐƠN THANH TOÁN", title_style))
+    elements.append(Paragraph("<br/><br/>", content_style))
+    elements.append(Paragraph("<br/><br/>", content_style))
+
+    # Thông tin cơ bản
+    basic_info_data = [
+        ["Nhân viên lập phiếu", "Ngày nhận phòng", "Ngày trả phòng", "Số lượng khách thuê", "Số lượng phòng thuê"],
+        [current_user.name, order.checkin_date.strftime('%d/%m/%Y'), order.checkout_date.strftime('%d/%m/%Y'),
+         len(custs), len(rooms)]
+    ]
+    basic_info_table = Table(basic_info_data, colWidths=[140, 100, 100, 130, 130])
+    basic_info_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.pink),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.black),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('FONTNAME', (0, 0), (-1, -1), 'DejaVuSerif'),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 10),
+        ('GRID', (0, 0), (-1, -1), 1, colors.black)
+    ]))
+    elements.append(basic_info_table)
+
+    new_custom_style = styles['Normal']
+    new_custom_style.fontName = 'DejaVuSerif'  # Sử dụng font DejaVuSerif
+    new_custom_style.fontSize = 11  # Kích thước chữ nhỏ hơn
+    new_custom_style.alignment = 1  # Căn trái
+
+
+    # Thêm dòng trống
+    elements.append(Paragraph("<br/><br/>", content_style))
+    elements.append(Paragraph("Tổng tiền: " + "{:,.0f}".format(total_price) + " VNĐ", new_custom_style))
+    elements.append(Paragraph("<br/><br/>", content_style))
+    # Danh sách khách hàng
+    customer_data = [["Phòng", "Khách nội địa", "Khách quốc tế", "Đơn giá phòng", "Tổng giá phòng"]]
+    for item in renting_details:
+        customer_row = [
+            Paragraph(item['room_name'], content_style),
+            Paragraph(str(item['num_of_default_cust']), content_style),
+            Paragraph(str(item['num_of_other_cust']), content_style),
+            Paragraph("{:,.0f}".format(item['room_base_price']), content_style),
+            Paragraph("{:,.0f}".format(item['room_final_price']), content_style)
+        ]
+        customer_data.append(customer_row)
+
+    customer_table = Table(customer_data, colWidths=[140, 100, 100, 130, 130])
+    customer_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.pink),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.black),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('FONTNAME', (0, 0), (-1, -1), 'DejaVuSerif'),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 10),
+        ('GRID', (0, 0), (-1, -1), 1, colors.black)
+    ]))
+    elements.append(customer_table)
+    elements.append(Paragraph("<br/><br/>", content_style))
+
+    # Lời cảm ơn
+    elements.append(Paragraph(
+        "Cảm ơn quý khách đã sử dụng dịch vụ thuê phòng khách sạn của chúng tôi!",
+        content_style
+    ))
+
+    # Tạo PDF
+    pdf.build(elements)
+    buffer.seek(0)
+
+    # Trả về file PDF
+    return send_file(buffer, as_attachment=True, download_name=f"hoa_don_{order.id}.pdf", mimetype='application/pdf')
 
 
 @login.user_loader
