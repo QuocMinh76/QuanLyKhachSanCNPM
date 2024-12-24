@@ -383,17 +383,10 @@ pdfmetrics.registerFont(TTFont('DejaVuSerif', font_path))
 def export_pdf(order_id):
     order = dao.get_renting_order_by_id(order_id)
     booking_order = dao.get_booking_order_details(order_id)
-    rooms = []
-    for room_info in booking_order.booking_room_info:
-        room = dao.get_room_by_id(room_info.room_id)
-        rooms.append(room)
-
-    custs = []
-    for cust_info in booking_order.booking_cust_info:
-        cust = dao.get_customer_by_id(cust_info.cust_id)
-        custs.append(cust)
+    rooms = [dao.get_room_by_id(room_info.room_id) for room_info in booking_order.booking_room_info]
+    custs = [dao.get_customer_by_id(cust_info.cust_id) for cust_info in booking_order.booking_cust_info]
     data = dao.get_room_cust_info_of_renting_order(order_id)
-    print(data)
+
     if not order:
         return "Phiếu thuê không tồn tại", 404
 
@@ -402,28 +395,31 @@ def export_pdf(order_id):
     pdf = SimpleDocTemplate(buffer, pagesize=letter)
     styles = getSampleStyleSheet()
 
-    # Tùy chỉnh style hỗ trợ font Unicode
-    custom_style = ParagraphStyle(
-        'CustomStyle',
+    # Định nghĩa style chung
+    title_style = ParagraphStyle(
+        'TitleStyle',
+        parent=styles['Normal'],
+        fontName='DejaVuSerif',
+        fontSize=14,
+        alignment=1,  # Căn giữa
+    )
+
+    content_style = ParagraphStyle(
+        'ContentStyle',
         parent=styles['Normal'],
         fontName='DejaVuSerif',
         fontSize=10,
-        leading=12
+        leading=12,
+        wordWrap='CJK',  # Tự động xuống dòng
+        alignment=1,  # Căn trái
     )
 
     elements = []
 
-    styles = getSampleStyleSheet()
-    custom_style = styles['Title']
-    custom_style.alignment = 1
-    custom_style.fontName = 'DejaVuSerif'  # Use the DejaVuSerif font
-    custom_style.fontSize = 14  # Adjust font size as needed
-
     # Tiêu đề
-    title = Paragraph("PHIẾU THUÊ PHÒNG", custom_style)
-    elements.append(title)
-    elements.append(Paragraph("<br/>", custom_style))  # Dòng trống
-    elements.append(Paragraph("<br/>", custom_style))  # Dòng trống
+    elements.append(Paragraph("PHIẾU THUÊ PHÒNG", title_style))
+    elements.append(Paragraph("<br/><br/>", content_style))
+    elements.append(Paragraph("<br/><br/>", content_style))
 
     # Thông tin cơ bản
     basic_info_data = [
@@ -436,25 +432,22 @@ def export_pdf(order_id):
         ('BACKGROUND', (0, 0), (-1, 0), colors.pink),
         ('TEXTCOLOR', (0, 0), (-1, 0), colors.black),
         ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-        ('FONTNAME', (0, 0), (-1, -1), 'DejaVuSerif'),  # Sử dụng font DejaVuSerif
+        ('FONTNAME', (0, 0), (-1, -1), 'DejaVuSerif'),
         ('BOTTOMPADDING', (0, 0), (-1, 0), 10),
         ('GRID', (0, 0), (-1, -1), 1, colors.black)
     ]))
     elements.append(basic_info_table)
 
-    # Tạo một custom_style mới
     new_custom_style = styles['Normal']
     new_custom_style.fontName = 'DejaVuSerif'  # Sử dụng font DejaVuSerif
     new_custom_style.fontSize = 11  # Kích thước chữ nhỏ hơn
-    new_custom_style.alignment = 0  # Căn trái
+    new_custom_style.alignment = 1  # Căn trái
+
 
     # Thêm dòng trống
-    elements.append(Paragraph("<br/>", custom_style))  # Dòng trống
-    elements.append(Paragraph("<br/>", custom_style))  # Dòng trống
+    elements.append(Paragraph("<br/><br/>", content_style))
     elements.append(Paragraph("Các phòng thuê: " + ", ".join(room.name for room in rooms), new_custom_style))
-    elements.append(Paragraph("<br/>", custom_style))  # Dòng trống
-    elements.append(Paragraph("<br/>", custom_style))  # Dòng trống
-
+    elements.append(Paragraph("<br/><br/>", content_style))
     # Danh sách khách hàng
     customer_data = [["Tên khách hàng", "Loại khách hàng", "CMND", "Địa chỉ", "Phòng"]]
     for item in data:
@@ -462,28 +455,32 @@ def export_pdf(order_id):
         cust_id = item['cust_id']
         customer = dao.get_customer_by_id(cust_id)
         room = dao.get_room_by_id(room_id)
-        info = [customer.cust_name, customer.custType.name, customer.custIdentity_num, customer.custAddress, room.name]
-        customer_data.append(info)
+        customer_row = [
+            Paragraph(customer.cust_name, content_style),
+            Paragraph(customer.custType.name, content_style),
+            Paragraph(customer.custIdentity_num, content_style),
+            Paragraph(customer.custAddress, content_style),
+            Paragraph(room.name, content_style)
+        ]
+        customer_data.append(customer_row)
 
     customer_table = Table(customer_data, colWidths=[140, 100, 100, 130, 130])
     customer_table.setStyle(TableStyle([
         ('BACKGROUND', (0, 0), (-1, 0), colors.pink),
         ('TEXTCOLOR', (0, 0), (-1, 0), colors.black),
         ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-        ('FONTNAME', (0, 0), (-1, -1), 'DejaVuSerif'),  # Sử dụng font DejaVuSerif
+        ('FONTNAME', (0, 0), (-1, -1), 'DejaVuSerif'),
         ('BOTTOMPADDING', (0, 0), (-1, 0), 10),
         ('GRID', (0, 0), (-1, -1), 1, colors.black)
     ]))
     elements.append(customer_table)
+    elements.append(Paragraph("<br/><br/>", content_style))
 
-    n_custom_style = styles['Normal']
-    n_custom_style.fontName = 'DejaVuSerif'  # Sử dụng font DejaVuSerif
-    n_custom_style.fontSize = 10  # Kích thước chữ nhỏ hơn
-    n_custom_style.alignment = 1  # Căn trái
-    elements.append(Paragraph("<br/>", custom_style))  # Dòng trống
-    elements.append(Paragraph("<br/>", custom_style))  # Dòng trống
-    elements.append(Paragraph("Cảm ơn quý khách đã sử dụng dịch vụ thuê phòng khách sạn của chúng tôi!",
-                              n_custom_style))  # Dòng trống
+    # Lời cảm ơn
+    elements.append(Paragraph(
+        "Cảm ơn quý khách đã sử dụng dịch vụ thuê phòng khách sạn của chúng tôi!",
+        content_style
+    ))
 
     # Tạo PDF
     pdf.build(elements)
