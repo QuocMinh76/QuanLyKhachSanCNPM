@@ -21,7 +21,7 @@ def get_all_rooms():
     return Room.query.order_by('id').all()
 
 
-def load_rooms(room_type_id=None, kw=None, page=1):
+def load_rooms(room_type_id=None, kw=None, min_price=None, max_price=None, page=1):
     rooms = Room.query.filter(Room.available.__eq__(True))
 
     if kw:
@@ -29,6 +29,12 @@ def load_rooms(room_type_id=None, kw=None, page=1):
 
     if room_type_id:
         rooms = rooms.filter(Room.roomType_id.__eq__(room_type_id))
+
+    if min_price:
+        rooms = rooms.filter(Room.roomPrice >= float(min_price))
+
+    if max_price:
+        rooms = rooms.filter(Room.roomPrice <= float(max_price))
 
     page_size = app.config["PAGE_SIZE"]
     start = (page - 1) * page_size
@@ -550,40 +556,6 @@ def update_room_status(room_id, available):
         return False
 
 
-# def get_monthly_statistics(month):
-#     # Phân tích dữ liệu doanh thu và tần suất
-#     start_date = datetime.strptime(month, '%Y-%m')
-#     end_date = start_date + relativedelta(months=1)
-#
-#     # Thống kê doanh thu
-#     revenue_query = (
-#         db.session.query(
-#             RoomType.name.label('room_type'),
-#             func.sum(Bill.finalPrice).label('total_revenue'),
-#             func.count(Bill.id).label('rental_count')
-#         )
-#         .join(RentingOrder, RentingOrder.id == Bill.id)
-#         .join(BookingOrder, BookingOrder.id == RentingOrder.id)
-#         .join(BookingRoomInfo, BookingRoomInfo.bookingOrder_id == BookingOrder.id)
-#         .join(Room, Room.id == BookingRoomInfo.room_id)
-#         .join(RoomType, RoomType.id == Room.roomType_id)
-#         .filter(Bill.created_date >= start_date, Bill.created_date < end_date)
-#         .group_by(RoomType.name)
-#     ).all()
-#
-#     # Chuyển đổi kết quả thành dictionary
-#     revenue_data = [
-#         {
-#             'room_type': r.room_type,
-#             'total_revenue': r.total_revenue,
-#             'rental_count': r.rental_count,
-#             'rate': (r.rental_count / sum(x.rental_count for x in revenue_query)) * 100
-#         }
-#         for r in revenue_query
-#     ]
-#
-#     return {'revenue_data': revenue_data}
-
 def get_monthly_statistics(month):
     start_date = datetime.strptime(month, '%Y-%m')
     end_date = start_date + relativedelta(months=1)
@@ -640,6 +612,11 @@ def get_monthly_statistics(month):
     return {'revenue_data': revenue_data, 'frequency_data': frequency_data}
 
 
+def stats_rooms():
+    return db.session.query(RoomType.id, RoomType.name, func.count(Room.id))\
+        .join(Room, Room.roomType_id.__eq__(RoomType.id), isouter=True).group_by(RoomType.id).all()
+
+
 def get_expired_booking_orders():
     with db.session.begin():
         now = datetime.utcnow().replace(tzinfo=pytz.utc).astimezone(pytz.timezone('Asia/Ho_Chi_Minh'))
@@ -657,5 +634,4 @@ def update_booking_order_status_and_rooms(order):
 
 if __name__ == '__main__':
     with app.app_context():
-        res = get_monthly_statistics('2024-12')
-        print(res)
+        print(stats_rooms())
