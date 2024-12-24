@@ -48,6 +48,14 @@ function initializeRoomValidation() {
 
 // Initialize validation when the document is fully loaded
 document.addEventListener('DOMContentLoaded', initializeRoomValidation);
+document.addEventListener("DOMContentLoaded", function () {
+    const confirmButton = document.getElementById("confirmButton");
+
+    confirmButton.addEventListener("click", function () {
+        // Hiển thị thông báo
+        alert("Thông tin lập phiếu đã được gửi đi!");
+    });
+});
 
 document.addEventListener("DOMContentLoaded", function () {
     const confirmButton = document.getElementById("confirmButton");
