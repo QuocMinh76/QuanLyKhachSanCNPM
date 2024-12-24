@@ -34,5 +34,5 @@ def schedule_periodic_task():
 
     # Schedule the task to run every 24 hours
     # scheduler.add_job(func=check_booking_orders, trigger="interval", hours=check_interval)
-    scheduler.add_job(func=check_booking_orders, trigger="interval", minutes=1) #check
+    scheduler.add_job(func=check_booking_orders, trigger="interval", seconds=30) #check
     scheduler.start()

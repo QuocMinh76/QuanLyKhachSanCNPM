@@ -4,6 +4,7 @@ backports.zoneinfo==0.2.1
 blinker==1.8.2
 certifi==2024.8.30
 cffi==1.17.1
+chardet==5.2.0
 click==8.1.7
 cloudinary==1.41.0
 colorama==0.4.6
@@ -18,10 +19,12 @@ importlib_metadata==8.5.0
 itsdangerous==2.2.0
 Jinja2==3.1.4
 MarkupSafe==2.1.5
+pillow==10.4.0
 pycparser==2.22
 PyMySQL==1.1.1
 python-dateutil==2.9.0.post0
 pytz==2024.2
+reportlab==4.2.5
 six==1.16.0
 SQLAlchemy==2.0.36
 sqlparse==0.5.3
@@ -32,4 +35,3 @@ urllib3==2.2.3
 Werkzeug==3.0.6
 WTForms==3.1.2
 zipp==3.20.2
-reportlab~=4.2.5
