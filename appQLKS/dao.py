@@ -1,6 +1,6 @@
 from datetime import timedelta, datetime
-
 import pytz
+from dateutil.relativedelta import relativedelta
 from flask_login import current_user
 from appQLKS.models import (User, Room, RoomType, CustomerType, Customer, BookingOrder, BookingRoomInfo,
                             BookingCustInfo, Comment, RentingOrder, RentingDetails, Bill)
@@ -333,6 +333,12 @@ def get_renting_order_details(renting_order_id):
 
     return renting_order
 
+def get_room_cust_info_of_renting_order(renting_order_id):
+    results = RentingDetails.query.filter(RentingDetails.rentingOrder_id == renting_order_id).all()
+    if not results:
+        return {}
+    response = [{"cust_id": record.cust_id, "room_id": record.room_id} for record in results]
+    return response
 
 def get_user_by_id(user_id):
     return User.query.get(user_id)
@@ -345,6 +351,8 @@ def get_room_type_by_id(room_type_id):
 def get_booking_order_by_id(booking_order_id):
     return BookingOrder.query.get(booking_order_id)
 
+def get_renting_order_by_id(renting_order_id):
+    return RentingOrder.query.get(renting_order_id)
 
 def get_renting_order_by_id(renting_order_id):
     return RentingOrder.query.get(renting_order_id)
@@ -529,6 +537,39 @@ def update_room_status(room_id, available):
         print(f"Error updating room status: {e}")
         return False
 
+def get_monthly_statistics(month):
+    # Phân tích dữ liệu doanh thu và tần suất
+    start_date = datetime.strptime(month, '%Y-%m')
+    end_date = start_date + relativedelta(months=1)
+
+    # Thống kê doanh thu
+    revenue_query = (
+        db.session.query(
+            RoomType.name.label('room_type'),
+            func.sum(Bill.finalPrice).label('total_revenue'),
+            func.count(Bill.id).label('rental_count')
+        )
+        .join(RentingOrder, RentingOrder.id == Bill.id)
+        .join(BookingOrder, BookingOrder.id == RentingOrder.id)
+        .join(BookingRoomInfo, BookingRoomInfo.bookingOrder_id == BookingOrder.id)
+        .join(Room, Room.id == BookingRoomInfo.room_id)
+        .join(RoomType, RoomType.id == Room.roomType_id)
+        .filter(Bill.created_date >= start_date, Bill.created_date < end_date)
+        .group_by(RoomType.name)
+    ).all()
+
+    # Chuyển đổi kết quả thành dictionary
+    revenue_data = [
+        {
+            'room_type': r.room_type,
+            'total_revenue': r.total_revenue,
+            'rental_count': r.rental_count,
+            'rate': (r.rental_count / sum(x.rental_count for x in revenue_query)) * 100
+        }
+        for r in revenue_query
+    ]
+
+    return {'revenue_data': revenue_data}
 
 def get_expired_booking_orders():
     with db.session.begin():

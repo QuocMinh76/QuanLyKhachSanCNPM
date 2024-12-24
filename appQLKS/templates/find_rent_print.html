@@ -26,7 +26,7 @@
                 <td>{{ o.checkin_date.strftime('%d/%m/%Y') }}</td>
                 <td>{{ o.checkout_date.strftime('%d/%m/%Y') }}</td>
                 <td>
-                    <button class="btn btn-pink2 btn-sm">Xuất phiếu</button>
+                    <a href="/export-pdf/{{ o.id }}" class="btn btn-pink2 btn-sm">Xuất phiếu</a>
                 </td>
             </tr>
             {% endfor %}
