@@ -1,0 +1,16 @@
+<div class="my-search-box border p-3 rounded mb-3 mt-3">
+    <form method="get" action="/" class="d-flex">
+        <input class="form-control me-2" type="text" placeholder="Tìm phòng..." name="kw"/>
+        <input class="form-control me-2" type="number" placeholder="Giá lớn hơn" name="min_price"/>
+        <input class="form-control me-2" type="number" placeholder="Giá nhỏ hơn" name="max_price"/>
+
+        <select class="form-control me-2" name="room_type">
+            <option value="" disabled selected>Chọn loại phòng</option>
+            {% for r in room_types %}
+                <option value="{{ r.id }}">{{ r.name }}</option>
+            {% endfor %}
+        </select>
+
+        <button class="btn btn-gr" type="submit">Tìm</button>
+    </form>
+</div>

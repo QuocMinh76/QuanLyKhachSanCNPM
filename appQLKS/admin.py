@@ -1,5 +1,5 @@
-from appQLKS import db, app
-from flask_admin import Admin, BaseView, expose
+from appQLKS import db, app, dao
+from flask_admin import Admin, BaseView, expose, AdminIndexView
 from flask_admin.contrib.sqla import ModelView
 from flask_login import current_user, logout_user
 from flask import redirect, flash
@@ -8,6 +8,12 @@ from appQLKS.models import (RoomType, Room, CustomerType, UserRoles, User,
 import hashlib
 from flask import request
 import cloudinary.uploader
+
+
+class MyAdminIndexView(AdminIndexView):
+    @expose("/")
+    def index(self):
+        return self.render('admin/index.html', room_type_stats=dao.stats_rooms())
 
 
 class AuthenticatedView(ModelView):
@@ -87,7 +93,7 @@ class BookingOrderView(AuthenticatedView):
     column_filters = ['user_id', 'checkin_date', 'checkout_date', 'created_date']
     can_view_details = True
     can_delete = False
-    column_labels = dict(id='Mã đơn đặt', user_id='Người đặt', checkin_date='Ngày nhận phòng',
+    column_labels = dict(id='Mã đơn đặt', user_id='Mã người đặt', checkin_date='Ngày nhận phòng',
                          checkout_date='Ngày trả phòng', created_date='Ngày tạo đơn', deadline_date='Hạn nhận phòng',
                          is_processed='Đã lập phiếu', is_cancelled='Đã hủy')
 
@@ -148,8 +154,7 @@ class StatsView(AuthenticatedBaseView):
         return self.render('admin/stats.html')
 
 
-admin = Admin(app, name='Hotel Admin Page', template_mode='bootstrap4')
-
+admin = Admin(app, name='Hotel Admin Page', template_mode='bootstrap4', index_view=MyAdminIndexView())
 
 admin.add_view(RoomTypeView(RoomType, db.session, name='Loại phòng'))
 admin.add_view(RoomView(Room, db.session, name='Phòng'))
@@ -159,7 +164,6 @@ admin.add_view(UserView(User, db.session, name='Người dùng'))
 admin.add_view(BookingOrderView(BookingOrder, db.session, name='Đơn đặt phòng'))
 admin.add_view(RentingOrderView(RentingOrder, db.session, name='Phiếu thuê phòng'))
 admin.add_view(BillView(Bill, db.session, name='Hóa đơn'))
-
 
 admin.add_view(StatsView(name='Thống kê - Báo cáo'))
 admin.add_view(LogoutView(name='Đăng xuất'))

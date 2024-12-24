@@ -2,8 +2,71 @@
 
 {% block body %}
 {% if current_user.is_authenticated %}
-<h1 class="text-info mt-1">CHÀO MỪNG ĐẾN VỚI TRANG QUẢN TRỊ!</h1>
-<h2 class="text-danger">Chào {{ current_user.username }}.</h2>
+<h1 class="text-info mt-1 text-center">CHÀO MỪNG ĐẾN VỚI TRANG QUẢN TRỊ!</h1>
+
+<h3 class="mt-2">Thông tin phòng khách sạn</h3>
+<div class="row mt-4">
+    <div class="col-md-6 col-12">
+        <table class="table">
+            <tr>
+                <th>Id</th>
+                <th>Tên loại phòng</th>
+                <th>Số lượng phòng</th>
+            </tr>
+            {% for s in room_type_stats %}
+            <tr>
+                <td>{{ s[0] }}</td>
+                <td>{{ s[1] }}</td>
+                <td>{{ s[2] }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+    <div class="col-md-6 col-12">
+        <canvas id="myChart"></canvas>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    let room_type_data = []
+    let room_type_labels = []
+
+    {% for s in room_type_stats %}
+        room_type_labels.push('{{ s[1] }}')
+        room_type_data.push({{ s[2] }})
+    {% endfor %}
+
+    function draw(ctx, data, labels) {
+            new Chart(ctx, {
+             type: 'pie',
+             data: {
+               labels: labels,
+               datasets: [{
+                 label: 'Doanh thu',
+                 data: data,
+                 borderWidth: 1,
+                 backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF']
+               }]
+             },
+             options: {
+               scales: {
+                 y: {
+                   beginAtZero: true
+                 }
+               },
+               responsive: true
+             }
+           });
+        }
+
+    window.onload = function() {
+        const room_type_ctx = document.getElementById('myChart');
+
+        draw(room_type_ctx, room_type_data, room_type_labels);
+    }
+</script>
+
 {% else %}
 <h1 class="text-center text-danger">ĐĂNG NHẬP QUẢN TRỊ</h1>
 <form method="post" action="/login-admin">

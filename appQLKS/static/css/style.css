@@ -119,6 +119,13 @@
     text-align: center;
 }
 
+.my-search-box {
+    background-color: rgb(255, 178, 165); !important;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border: solid 2px;
+}
+
 .fnc_button {
         display: flex;
         justify-content: space-between;
@@ -199,3 +206,28 @@
     height: 280px; /* Maintains aspect ratio */
     display: block; /* Removes any unwanted inline spacing */
 }
+
+/* Show dropdown on hover */
+    .nav-item.dropdown:hover .dropdown-menu {
+        display: block;
+    }
+
+    /* Optional: Adds a delay to make the dropdown appear smoothly */
+    .nav-item.dropdown .dropdown-menu {
+        display: none;
+        position: absolute;
+        background-color: #343a40;
+        border: none;
+    }
+
+    /* Lighter text color for dropdown items */
+    .dropdown-menu .dropdown-item {
+        color: #f8f9fa; /* Lighter text color */
+    }
+
+    /* Change text color on hover for dropdown items */
+    .dropdown-menu .dropdown-item:hover {
+        color: #d6d6d6; /* Even lighter color on hover */
+        background-color: #495057; /* Optional: background change on hover */
+
+

@@ -25,9 +25,12 @@ def index():
     room_type = dao.load_room_types()
 
     page = request.args.get('page', 1)
-    room_type_id = request.args.get('room_type_id')
+    room_type_id = request.args.get('room_type')
     kw = request.args.get('kw')
-    rooms = dao.load_rooms(room_type_id=room_type_id, kw=kw, page=int(page))
+    min_price = request.args.get('min_price')
+    max_price = request.args.get('max_price')
+
+    rooms = dao.load_rooms(room_type_id=room_type_id, kw=kw, min_price=min_price, max_price=max_price, page=int(page))
 
     page_size = app.config["PAGE_SIZE"]
     total_room = dao.count_rooms()
