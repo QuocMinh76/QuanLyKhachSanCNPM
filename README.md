@@ -3,6 +3,11 @@
 A hotel booking web application developed by a team of 3 using **Python Flask**.  
 The system supports multiple user roles with distinct capabilities, including normal users, hotel employees, and administrators.
 
+## Finished product
+We used pythonanywhere to host the web application: https://hqminh.pythonanywhere.com/.
+
+However, the booking timeout system has been deactivate, as APScheduler has very limited supports by pythonanywhere.
+
 ## 🌐 Features
 
 ### 👤 Normal Users
